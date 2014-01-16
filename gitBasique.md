@@ -47,6 +47,8 @@ Enfin il faut pusher le tout vers github :
 git push
 ```
 
+Le terminal vous demande alors votre login et mot de passe github pour valider le push.
+
 Comme le répertoire a originelement été cloné depuis github le push devrait par défaut se faire vers la même adresse.
 
 ## Obtenir des informations sur le repository
