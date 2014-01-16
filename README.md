@@ -20,5 +20,5 @@ Contains every code written.
 
 ##generalDocumentation
 
-Contains documentation relevent to used devices and material, not to the toolbox itself.
+Contains documentation relevent to used devices and material, not to the toolkit itself.
 
