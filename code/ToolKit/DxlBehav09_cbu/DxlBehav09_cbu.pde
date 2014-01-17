@@ -1,6 +1,7 @@
 
 import processing.serial.*;
 import controlP5.*;
+import themidibus.*;
 
 PApplet  mainApp;
 
@@ -11,10 +12,6 @@ int serialEventCount = 0;
 
 DXLmotor dxlGui;
 MotorGroup motorGroup;
-
-//Anim anim;
-//AnimGui  animGui;
-
 
 ControlP5 cp5;
 int globalID = 0;  //GRRRR

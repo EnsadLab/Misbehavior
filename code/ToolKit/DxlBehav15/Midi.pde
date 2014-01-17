@@ -24,14 +24,14 @@ void noteOn(int channel, int pitch, int vel)
   print(" C:"+channel);
   print(" N:"+pitch);
   println(" V:"+vel);
-  motorGroup.midiValue(pitch-1,64);  
+  servoGUIarray.midiValue(pitch-1,64);  
 }
 
 void noteOff(int channel, int pitch, int vel)
 {
   print("off: ");print(" C:"+channel);print(" N:"+pitch);println(" V:"+vel);
   //servoArray.servos[pitch-1].relax(true);
-  motorGroup.midiValue(pitch-1,64);  
+  servoGUIarray.midiValue(pitch-1,64);  
 }
 
 
@@ -46,9 +46,9 @@ void midiCtrlChange( int inum, int value )
 void controllerChange(int channel, int num, int value)
 {  
   if(num==1)
-    motorGroup.midiValue(num-1,value);
+    servoGUIarray.midiValue(num-1,value);
   else if(num==2)
-    motorGroup.midiValue(num-1,127-value);
+    servoGUIarray.midiValue(num-1,127-value);
     delay(10);
   
   // Receive a controlChange

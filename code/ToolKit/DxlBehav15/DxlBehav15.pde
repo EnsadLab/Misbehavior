@@ -6,94 +6,109 @@ PApplet  mainApp;
 int keyModifier = 0; //1 shift 2ctrl 4alt 
 
 PFont arialFont; // = createFont("Arial",20,true); // use true/false for smooth/no-smooth
-//ControlFont font; // = new ControlFont(pfont,241);
 
-
-CommIno  arduino;
-ServoArray servoArray;
-
-int serialEventCount = 0;
-
-DXLmotor dxlGui;
-MotorGroup motorGroup;
+CommArduino    arduino;
+DxlControl     dxlGui;
+ServoArray     servoArray;
+ServoGUIarray  servoGUIarray;
 
 ControlP5 cp5;
-int globalID = 0;  //GRRRR
-int myColor = color(0,0,0);
+int globalID = 0;
 
-//int sliderValue = 100;
-//int sliderTicks1 = 100;
-//int sliderTicks2 = 30;
-//Slider abc;
+String tabNameBasic = "default"; // the identifier name is different from the label for the default tab.
+String tabNameAdvanced = "ADVANCED";
+int currentTabId = 1; // 1:default tab / 2:ADVANCED tab
 
-//Curve curve = new Curve();
-ListEdit editAnim = new ListEdit("Anim0");
-//ListEdit edit2    = new ListEdit("Anim1");
-Anim anim = new Anim();
-ScriptArray scriptlist = new ScriptArray(); 
+int nbMotors = 4; // default value. Might be overriden with value set in the config.xml file
+int[] motorIds;
+String[] animPaths;
+int nbAnims = 0;
+int nbAnimsMax = 18; 
+String arduinoPort = "COM13";
+int arduinoBaudRate = 57600;
 
-Script script = new Script();
-
-ScriptConsole scriptConsole = new ScriptConsole();
+Script[]    scriptArray    = new Script[4];
+ScriptGUI[] scriptGuiArray = new ScriptGUI[4];
 
 void setup()
 {
   mainApp = this;
-  size(1100,700); //P3D OPENGL
+  size(1150,800); //P3D OPENGL
   
   println("Path:"+sketchPath);
-  
   
   cp5 = new ControlP5(this);
   globalID = 200;
   
-  //arialFont = createFont("Monospaced.plain",14,false); // use true/false for smooth/no-smooth
-  //arialFont = createFont("Lucida Console",14,false); // use true/false for smooth/no-smooth
   arialFont = createFont("Courier New",12,false); // use true/false for smooth/no-smooth
-  
-  arduino = new CommIno();
-  arduino.buildGUI(150,20);
 
-  servoArray = new ServoArray(4);
-      
-  dxlGui = new DXLmotor();
-  dxlGui.buildGUI(100,20);
+  cp5.addTab(tabNameAdvanced)
+     .activateEvent(true)
+     .setId(2);
+     //.setColorBackground(color(255, 160, 100))
+     //.setColorLabel(color(0,0,0))
+     //.setColorActive(color(255,128,255));
+  cp5.getTab("default")
+     .setLabel("BASIC")
+     .activateEvent(true)
+     .setId(1);
+     //.setColorBackground(color(0, 160, 100))
+     //.setColorLabel(color(255))
+     //.setColorActive(color(255,128,0));
+
+  loadConfig("config_dib.xml");
   
-  motorGroup = new MotorGroup(4);
-  motorGroup.buildGUI(350,20);
+  arduino = new CommArduino(arduinoPort,arduinoBaudRate);
+  arduino.buildBasicGUI(20,50,tabNameBasic);
+  arduino.buildGUI(150,20,tabNameAdvanced);
+
+  servoArray = new ServoArray(motorIds);
+       
+  dxlGui = new DxlControl();
+  dxlGui.buildGUI(100,20,tabNameAdvanced);
   
-  //anim = new Anim();
-  //animGui = new AnimGui();
-  //animGui.buildGUI(500,50,550);
-  //curve.buildGUI(500,100);
-  
-  editAnim.buildGui("E1",500,150,25);
-  //edit2.buildGui("E2",700,150,25);  
+  servoGUIarray = new ServoGUIarray(motorIds);
+  servoGUIarray.buildGUI(350,20,tabNameAdvanced);
+  servoGUIarray.buildBasicGui(250,50,tabNameBasic);
     
-  //scriptlist.loadAll(sketchPath+"/anims");
   
-  scriptConsole.buildGui(700,150,450);
+  //scriptConsole.buildGui(700,150,450); //a suprimer
+  //scriptEditor.buildGui(800,150,450); //a suprimer
+  scriptArray[0]    = new Script();
+  scriptArray[1]    = new Script();
+  scriptGuiArray[0] = new ScriptGUI(350,200,400,tabNameAdvanced);
+  scriptGuiArray[1] = new ScriptGUI(650,200,400,tabNameAdvanced);
 
+
+/*
   listMidiDevices();
   openMidi("BCF2000", "BCF2000");  
-//  openMidi("BCR2000", "BCR2000");  
+  //openMidi("BCR2000", "BCR2000");  
+*/
 
-  editAnim.script = script;
-  //editAnim.load(sketchPath+"/anims/AnimE1.txt");
-  editAnim.load("/anims/AnimE1.txt");
+  scriptArray[0].load("/anims/AnimE1.txt");
+
   //String[] fonts = PFont.list();
   //println(fonts);
 }
 
 void draw()
-{  
-  background(64);
-  //anim.update();
-  script.update();
+{
+  if(currentTabId == 1) // tab BASIC
+  {
+    background(255);
+  }
+  else // tab ADVANCED
+  {
+    background(64);
+  } 
+  
+  //scriptArray[0].update();
   servoArray.update();
-  motorGroup.update();
+  servoGUIarray.update();
   arduino.update();  
   dxlGui.update();
+  
   //servoArray.draw(500,20);
   //curve.test(500,100,1300,500);
 }
@@ -111,8 +126,50 @@ void exit()
   super.exit();  
 }
 
+void loadConfig(String xmlFilePath)
+{
+  
+  println("Loading Config file...");
+  XML xml = loadXML(xmlFilePath);
+  if(xml==null)
+    return;      //>>error message ?
+  
+  XML[] children = xml.getChildren("motor");
+  
+  arduinoPort = xml.getChild("arduino").getString("port");
+  arduinoBaudRate = xml.getChild("arduino").getInt("bauds");
+  println("-> Arduino port="+arduinoPort + " bauds=" + arduinoBaudRate);
+
+  nbMotors = children.length;
+  motorIds = new int[nbMotors];
+  for (int i = 0; i < children.length; i++) {
+    int id = children[i].getInt("id");
+    motorIds[i] = id;
+    println("-> adding motor with id " + id);
+  }
+  
+  children = xml.getChildren("anim");
+  nbAnims = children.length;
+  //animPaths = new String[nbAnims];
+  animPaths = new String[nbAnimsMax];
+  for(int i=0; i<children.length; i++)
+  {
+    String animPath = children[i].getString("path");
+    animPaths[i] = animPath;
+    println("-> adding anim with path " + animPath);
+  }
+}
 
 void controlEvent(ControlEvent evt)
+{
+  if(evt.isTab())
+  {
+    //println("TAB "+evt.getTab().getName()+" IS SELECTED with id "+evt.getTab().getId());
+    currentTabId = evt.getTab().getId();
+  }
+}
+
+void garbage(ControlEvent evt)
 {
   if(evt.isGroup())
   {
@@ -170,7 +227,6 @@ void serialEvent(Serial serial)
       serial.read();
   }
   */
-  serialEventCount++;
 }
 
 void keyReleased()
@@ -193,8 +249,7 @@ void keyPressed()
   //if(key>32)print(" "+key);
   //if( (keyCode>32)&&(keyCode<256) )print(" "+(char)keyCode);
   //println(" ");
-  
-  
+    
   if(key==CODED)
   {
     switch(keyCode)
@@ -223,14 +278,14 @@ void keyPressed()
       arduino.serialSend("S\n");
 
   }
-  
+  /*
   if( editHandleKey(key,keyCode) )
     return;
-    
+  */  
   if( keyCode == CONTROL )
   {
-    if(key=='A')
-      anim.fromListEdit(editAnim);
+    //if(key=='A')
+    //  anim.fromListEdit(editAnim);
   }  
     
 /*  

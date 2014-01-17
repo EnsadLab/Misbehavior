@@ -1,3 +1,6 @@
+int numScript = 0;
+
+
 class Token
 {
   //AREVOIR: 1 2 ou 3 caracteres style /jr /cr /# /< ...etc  OSC /E0/Sj i val
@@ -111,11 +114,11 @@ class ScriptStack
 
 class Script
 {
+  int index = 0;
   static final int STACK_MAX = 128;
   int frameTime = 0;
   int pauseDuration = 40;
   int execMode = 0;
-  //int engineID;
   int engineIndex = 0;
   
   boolean waitReady = true;
@@ -134,14 +137,16 @@ class Script
   ArrayList<ScriptLabel> labels = new ArrayList<ScriptLabel>();
   
   Script()
-  {    
+  {
+    index = numScript++; 
     for(int i=0;i<STACK_MAX;i++)
       stack[i]=new ScriptStack();
   }
   
   void dbg(String txt)
   {
-    scriptConsole.append(txt);
+    //scriptConsole.append(txt);
+    scriptGuiArray[index].print(txt);
   }
   
   void send( int tok,int value )
@@ -460,20 +465,43 @@ boolean execTorque()
 //===========================PARSE
 void load(String name)
 {
+  try
+  {
+    scriptGuiArray[index].clearList();
+    scriptGuiArray[index].clearConsole();
+    scriptGuiArray[index].setName(name);
+  }catch(Exception e){}
+  
   script = loadStrings(name);
   parse();
+  
+  try
+  {
+      for(int i=0;i<script.length;i++)
+        scriptGuiArray[index].addLine(script[i]);
+  }catch(Exception e){}
 }
 
 void parse(String src[])
 {
     script = src;
-    parse();
+    parse();    
+}
+
+String getLine(int iline)
+{
+  if(iline<script.length)
+    return script[iline];
+  return null;
 }
 
 
 void parse()
 {
-  scriptConsole.clear();
+  //scriptConsole.clear();
+  try{ scriptGuiArray[index].clearConsole(); }
+  catch(Exception e){}
+   
   iChar = 0;
   iStack=-1;
   tokens.clear();

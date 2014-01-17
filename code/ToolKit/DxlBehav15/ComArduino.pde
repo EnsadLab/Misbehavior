@@ -1,17 +1,19 @@
 
 
 
-class CommIno implements ControlListener //CallbackListener
+class CommArduino implements ControlListener //CallbackListener
 {
   int listIndex = 0;
   String port = "COM13";
-  //int baudrate = 9600; //57600;
   int baudrate = 57600;
   boolean openned = false;
   int action = 0;
   Serial serial;
   //GUI
+  Toggle titleButtonBasic;
   Toggle titleButton;
+  Toggle togleDogBasic;
+  Toggle togleDog;
   Toggle scanButton;  
   DropdownList listBauds;
   DropdownList listBox;
@@ -21,30 +23,74 @@ class CommIno implements ControlListener //CallbackListener
   int iBuffer = 0;
   byte[] buffer = new byte[256];
     
+  CommArduino(String port, int baudrate)
+  {
+    this.port = port;
+    this.baudrate = baudrate;
+  }
+     
+  // basic GUI: port and bauds must be set in the config.xml file
+  void buildBasicGUI(int x,int y, String tabName)
+  {
+    
+     Textlabel label = cp5.addTextlabel("arduinoInfos")
+                  .setText("Current port: "+port + "\nCurrent baudrate: "+baudrate)
+                  .setPosition(x-4,y+50)
+                  .setColorValue(0xFF000000)
+                  .setFont(createFont("Verdana",10))
+                  .moveTo(tabName);
+                  ;
+      titleButtonBasic = cp5.addToggle("ARDUINObasic")
+        .setPosition(x,y)
+        .setColorActive(0xFFCC0000)
+        .setSize(180,40)
+        .moveTo(tabName)
+        .setCaptionLabel("CONNECT TO ARDUINO");
+     titleButtonBasic.getCaptionLabel().setFont(createFont("Verdana",13)).align(ControlP5.CENTER,ControlP5.CENTER);
+     
+     togleDogBasic = cp5.addToggle("DOGbasic")
+         .setPosition(x+6,y+6)
+         .setSize(6,6)
+         .setColorActive(0xFF00FF00)
+         .moveTo(tabName);
+     togleDogBasic.getCaptionLabel().setText("");
+
+  }
        
-  void buildGUI(int x,int y)
+       
+  void buildGUI(int x,int y,String tabName)
   {
     
    titleButton = cp5.addToggle("ARDUINO")
       .setPosition(x,y)
       .setColorActive(0xFFCC0000)
-      .setSize(150,18);   
+      .setSize(150,18)
+      .moveTo(tabName);   
    titleButton.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
-      
-    y+=20;
 
-    
+   //watchdog reception CM9
+   togleDog = cp5.addToggle("Dog")
+       .setPosition(x+6,y+6)
+       .setSize(6,6)
+       .setColorActive(0xFF00FF00)
+       .moveTo(tabName);
+   togleDog.getCaptionLabel().setText("");
+   
+   y+=20;
 
    scanButton = cp5.addToggle("SCAN")
      .setPosition(x,y)
-     .setWidth(30);
+     .setWidth(30)
+     .moveTo(tabName);
    scanButton.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
 
     listBox = cp5.addDropdownList("SerialPort")
       .setPosition(x+48,y+20) //??? origine en bas !!!
       .setWidth(50)
       .setBarHeight(19)
-      .setOpen(false);    
+      .setOpen(false)
+      .moveTo(tabName);
+    
     for(int i=0;i<10;i++) 
       listBox.addItem("COMM"+i,i);     
     listBox.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
@@ -57,7 +103,9 @@ class CommIno implements ControlListener //CallbackListener
       .setWidth(50)
       .setBarHeight(19)
       .setOpen(false)
-      .addItems( bauds );
+      .addItems( bauds )
+      .moveTo(tabName);
+
    listBauds.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
    listBauds.getCaptionLabel().setText("57600");  
  
@@ -68,7 +116,8 @@ class CommIno implements ControlListener //CallbackListener
      .setLineHeight(14)
      .setColor(color(255))
      .setColorBackground(color(0))
-     .setColorForeground(color(255));
+     .setColorForeground(color(255))
+     .moveTo(tabName);
      
      listBauds.bringToFront();
      listBox.bringToFront();
@@ -77,12 +126,14 @@ class CommIno implements ControlListener //CallbackListener
      sendField = cp5.addTextfield("SEND")
            .setPosition(x,y)
            .setWidth(118)
-           .setAutoClear(true);
+           .setAutoClear(true)
+           .moveTo(tabName);
     
      //y+=20;
      cp5.addButton("CLEAR")
        .setWidth(30)
-       .setPosition(x+120,y);
+       .setPosition(x+120,y)
+       .moveTo(tabName);
        
     cp5.addListener(this);
   }
@@ -92,7 +143,8 @@ class CommIno implements ControlListener //CallbackListener
     switch(action)
     {
       case 0: break;
-      case 1: toggleOnOff(); action=0; break;
+      case 1: toggleOnOff(titleButton); action=0; break;
+      case 2: toggleOnOff(titleButtonBasic); action=0; break;
     }
   }
   
@@ -112,7 +164,7 @@ class CommIno implements ControlListener //CallbackListener
        //println("event from group : "+evt.getGroup().getValue()+" from "+evt.getGroup());
        //println("event from group : "+evt.getGroup().getValue()+" from "+gName);
     }
-    else
+    else if(evt.isController())  // cbu: added this check otherwise we might get a nullpointerexception
     {
       Controller c = evt.getController();
       //println("arduiEvent ");
@@ -133,7 +185,7 @@ class CommIno implements ControlListener //CallbackListener
       else if( evName.equals("CLEAR") )
         clearTerminal();      
     }
-//println("done");
+    //println("done");
   }
   
   void append(String txt)
@@ -146,18 +198,10 @@ class CommIno implements ControlListener //CallbackListener
   {
     textArea.clear();
   }
-  
-  void saveConfig()
-  {
-    JSONObject jo = new JSONObject();
-    jo.setInt("bauds",baudrate);
-    jo.setString("port",port);    
-    saveJSONObject(jo,"SerialConfig.txt");
-  }
 
-  void loadConfig() //TODO
-  {
-  }
+  //cbu: done in DxlBehav09  
+  //void saveConfig(){...} //TODO
+  //void loadConfig(){...} //TODO
   
   void list()
   {
@@ -183,7 +227,6 @@ class CommIno implements ControlListener //CallbackListener
   {
     port = listBox.item(iselect).getName();
     open();
-    saveConfig();
   }
   
   void baudFromGUI()
@@ -193,21 +236,27 @@ class CommIno implements ControlListener //CallbackListener
     
   }
   
-  void toggleOnOff()
+  void toggleOnOff(Toggle titleButton) //modif cbu
   {
     //println("toggle");
     if(titleButton.getState())
     {
+      this.titleButton.setState(true); // We need to ensure that both buttons have the same state, although just one of them had been clicked
+      this.titleButtonBasic.setState(true);
       open();
-      titleButton.getCaptionLabel().setText("ARDUINO on");
+      this.titleButton.getCaptionLabel().setText("ARDUINO on");
+      this.titleButtonBasic.getCaptionLabel().setText("ARDUINO on");
     }
     else
     {
+      this.titleButton.setState(false);
+      this.titleButtonBasic.setState(false);
       close();
-      titleButton.getCaptionLabel().setText("ARDUINO off");
+      this.titleButton.getCaptionLabel().setText("ARDUINO off");
+      this.titleButtonBasic.getCaptionLabel().setText("ARDUINO off");
     }
   }
-    
+  
   void open()
   {
     println("openning "+port+" ");
@@ -254,7 +303,7 @@ class CommIno implements ControlListener //CallbackListener
         int ireg = Integer.parseInt(toks[2]); //GRRR
         int val  = Integer.parseInt(toks[3]); //GRRRRRRRRRR
         servoArray.regValue(imot,ireg,val);
-        motorGroup.setValue(imot,ireg,val);
+        servoGUIarray.setValue(imot,ireg,val);
         dxlGui.setValue(imot,ireg,val);
         }catch(Exception e){println("TOK EXCEPTION");}
       }
@@ -264,7 +313,7 @@ class CommIno implements ControlListener //CallbackListener
         try{ 
         int imot = Integer.parseInt(toks[1]); //GRRR
         int icmd = Integer.parseInt(toks[2]); //GRRR
-        script.rcvMsg(imot,icmd);
+        scriptArray[0].rcvMsg(imot,icmd); //!!!!! REVOIR !!!!!
         }catch(Exception e){}
     }
   }
