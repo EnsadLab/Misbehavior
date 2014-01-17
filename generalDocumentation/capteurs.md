@@ -1,4 +1,3 @@
-
 ##CM9
 
 
@@ -6,6 +5,16 @@
 * Fonctionnement interne : 3,3V
 * Voltage de référence : 3,3V 
 * Digital output : 3,3V
+
+##Récapitulatif
+
+| CAPTEUR 	        		 | TYPE                 	| FONCTION								 | INTEGRATION													| CONTRAINTES								 			  |
+| -------------------------- | ------------------------	| -------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------- |
+| Ping)))           		 | ultrasonique   			| distance : 10cm à 1m					 | deux ronds noirs cerclé, diam. 10cm  						| interférences avec d'autres ultrasoniques 			  |
+| Sharp 2Y0A21				 | infragouge   			| distance : 10cm à 80cm 				 | barrette noire 3cm x 10cm 									| luminosité ambiante									  |
+| Dynamixel AX-S1			 | infrarouge + son			| 										 | même forme que les moteurs, faces doivent être apparentes 	| luminosité ambiante									  |
+| impact sonore				 | micro					| impact supérieur à un seuil			 | peut être caché												|														  |
+| capteur bande X 			 | 							| detecte les mouvements entre 2,4m et9m | peut être placé derrière un obstacle 						| ne détecte pas avant 2m (tester ce qui est exploitable) |
 
 
 ##Parallax Ping)))
