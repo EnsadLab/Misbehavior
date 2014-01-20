@@ -11,6 +11,7 @@ CommArduino    arduino;
 DxlControl     dxlGui;
 ServoArray     servoArray;
 ServoGUIarray  servoGUIarray;
+Script[]       scriptArray;
 
 ControlP5 cp5;
 int globalID = 0;
@@ -27,8 +28,6 @@ int nbAnimsMax = 18;
 String arduinoPort = "COM13";
 int arduinoBaudRate = 57600;
 
-Script[]    scriptArray    = new Script[4];
-ScriptGUI[] scriptGuiArray = new ScriptGUI[4];
 
 void setup()
 {
@@ -74,19 +73,23 @@ void setup()
   
   //scriptConsole.buildGui(700,150,450); //a suprimer
   //scriptEditor.buildGui(800,150,450); //a suprimer
+  scriptArray        = new Script[4]; //... TODO : config
   scriptArray[0]    = new Script();
+  scriptArray[0].buildGui(350,200,400,tabNameAdvanced);
   scriptArray[1]    = new Script();
-  scriptGuiArray[0] = new ScriptGUI(350,200,400,tabNameAdvanced);
-  scriptGuiArray[1] = new ScriptGUI(650,200,400,tabNameAdvanced);
+  scriptArray[1].buildGui(650,200,400,tabNameAdvanced);
+  scriptArray[0].load("/anims/AnimE1.txt");
+  
+  //scriptGuiArray[0] = new ScriptGUI(350,200,400,tabNameAdvanced);
+  //scriptGuiArray[1] = new ScriptGUI(650,200,400,tabNameAdvanced);
 
 
 /*
   listMidiDevices();
-  openMidi("BCF2000", "BCF2000");  
+  openMidi("BCF2000", "BCF2000"); //TODO  config
   //openMidi("BCR2000", "BCR2000");  
 */
 
-  scriptArray[0].load("/anims/AnimE1.txt");
 
   //String[] fonts = PFont.list();
   //println(fonts);
@@ -103,7 +106,8 @@ void draw()
     background(64);
   } 
   
-  //scriptArray[0].update();
+  scriptArray[0].update();
+  //scriptGuiArray[0].update();
   servoArray.update();
   servoGUIarray.update();
   arduino.update();  
@@ -164,7 +168,7 @@ void controlEvent(ControlEvent evt)
 {
   if(evt.isTab())
   {
-    //println("TAB "+evt.getTab().getName()+" IS SELECTED with id "+evt.getTab().getId());
+    println("TAB "+evt.getTab().getName()+" IS SELECTED with id "+evt.getTab().getId());
     currentTabId = evt.getTab().getId();
   }
 }
@@ -214,11 +218,15 @@ void garbage(ControlEvent evt)
 
 void serialEvent(Serial serial)
 {
+  try{
+    
   if( serial == arduino.serial )
   {
     arduino.serialRcv();
     //arduino.append("received "+serialEventCount+'\n');
   }
+  }catch(Exception e){println("SERIAL EXCEPTION");}
+  
   /*
   else
   {

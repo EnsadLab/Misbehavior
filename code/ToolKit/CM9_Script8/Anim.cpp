@@ -35,8 +35,8 @@ void Anim::setDxlId(int id)
   speedValue = 0;
   startValue = 0;
   destValue  = 0;
-  bezierIn   = 0.0;
-  bezierOut  = 1.0;
+  bezierIn   = 0.333;
+  bezierOut  = 0.666;
   wantedGoal  = 0;
   goalMargin  = 4;
 }
@@ -83,7 +83,7 @@ void Anim::sendReady()
   currentTask=0;
   duration  = 0;
   localTime = 0;
-  SERIAL.print("MA ");SERIAL.print(pEngine->index);SERIAL.println(" 0"); //READY 
+  SERIAL.print("ok ");SERIAL.print(pEngine->index);SERIAL.println(" 0"); //READY 
 }
 
 void Anim::execCmd(const char* strcmd,int value)
@@ -111,7 +111,7 @@ void Anim::execCmd(const char* strcmd,int value)
 
 void Anim::execTokenDbg(int tok,int value)
 {
-  SERIAL.print("DBG[");SERIAL.print(pEngine->dxlId);SERIAL.print("]");SERIAL.print(tok);SERIAL.print(" ");SERIAL.println(value); //READY  
+  //SERIAL.print("DBG[");SERIAL.print(pEngine->dxlId);SERIAL.print("]");SERIAL.print(tok);SERIAL.print(" ");SERIAL.println(value); //READY  
   int cmd = tok & 0x3F; //0x80=EOL 0x40=RND
   switch(cmd)
   {
@@ -126,6 +126,7 @@ void Anim::execTokenDbg(int tok,int value)
       currentTask = 0;
       startValue=(float)pEngine->getPos();
       destValue =(float)value;
+      wantedGoal = value;
       wantedTask=TASK_JOINT;
       break;
     case TOKEN_WHEEL:   pEngine->setWheelSpeed(value);break;
@@ -146,9 +147,11 @@ void Anim::execTokenDbg(int tok,int value)
     break;
     case TOKEN_TGIN:
       bezierIn  = 0.01f*(float)value;
+      SERIAL.print("bIn ");SERIAL.println(bezierIn);
       break;
     case TOKEN_TGOUT:
-      bezierOut = 0.01f*(float)value;
+      bezierOut = 0.01f*(float)(100-value);
+      SERIAL.print("bOut ");SERIAL.println(bezierOut);
       break;
     case TOKEN_MARGIN:
       goalMargin = value;
@@ -158,13 +161,14 @@ void Anim::execTokenDbg(int tok,int value)
       break;
     case TOKEN_TORQUE:
       pEngine->setTorque(value);
+      SERIAL.print("torque ");SERIAL.println(value);
       break;      
     case TOKEN_PAUSE:
        localTime = 0; duration = (float)value;
        currentTask=TASK_PAUSE;
        break;
     default:
-      SERIAL.print("...UNKNOWN");SERIAL.println(cmd); //READY
+      SERIAL.print("...UNKNOWN");SERIAL.println(cmd);
   }
 }
 
@@ -222,10 +226,9 @@ bool Anim::taskJoint(unsigned int dt)
   {
     //A VOIR: MOVING ???
     int pos = pEngine->getPos();
-    SERIAL.print("MV ");SERIAL.print(pEngine->dxlId);SERIAL.print(" ");
-    SERIAL.print(P_PRESENT_POSITION_L);SERIAL.print(" ");SERIAL.println(pos);
-
-    SERIAL.print("goal ");SERIAL.print(wantedGoal);SERIAL.print(" ");SERIAL.println(pEngine->getGoal());
+    //SERIAL.print("mv ");SERIAL.print(pEngine->dxlId);SERIAL.print(" ");
+    //SERIAL.print(P_PRESENT_POSITION_L);SERIAL.print(" ");SERIAL.println(pos);
+    //SERIAL.print("goal ");SERIAL.print(wantedGoal);SERIAL.print(" ");SERIAL.println(pEngine->getGoal());
     int dg  = wantedGoal-pos;
     if( (dg>goalMargin)||(dg<-goalMargin) )
       return false;
@@ -233,7 +236,10 @@ bool Anim::taskJoint(unsigned int dt)
     sendReady();  
     return true;
   }
-  // BEZIER  
+  // BEZIER
+  //if(dt>100)
+  //  dt=101;
+  
   float dlt = timeCoef*(float)dt;
   float t0  = localTime;
   localTime += dlt;
@@ -248,8 +254,9 @@ bool Anim::taskJoint(unsigned int dt)
   float fg = bt*( (bt*bt)+ (ot*bezierIn + bt*bezierOut)*ot*3 );
   int ig   = (int)( startValue + fg*(destValue-startValue) );
   pEngine->setGoal( ig );
-  SERIAL.print("MV ");SERIAL.print(pEngine->dxlId);SERIAL.print(" ");
-  SERIAL.print(P_GOAL_POSITION_L);SERIAL.print(" ");SERIAL.println( ig );
+  //SERIAL.print("dt ");SERIAL.println(dt);
+  //SERIAL.print("MV ");SERIAL.print(pEngine->dxlId);SERIAL.print(" ");
+  //SERIAL.print(P_GOAL_POSITION_L);SERIAL.print(" ");SERIAL.println( ig );
   return false; 
 }
 

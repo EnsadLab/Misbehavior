@@ -1,5 +1,5 @@
 
-
+//TODO READY ok ...
 
 class CommArduino implements ControlListener //CallbackListener
 {
@@ -153,9 +153,9 @@ class CommArduino implements ControlListener //CallbackListener
     //println("ARDUI EVT");
     if(evt.isGroup()) //dropdown list
     {
-      println("ARDUI GROUP");
       
        String gName = evt.getGroup().getName();
+      println("ARDUI GROUP :"+gName);
        int iselect = (int)evt.getGroup().getValue();
        if(gName.equals("SerialPort"))
          println("SERIALPORT :"+iselect ); //useless
@@ -177,6 +177,11 @@ class CommArduino implements ControlListener //CallbackListener
         titleButton.getCaptionLabel().setText("WAIT");        
         //arduino.toggleOnOff(); //bloquant ... 
         action = 1; //will toggle next loop;
+      }
+      else if(evName.equals("ARDUINObasic") )
+      {
+        titleButtonBasic.getCaptionLabel().setText("WAIT"); 
+        action = 2;
       }
       else if( evName.equals("SCAN") )
         list();
@@ -269,6 +274,7 @@ class CommArduino implements ControlListener //CallbackListener
     println("openned "+port); 
     textArea.append("Openned "+port+" "+baudrate+"\n");
     openned = true;
+    servoArray.sendDxlId();
   }
   
   void close()
@@ -277,11 +283,13 @@ class CommArduino implements ControlListener //CallbackListener
     textArea.append("closing "+port+"\n");
     if(serial!=null)
     {
-      serial.clear();
+      //serial.clear();
       serial.stop();
       serial.clear();
       serial = null;
     }
+    togleDog.setState(false);
+    togleDogBasic.setState(false);
   }
   
   void serialRcv()
@@ -290,6 +298,13 @@ class CommArduino implements ControlListener //CallbackListener
       return;
     
     String rcv = serial.readString();
+    if(rcv.charAt(0)=='x')
+    {
+      if(togleDog.getState()){togleDog.setState(false);togleDogBasic.setState(false); }
+      else {togleDog.setState(true);togleDogBasic.setState(true);}
+      return;
+    }
+      
     textArea.append("---"+rcv);
     textArea.scroll(1.0);
     
@@ -308,7 +323,7 @@ class CommArduino implements ControlListener //CallbackListener
         }catch(Exception e){println("TOK EXCEPTION");}
       }
     }
-    else if(toks[0].equals("MA"))
+    else if(toks[0].equals("ok")) //TODO TODO
     {      
         try{ 
         int imot = Integer.parseInt(toks[1]); //GRRR

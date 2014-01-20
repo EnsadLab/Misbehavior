@@ -195,9 +195,9 @@ void processMotor()
       break;
     case 'R':
       SERIAL.print("MV ");
-      SERIAL.print(params[1]);
+      SERIAL.print(params[1]); //Engine ID
       SERIAL.print(" ");
-      SERIAL.print(params[2]);
+      SERIAL.print(params[2]); //Engine MemAdrr
       SERIAL.print(" ");
       SERIAL.println( dxlRead(params[1],params[2]) );
       break;
@@ -221,7 +221,13 @@ void processMotor()
       if( (params[1]>=0)&&(params[1]<4) )
         engines[params[1]].setId(params[2]);
       SERIAL.print("MI ");SERIAL.print(params[1]);SERIAL.print(" ");SERIAL.println(engines[params[1]].dxlId);
-      break;        
+      break;
+
+    case '?':
+      if(parseStep==2)
+        SERIAL.print("M? ");SERIAL.print(params[1]);SERIAL.print(" ");SERIAL.println(dxlFindEngine(params[1]));
+      break;
+      
   }
 }
 

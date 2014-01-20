@@ -118,6 +118,9 @@ class ServoDxl
   int minGoal = 0;     //DXL 6
   int maxGoal = 1023;  //DXL 8
 
+  float origin = 0;
+  float scale  = 0;
+  
   boolean recording = false;
   boolean playing = false;
   int currFrame = 0;
@@ -129,13 +132,12 @@ class ServoDxl
   ServoDxl(int index,int id)
   {
     this.index = index;
-    id = -1;
     recValue = new ServoKey[800];
     for(int i=0;i<800;i++)
       recValue[i]=new ServoKey();
       
-    setDxlId(id);  
-  }
+    setDxlId(id);   
+ }
 
   void setDxlId(int id)
   {
@@ -151,9 +153,9 @@ class ServoDxl
     {
       arduino.serialSend("MI "+index+" "+dxlId+"\n");
       delay(10);    
-      arduino.serialSend("WA "+dxlId+" 36\n"); //add watch pos
+//      arduino.serialSend("WA "+dxlId+" 36\n"); //add watch pos
       delay(10);
-      arduino.serialSend("WA "+dxlId+" 38\n"); //add watch speed
+//      arduino.serialSend("WA "+dxlId+" 38\n"); //add watch speed
       delay(10);
       arduino.serialSend("MR "+dxlId+" 6\n"); //CW min
       delay(10);

@@ -40,7 +40,7 @@ class Token
 
   Token(int c,int v,int l){cmd=c;value=v;line=l;};
   int type(){return cmd & (~RND); }
-  void dbg(){println("TOK="+cmd+" v="+value+" L="+line);}
+  void dbg(){} //println("TOK="+cmd+" v="+value+" L="+line);}
   int cmd;
   int value;
   int line;  
@@ -48,6 +48,26 @@ class Token
 
 class ScriptArray
 {
+  /*
+  Script    scriptList[];
+  ScriptGUI guiList[];
+  
+  ScriptArray(int nb)
+  {
+    scriptList = new Script[4];
+    for(int i=0;i<nb;i++)
+      scriptList[i]= new Script();
+      
+    guiList    = new ScriptGUI[4];
+    for(int i=0;i<nb;i++)
+      guiList[i]= new ScriptGUI();    
+  }
+  
+  Script    script(int i){return scriptList[i];}
+  ScriptGUI gui(int i){return guiList[i];}
+  */
+  
+  /*
     ArrayList<String[]> scriptList = new ArrayList<String[]>(); 
 
     int nbSripts(){return scriptList.size();}
@@ -88,7 +108,7 @@ class ScriptArray
       }
       return null;
     }
-  
+  */
 }
 
 class ScriptLabel
@@ -114,15 +134,18 @@ class ScriptStack
 
 class Script
 {
+  ScriptGUI gui = null;
+  
   int index = 0;
   static final int STACK_MAX = 128;
   int frameTime = 0;
   int pauseDuration = 40;
   int execMode = 0;
-  int engineIndex = 0;
+  int servoIndex = 0;
   
   boolean waitReady = true;
-  boolean verbose   = true;
+  boolean verbose   = false;
+  int currLine = 0;
   int iToken =0;
   ArrayList<Token> tokens = new ArrayList<Token>();
   int iStack=-1;
@@ -143,24 +166,33 @@ class Script
       stack[i]=new ScriptStack();
   }
   
+  void buildGui(int x,int y,int h,String tabName)
+  {
+    gui = new ScriptGUI(this);
+    gui.build(x,y,h,tabName);
+  }
+  
   void dbg(String txt)
   {
     //scriptConsole.append(txt);
-    scriptGuiArray[index].print(txt);
+    //scriptGuiArray[index].print(txt);
+    if(gui!=null)
+      gui.print(txt);
+      
   }
   
   void send( int tok,int value )
   {
-    dbg("SEND:"+"A "+engineIndex+" "+tok+" "+value);
-    if(engineIndex>=0)
+    //dbg("SEND:"+"S "+servoIndex+" "+tok+" "+value);
+    if(servoIndex>=0)
     {
-      arduino.serialSend("S "+engineIndex+" "+tok+" "+value+"\n");
+      arduino.serialSend("S "+servoIndex+" "+tok+" "+value+"\n");
     }
-    dbg("SEND "+cmdToString(tok)+" "+value);
+    dbg(cmdToString(tok)+" "+value);
   }
   
       
-  void start(int currLine)
+  void start(int line)
   {
     servoArray.sendDxlId();
     //arduino.serialSend("MI "+engineIndex+" "+tok+" "+value+"\n");
@@ -171,10 +203,11 @@ class Script
     waitReady = false;    
     for(int i=0;i<tokens.size();i++)
     {
-      if(tokens.get(i).line==currLine)
+      if(tokens.get(i).line==line)
       {
         println("got line "+i );
-        iLine  = currLine;
+        currLine = line;
+        iLine  = line;
         iToken = i;
         break;
       }
@@ -194,6 +227,7 @@ class Script
   {
     execMode = 0;
     iToken = -1;
+    arduino.serialSend("Q "+servoIndex+"\n");    
   }
 
   void run()
@@ -213,7 +247,7 @@ class Script
       return 0;
       
     execMode = 0;
-    stepToken(4);
+    stepToken(1);
     return tokens.get(iToken).line;    
   }
 
@@ -234,12 +268,15 @@ void update()
   //  return;
   frameTime = t;
   //pauseDuration = 40;
+  currLine=tokens.get(iToken).line;
   
   if( execMode>0 )//0 = step by step
   {
-    dbg("run");
     stepToken(4);
+    dbg("run*********");
   }
+  if( gui!=null )
+    gui.update();
 }
 
 void setReady()
@@ -278,7 +315,7 @@ void setReady()
       default:result="ERROR";break;
     }
     if( (tok & Token.RND)!=0 )
-      result+="+RND";
+      result+=" rnd:";
     
     return result;  
     
@@ -290,28 +327,33 @@ void stepToken(int countMax)
 {
   Token currTok=tokens.get(iToken);
   int  tok = currTok.type();  
-  int  currLine= -1;
+  int  line= -1;
   boolean gotCmd=false;
   int decount=countMax; //prevent infinite loop
   do
   {
-    if(verbose && (currLine!=currTok.line) )
+    currLine = currTok.line;
+    if(verbose && (line!=currLine) )
     {
-      currLine= currTok.line;
-      dbg("("+currTok.line+")"+script[currLine]);
-    }    
+      line=currLine;
+      dbg("("+currTok.line+")"+script[line]);
+    }
     switch(tok)
     {
       case Token.SCRIPT:
-      case Token.LABEL:      iToken++; break;
+      case Token.LABEL:
+        dbg("----------");
+        dbg("("+currTok.line+")"+script[currLine]);
+        iToken++;
+        break;
       case Token.JUMP:       execJump();decount=0; break;
       case Token.CALL:       execCall();decount=0; break;
       case Token.COUNT:      dbg("??? "+script[currTok.line]);iToken++;break;
       case Token.END:        execReturn(); decount=0;break;
       case Token.JOINT:      send(currTok.cmd,getValue());waitReady=true;gotCmd=true;break;
-      case Token.JOINT_D:    send(currTok.cmd,getValue());waitReady=true;gotCmd=true;break;
+      case Token.JOINT_D:    send(currTok.cmd,getValue());decount+=4;gotCmd=true;break;
       case Token.WHEEL:      send(currTok.cmd,getValue());gotCmd=true;break;
-      case Token.WHEEL_D:    send(currTok.cmd,getValue());waitReady=true;gotCmd=true;break;
+      case Token.WHEEL_D:    send(currTok.cmd,getValue());decount+=4;gotCmd=true;break;
       case Token.DURATION:   send(currTok.cmd,getValue());waitReady=true;decount=0;gotCmd=true;break;
       case Token.SPEED:      send(currTok.cmd,getValue());break;
       //case Token.BEZIER:     dbg("??? "+script[currTok.line]);iToken++;break;
@@ -331,6 +373,8 @@ void stepToken(int countMax)
     //next Token
     currTok=tokens.get(iToken);
     tok=currTok.type();
+    if(waitReady)
+      decount=0;
     /*
     if( gotCmd )
     {
@@ -347,6 +391,7 @@ void stepToken(int countMax)
     }
     */
   }while(--decount>0);
+  iLine = tokens.get(iToken).line;
 }
 
 int getValue()
@@ -465,21 +510,21 @@ boolean execTorque()
 //===========================PARSE
 void load(String name)
 {
-  try
+  if(gui!=null)
   {
-    scriptGuiArray[index].clearList();
-    scriptGuiArray[index].clearConsole();
-    scriptGuiArray[index].setName(name);
-  }catch(Exception e){}
+    gui.clearList();
+    gui.clearConsole();
+    gui.setName(name);
+  }
   
   script = loadStrings(name);
   parse();
   
-  try
+  if(gui!=null)
   {
       for(int i=0;i<script.length;i++)
-        scriptGuiArray[index].addLine(script[i]);
-  }catch(Exception e){}
+        gui.addLine(script[i]);
+  }
 }
 
 void parse(String src[])
@@ -499,7 +544,7 @@ String getLine(int iline)
 void parse()
 {
   //scriptConsole.clear();
-  try{ scriptGuiArray[index].clearConsole(); }
+  try{ gui.clearConsole(); }
   catch(Exception e){}
    
   iChar = 0;
@@ -521,7 +566,7 @@ void parse()
         String lbl=script[i].substring(1).trim();
         ScriptLabel lab = new ScriptLabel(lbl,-1,i) ; //token still unkown
         labels.add( lab ); //token still unkown
-        dbg("LABEL["+i+"] "+lbl);
+        //dbg("LABEL["+i+"] "+lbl);
       }
     }catch(Exception e){}      
   }
@@ -541,7 +586,7 @@ void parse()
     {
       int ilab=tokens.get(i).value;
       int itok=labels.get(ilab).iToken;
-      dbg( "jump label["+ilab+"]>>"+itok );
+      //dbg( "jump label["+ilab+"]>>"+itok );
       tokens.get(i).value = itok;      
     }
   }
@@ -554,12 +599,10 @@ void parse()
   iChar = 0;
   iToken = 0;
   iStack=-1;
-  dbg("-------------");
 }
 
 void parseLine()
 {
-  println("---------");
   boolean done=false;
   int iInterpole = -1; 
   boolean hasDuration=false;
@@ -615,7 +658,7 @@ int findLabel(int from,String name)
   {
     if( labels.get(i).name.equals(name) )
     {
-      dbg("FOUND "+name+" #"+i+" L"+labels.get(i).iLine);
+      //dbg("FOUND "+name+" #"+i+" L"+labels.get(i).iLine);
       return i;
     }
   }
@@ -649,7 +692,7 @@ int parseInt(int defo) //default
     }catch(Exception e){eol=true;}
     try{ result = Integer.decode(script[iLine].substring(iChar,inext)); }
     catch(Exception e){}
-    println("getint "+result);
+    //println("getint "+result);
     iChar = inext;
     return result;
   }

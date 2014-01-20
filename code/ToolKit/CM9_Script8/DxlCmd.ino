@@ -57,6 +57,18 @@ int dxlRead(int imot,int ireg)
   return r;
 }
 
+int dxlFindEngine(int from)
+{
+  for(int i=from;i<254;i++)
+  {
+    int id=Dxl.readByte(i,P_ID);
+    if( id==i)
+      return i;
+    delay(20);
+  }
+  return -1;
+}
+
 void dxlSetGoal(int imot,int goal)
 {
     Dxl.writeWord(imot,30,goal);

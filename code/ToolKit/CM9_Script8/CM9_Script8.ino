@@ -82,16 +82,18 @@ void loop()
 {
   unsigned long t = millis();
   unsigned long dt = t-loopTime;
-  if(dt>50)
+  if(dt>=50)
   {
     loopTime = t;
     if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);SERIAL.println("x");}
     else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
     //else if(dogCount==10)Serial2.println("bee");
-    cmdPoll(t);
+//    cmdPoll(t);
     engines[0].update(t);
   }
-  
+  else
+    cmdPoll(t);
+ 
   if( digitalRead(BUTTON_PIN) )
   {
     SERIAL.println("BUTTON");

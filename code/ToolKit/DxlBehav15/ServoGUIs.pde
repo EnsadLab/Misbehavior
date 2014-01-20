@@ -370,6 +370,7 @@ void buildGUI(int index,int x,int y,String tabName)
     .moveTo(tabName);
    tfID.getCaptionLabel().align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER);
    //tfID.getCaptionLabel().setText("MOTOR "+imot+" ");
+   tfID.setValue(""+motorId);
    tfID.addListener(this);
 
   toggleJoin = cp5.addToggle("JOIN"+index)
