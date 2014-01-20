@@ -30,6 +30,8 @@ class DxlValue
          .setText("0") 
          .setPosition(x,y)
          .setSize(30,h)
+         .setColorBackground(color(128))
+         .setColorForeground(color(128))
          .moveTo(tabName);
          
      tf.setInputFilter(Textfield.INTEGER);
@@ -37,9 +39,9 @@ class DxlValue
          
      Label lbl = tf.getCaptionLabel();
      lbl.align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER);
-     //lbl.toUpperCase(false);
-     lbl.setText(label+":"+registre);
-     
+     lbl.setFont(courrierFont);
+     lbl.setText(label+" "+registre+":");
+     lbl.setColor(0xFF000000);     
      textField = tf;
      return tf;
   }  
@@ -121,20 +123,7 @@ class DxlControl implements ControlListener //CallbackListener
  /*
   // DIDIER? est-ce que c'est moi qui l'ai mis en commentaire par hasard? ou ça vient de toi?
   //DE MOI !!!!
- void controlEvent(CallbackEvent evt)
- {
-   Controller ctrl = evt.getController();
-   int act = evt.getAction();
-   //if(act==ControlP5.ACTION_ENTER)
-   //println(" motorAction:["+act+"] "+ctrl.getAddress()+" "+ctrl.getValue() );
-   if(act == ControlP5.ACTION_BROADCAST )
-   {
-
-      println(" motor:"+ctrl.getAddress()+" "+ctrl.getStringValue() );
-     //println("action: "+act+" "+ControlP5.ACTION_BROADCAST );
-     //ctrl.setValueLabel("zob");
-   }
- }
+  // ... C'est Moi (Didier) ... supprimé
 */
  
  void update( )
@@ -157,14 +146,14 @@ class DxlControl implements ControlListener //CallbackListener
   void buildGUI(int x0,int y0, String tabName)
   {
      startID = globalID;
-     Textfield tf =cp5.addTextfield("DXL ID ")
+     Textfield tf =cp5.addTextfield(" DXL ID ")
       .setId(globalID++)
       .setPosition(x0,y0)
       .setWidth(30)
       .setInputFilter(Textfield.INTEGER)
       .setAutoClear(false)
       .moveTo(tabName);
-     tf.getCaptionLabel().align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER);
+     tf.getCaptionLabel().align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER).setColor(0xFF000000);
        //lbl.toUpperCase(false);
        //lbl.setText(label);
   

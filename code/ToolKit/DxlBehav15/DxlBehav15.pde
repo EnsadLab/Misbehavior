@@ -5,13 +5,14 @@ import controlP5.*;
 PApplet  mainApp;
 int keyModifier = 0; //1 shift 2ctrl 4alt 
 
-PFont arialFont; // = createFont("Arial",20,true); // use true/false for smooth/no-smooth
+PFont courrierFont; // = createFont("Arial",20,true); // use true/false for smooth/no-smooth
+PFont verdanaFont; //
 
 CommArduino    arduino;
 DxlControl     dxlGui;
 ServoArray     servoArray;
 ServoGUIarray  servoGUIarray;
-Script[]       scriptArray;
+ScriptArray    scriptArray;
 
 ControlP5 cp5;
 int globalID = 0;
@@ -28,6 +29,9 @@ int nbAnimsMax = 18;
 String arduinoPort = "COM13";
 int arduinoBaudRate = 57600;
 
+String midiInDevice = null; 
+String midiOutDevice = null;
+
 
 void setup()
 {
@@ -39,7 +43,8 @@ void setup()
   cp5 = new ControlP5(this);
   globalID = 200;
   
-  arialFont = createFont("Courier New",12,false); // use true/false for smooth/no-smooth
+  courrierFont = createFont("Courier New",12,false); // use true/false for smooth/no-smooth
+  verdanaFont  = createFont("Verdana",13,false); // use true/false for smooth/no-smooth
 
   cp5.addTab(tabNameAdvanced)
      .activateEvent(true)
@@ -59,37 +64,34 @@ void setup()
   
   arduino = new CommArduino(arduinoPort,arduinoBaudRate);
   arduino.buildBasicGUI(20,50,tabNameBasic);
-  arduino.buildGUI(150,20,tabNameAdvanced);
+  arduino.buildGUI(20,50,tabNameAdvanced);
 
   servoArray = new ServoArray(motorIds);
        
   dxlGui = new DxlControl();
-  dxlGui.buildGUI(100,20,tabNameAdvanced);
+  dxlGui.buildGUI(1100,90,tabNameAdvanced);
   
   servoGUIarray = new ServoGUIarray(motorIds);
   servoGUIarray.buildGUI(350,20,tabNameAdvanced);
   servoGUIarray.buildBasicGui(250,50,tabNameBasic);
     
-  
+  /*
   //scriptConsole.buildGui(700,150,450); //a suprimer
   //scriptEditor.buildGui(800,150,450); //a suprimer
-  scriptArray        = new Script[4]; //... TODO : config
-  scriptArray[0]    = new Script();
-  scriptArray[0].buildGui(350,200,400,tabNameAdvanced);
+  scriptArray        = new Script[2]; //... TODO : config
+  scriptArray[0]     = new Script();
+  scriptArray[0].buildGUI(350,200,400,tabNameAdvanced);
   scriptArray[1]    = new Script();
-  scriptArray[1].buildGui(650,200,400,tabNameAdvanced);
+  scriptArray[1].buildGUI(650,200,400,tabNameAdvanced);
   scriptArray[0].load("/anims/AnimE1.txt");
+  */
+  scriptArray        = new ScriptArray(2); //... TODO : config
+  scriptArray.buildGUI(260,160,550,tabNameAdvanced);
+  scriptArray.scriptAt(0).load("/anims/AnimE1.txt");
   
-  //scriptGuiArray[0] = new ScriptGUI(350,200,400,tabNameAdvanced);
-  //scriptGuiArray[1] = new ScriptGUI(650,200,400,tabNameAdvanced);
-
-
-/*
-  listMidiDevices();
-  openMidi("BCF2000", "BCF2000"); //TODO  config
-  //openMidi("BCR2000", "BCR2000");  
-*/
-
+  //listMidiDevices();
+  if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config
+    openMidi(midiInDevice,midiOutDevice);
 
   //String[] fonts = PFont.list();
   //println(fonts);
@@ -103,10 +105,10 @@ void draw()
   }
   else // tab ADVANCED
   {
-    background(64);
+    background(200);
   } 
   
-  scriptArray[0].update();
+  scriptArray.update();
   //scriptGuiArray[0].update();
   servoArray.update();
   servoGUIarray.update();
@@ -162,6 +164,15 @@ void loadConfig(String xmlFilePath)
     animPaths[i] = animPath;
     println("-> adding anim with path " + animPath);
   }
+  
+  try{midiInDevice  = xml.getChild("midi").getString("in");}catch(Exception e){}
+  try{midiOutDevice = xml.getChild("midi").getString("out");}catch(Exception e){}
+  println("MIDIin  "+midiInDevice);
+  println("MIDIout "+midiOutDevice);
+  
+  
+  
+  
 }
 
 void controlEvent(ControlEvent evt)
@@ -218,13 +229,12 @@ void garbage(ControlEvent evt)
 
 void serialEvent(Serial serial)
 {
-  try{
-    
-  if( serial == arduino.serial )
-  {
-    arduino.serialRcv();
-    //arduino.append("received "+serialEventCount+'\n');
-  }
+  try{      
+    if( serial == arduino.serial )
+    {
+      arduino.serialRcv();
+      //arduino.append("received "+serialEventCount+'\n');
+    }
   }catch(Exception e){println("SERIAL EXCEPTION");}
   
   /*

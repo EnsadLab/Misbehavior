@@ -48,24 +48,51 @@ class Token
 
 class ScriptArray
 {
-  /*
-  Script    scriptList[];
-  ScriptGUI guiList[];
-  
+  Script    scriptList[];  
   ScriptArray(int nb)
   {
-    scriptList = new Script[4];
+    scriptList = new Script[nb];
     for(int i=0;i<nb;i++)
-      scriptList[i]= new Script();
-      
-    guiList    = new ScriptGUI[4];
-    for(int i=0;i<nb;i++)
-      guiList[i]= new ScriptGUI();    
+      scriptList[i]= new Script(i);
+  }
+  void buildGUI(int x,int y,int h,String tabname)
+  {
+    for(int i=0;i<scriptList.length;i++)
+    {
+      scriptList[i].buildGUI(x,y,h,tabname);
+      x+=350;
+    }
   }
   
-  Script    script(int i){return scriptList[i];}
-  ScriptGUI gui(int i){return guiList[i];}
-  */
+  Script scriptAt(int i)
+  {
+    if(i<scriptList.length) return scriptList[i];
+    return null;
+  }
+  ScriptGUI guiAt(int i)
+  {
+    if(i<scriptList.length) return scriptList[i].gui;
+    return null;
+  }  
+  void update()
+  {
+    for(int i=0;i<scriptList.length;i++)
+      scriptList[i].update();
+  }
+  void stopAll()
+  {
+    for(int i=0;i<scriptList.length;i++)
+      scriptList[i].stop();
+  }
+  void rcvMsg(int iservo,int cmd)
+  {
+    for(int i=0;i<scriptList.length;i++)
+    {
+      if(scriptList[i].servoIndex == iservo )
+        scriptList[i].rcvMsg(iservo,cmd);
+    }
+  }
+
   
   /*
     ArrayList<String[]> scriptList = new ArrayList<String[]>(); 
@@ -146,7 +173,7 @@ class Script
   boolean waitReady = true;
   boolean verbose   = false;
   int currLine = 0;
-  int iToken =0;
+  int iToken = -1;
   ArrayList<Token> tokens = new ArrayList<Token>();
   int iStack=-1;
   ScriptStack stack[] = new ScriptStack[STACK_MAX];
@@ -159,14 +186,15 @@ class Script
   String script[];
   ArrayList<ScriptLabel> labels = new ArrayList<ScriptLabel>();
   
-  Script()
+  Script(int idx)
   {
-    index = numScript++; 
+    index = idx;
+    servoIndex = idx; 
     for(int i=0;i<STACK_MAX;i++)
       stack[i]=new ScriptStack();
   }
   
-  void buildGui(int x,int y,int h,String tabName)
+  void buildGUI(int x,int y,int h,String tabName)
   {
     gui = new ScriptGUI(this);
     gui.build(x,y,h,tabName);
@@ -268,7 +296,8 @@ void update()
   //  return;
   frameTime = t;
   //pauseDuration = 40;
-  currLine=tokens.get(iToken).line;
+  try{ currLine=tokens.get(iToken).line; }
+  catch(Exception e){println("ZOOB "+tokens.size() );}
   
   if( execMode>0 )//0 = step by step
   {
@@ -566,7 +595,7 @@ void parse()
         String lbl=script[i].substring(1).trim();
         ScriptLabel lab = new ScriptLabel(lbl,-1,i) ; //token still unkown
         labels.add( lab ); //token still unkown
-        //dbg("LABEL["+i+"] "+lbl);
+        dbg("LABEL["+i+"] "+lbl);
       }
     }catch(Exception e){}      
   }
@@ -700,7 +729,7 @@ int parseInt(int defo) //default
 
 boolean parseValue(int tok,int defoo)
 {
-    dbg("tokenize value...");
+    //dbg("tokenize value...");
     if(!skipSpaces())
     {
       tokens.add( new Token( tok,defoo,iLine) );
@@ -711,20 +740,20 @@ boolean parseValue(int tok,int defoo)
       tokens.add( new Token( tok,parseInt(defoo),iLine) ); //RND
     else
     {    
-      dbg("tokenize Random...");
+      //dbg("tokenize Random...");
       iChar++;
       int v1    = parseInt(defoo);
       int v2    = parseInt(v1);
-      dbg(" [ "+v1+" "+v2+" ]");
+      //dbg(" [ "+v1+" "+v2+" ]");
       if( v1==v2 )
         tokens.add( new Token( tok,v1,iLine) );
       else if(v1<v2)
       {
-        dbg(" [ "+v1+" "+v2+" ]");
+        //dbg(" [ "+v1+" "+v2+" ]");
         int it = tokens.size();
         tokens.add( new Token( tok+Token.RND,v1,iLine) );
         tokens.add( new Token( Token.RND,v2,iLine) );
-        dbg(" tok1 "+tokens.get(it).cmd+" tok2 "+tokens.get(it+1).cmd);
+        //dbg(" tok1 "+tokens.get(it).cmd+" tok2 "+tokens.get(it+1).cmd);
         
       }
       else
@@ -756,7 +785,7 @@ boolean parseLabel(int tok)
       currentSubScript = ilabel;    
     return true;
   }
-  println("ERR "+script[iLine] ); 
+  dbg("ERROR "+script[iLine] ); 
   return false;
 }
 
@@ -794,7 +823,7 @@ boolean parseJump()
     if( iFrom != currentSubScript )
       jumpType = Token.CALL;
     
-    dbg(" destLabel "+iLabel);
+    //dbg(" destLabel "+iLabel);
     tokens.add( new Token( jumpType,iLabel,iLine) ); //iLabel sera remplacé par iToken
     parseValue( Token.COUNT,-1 );
     return true;

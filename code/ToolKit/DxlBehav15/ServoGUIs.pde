@@ -28,7 +28,7 @@ class ServoGUIarray
     {
       servoGUIs[i].buildGUI(i, x,y,tabName);
       //y+=170;
-      x+=200;
+      x+=350;
     }
   }
   

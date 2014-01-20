@@ -64,9 +64,11 @@ class CommArduino implements ControlListener //CallbackListener
    titleButton = cp5.addToggle("ARDUINO")
       .setPosition(x,y)
       .setColorActive(0xFFCC0000)
-      .setSize(150,18)
+      .setSize(180,40)
       .moveTo(tabName);   
-   titleButton.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
+   titleButton.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER)
+     .setFont(verdanaFont)
+     .setText("CONNECT TO ARDUINO");
 
    //watchdog reception CM9
    togleDog = cp5.addToggle("Dog")
@@ -76,31 +78,28 @@ class CommArduino implements ControlListener //CallbackListener
        .moveTo(tabName);
    togleDog.getCaptionLabel().setText("");
    
-   y+=20;
+    y+=45;
+    listBox = cp5.addDropdownList("SerialPort")
+      .setPosition(x,y+20) //??? origine en bas !!!
+      .setWidth(180)
+      .setBarHeight(19)
+      .setOpen(false)
+      .moveTo(tabName);    
+    for(int i=0;i<10;i++) 
+      listBox.addItem("COMM"+i,i);     
+    listBox.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setText(port);
 
+    y+=20;
    scanButton = cp5.addToggle("SCAN")
      .setPosition(x,y)
      .setWidth(30)
      .moveTo(tabName);
    scanButton.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
 
-    listBox = cp5.addDropdownList("SerialPort")
-      .setPosition(x+48,y+20) //??? origine en bas !!!
-      .setWidth(50)
-      .setBarHeight(19)
-      .setOpen(false)
-      .moveTo(tabName);
-    
-    for(int i=0;i<10;i++) 
-      listBox.addItem("COMM"+i,i);     
-    listBox.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
-    listBox.getCaptionLabel().setText(port);
- 
- 
    String[] bauds ={"9600","14400","19200","28800","38400","57600","115200"};
    listBauds = cp5.addDropdownList("BAUDRATE")
-      .setPosition(x+100,y+20)
-      .setWidth(50)
+      .setPosition(x+50,y+20)
+      .setWidth(130)
       .setBarHeight(19)
       .setOpen(false)
       .addItems( bauds )
@@ -109,13 +108,13 @@ class CommArduino implements ControlListener //CallbackListener
    listBauds.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
    listBauds.getCaptionLabel().setText("57600");  
  
-   y+=20;
+   y+=30;
    textArea = cp5.addTextarea("TextArea")
      .setPosition(x,y)
-     .setSize(150,600)
+     .setSize(180,600)
      .setLineHeight(14)
      .setColor(color(255))
-     .setColorBackground(color(0))
+     .setColorBackground(color(128))
      .setColorForeground(color(255))
      .moveTo(tabName);
      
@@ -125,14 +124,14 @@ class CommArduino implements ControlListener //CallbackListener
      y+=602;
      sendField = cp5.addTextfield("SEND")
            .setPosition(x,y)
-           .setWidth(118)
+           .setWidth(148)
            .setAutoClear(true)
            .moveTo(tabName);
     
      //y+=20;
      cp5.addButton("CLEAR")
        .setWidth(30)
-       .setPosition(x+120,y)
+       .setPosition(x+150,y)
        .moveTo(tabName);
        
     cp5.addListener(this);
@@ -296,8 +295,11 @@ class CommArduino implements ControlListener //CallbackListener
   {
     if( !openned || (serial == null))
       return;
-    
-    String rcv = serial.readString();
+
+    String rcv = null;
+    try{ rcv = serial.readString(); } //???
+    catch(Exception e){return;}       //???
+
     if(rcv.charAt(0)=='x')
     {
       if(togleDog.getState()){togleDog.setState(false);togleDogBasic.setState(false); }
@@ -328,18 +330,22 @@ class CommArduino implements ControlListener //CallbackListener
         try{ 
         int imot = Integer.parseInt(toks[1]); //GRRR
         int icmd = Integer.parseInt(toks[2]); //GRRR
-        scriptArray[0].rcvMsg(imot,icmd); //!!!!! REVOIR !!!!!
+        scriptArray.rcvMsg(imot,icmd);
         }catch(Exception e){}
     }
   }
 
  boolean serialSend(String toSend)
  {
-   if(openned && (serial!=null) )
+   try
    {
-     textArea.append( ">>>"+toSend );
-     serial.write(toSend);
+     if(openned && (serial!=null) )
+     {
+       textArea.append( ">>>"+toSend );
+       serial.write(toSend);
+     }
    }
+   catch(Exception e){}
    return openned;   
  }
  
