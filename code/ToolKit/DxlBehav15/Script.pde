@@ -89,7 +89,10 @@ class ScriptArray
     for(int i=0;i<scriptList.length;i++)
     {
       if(scriptList[i].servoIndex == iservo )
+      {
         scriptList[i].rcvMsg(iservo,cmd);
+        println("RCV "+iservo+" "+i);
+      }
     }
   }
 
@@ -183,7 +186,7 @@ class Script
   int iLine=0;
   int iChar=0;
   boolean eol = false; //EndOfLine
-  String script[];
+  String scriptLines[];
   ArrayList<ScriptLabel> labels = new ArrayList<ScriptLabel>();
   
   Script(int idx)
@@ -254,7 +257,6 @@ class Script
   void stop()
   {
     execMode = 0;
-    iToken = -1;
     arduino.serialSend("Q "+servoIndex+"\n");    
   }
 
@@ -271,7 +273,7 @@ class Script
   
   int nextStep()
   {
-    if( (tokens==null)||(iToken<0)||(tokens.size()<=iToken) )
+    if( (tokens==null)||(iToken<0)||(tokens.size()<=iToken)||(scriptLines==null) )
       return 0;
       
     execMode = 0;
@@ -365,19 +367,19 @@ void stepToken(int countMax)
     if(verbose && (line!=currLine) )
     {
       line=currLine;
-      dbg("("+currTok.line+")"+script[line]);
+      dbg("("+currTok.line+")"+scriptLines[line]);
     }
     switch(tok)
     {
       case Token.SCRIPT:
       case Token.LABEL:
         dbg("----------");
-        dbg("("+currTok.line+")"+script[currLine]);
+        dbg("("+currTok.line+")"+scriptLines[currLine]);
         iToken++;
         break;
       case Token.JUMP:       execJump();decount=0; break;
       case Token.CALL:       execCall();decount=0; break;
-      case Token.COUNT:      dbg("??? "+script[currTok.line]);iToken++;break;
+      case Token.COUNT:      dbg("??? "+scriptLines[currTok.line]);iToken++;break;
       case Token.END:        execReturn(); decount=0;break;
       case Token.JOINT:      send(currTok.cmd,getValue());waitReady=true;gotCmd=true;break;
       case Token.JOINT_D:    send(currTok.cmd,getValue());decount+=4;gotCmd=true;break;
@@ -394,7 +396,7 @@ void stepToken(int countMax)
       //case Token.ENGINE:     break;
       //case Token.REG:        break;
       case Token.PAUSE:      pauseDuration=getValue();waitReady=true;decount=0; break; //waitReady inutile
-      case Token.RND:        dbg("??? "+script[currTok.line]);iToken++;break;
+      case Token.RND:        dbg("??? "+scriptLines[currTok.line]);iToken++;break;
       case Token.EOL:        send(currTok.cmd,getValue());decount=0; break;
       default:
         dbg("UNKNOWN TOKEN "+tok);iToken++;decount=0;
@@ -539,6 +541,9 @@ boolean execTorque()
 //===========================PARSE
 void load(String name)
 {
+  println("scr loading "+name);
+  stop();
+  iToken = -1;
   if(gui!=null)
   {
     gui.clearList();
@@ -546,26 +551,32 @@ void load(String name)
     gui.setName(name);
   }
   
-  script = loadStrings(name);
+  try{ scriptLines = loadStrings(name); }
+  catch(Exception e){ println("FILE ERROR");return;} //TODO ... clear tokens ???
+  if(scriptLines==null)
+  {
+    println("FILE ERROR2");return;
+  }
+    
   parse();
   
   if(gui!=null)
   {
-      for(int i=0;i<script.length;i++)
-        gui.addLine(script[i]);
+      for(int i=0;i<scriptLines.length;i++)
+        gui.addLine(scriptLines[i]);
   }
 }
 
 void parse(String src[])
 {
-    script = src;
+    scriptLines = src;
     parse();    
 }
 
 String getLine(int iline)
 {
-  if(iline<script.length)
-    return script[iline];
+  if(iline<scriptLines.length)
+    return scriptLines[iline];
   return null;
 }
 
@@ -580,19 +591,19 @@ void parse()
   iStack=-1;
   tokens.clear();
   labels.clear();
-  if(script==null)
+  if(scriptLines==null)
     return;
   
   //build label list
-  int nbl = script.length;
+  int nbl = scriptLines.length;
   char c;
   for(int i=0;i<nbl;i++)
   {
     try{
-      c=script[i].charAt(0);
+      c=scriptLines[i].charAt(0);
       if( (c=='#')||(c=='<') )
       {
-        String lbl=script[i].substring(1).trim();
+        String lbl=scriptLines[i].substring(1).trim();
         ScriptLabel lab = new ScriptLabel(lbl,-1,i) ; //token still unkown
         labels.add( lab ); //token still unkown
         dbg("LABEL["+i+"] "+lbl);
@@ -641,7 +652,7 @@ void parseLine()
   {
       char c=0;
       int itok = tokens.size();
-      try{ c=script[iLine].charAt(iChar); }
+      try{ c=scriptLines[iLine].charAt(iChar); }
       catch(Exception e){done=true;}
       iChar++;
       if(!done)//
@@ -715,11 +726,11 @@ int parseInt(int defo) //default
     int result = defo;
     try{
       char c;
-      do{ c=script[iLine].charAt(inext); inext++; }
+      do{ c=scriptLines[iLine].charAt(inext); inext++; }
       while( (c=='-')||( (c>='0')&&(c<='9') ) );
       inext--;
     }catch(Exception e){eol=true;}
-    try{ result = Integer.decode(script[iLine].substring(iChar,inext)); }
+    try{ result = Integer.decode(scriptLines[iLine].substring(iChar,inext)); }
     catch(Exception e){}
     //println("getint "+result);
     iChar = inext;
@@ -736,7 +747,7 @@ boolean parseValue(int tok,int defoo)
       return true;
     }
     
-    if( script[iLine].charAt(iChar) != '[' )
+    if( scriptLines[iLine].charAt(iChar) != '[' )
       tokens.add( new Token( tok,parseInt(defoo),iLine) ); //RND
     else
     {    
@@ -766,7 +777,7 @@ boolean parseValue(int tok,int defoo)
     // skip  
     try{
       char c;
-      do{c=script[iLine].charAt(iChar);iChar++; }
+      do{c=scriptLines[iLine].charAt(iChar);iChar++; }
       while( (c==' ')||(c==']')||(c==',') );
       iChar--;
     }catch(Exception e){eol=true;}
@@ -785,7 +796,7 @@ boolean parseLabel(int tok)
       currentSubScript = ilabel;    
     return true;
   }
-  dbg("ERROR "+script[iLine] ); 
+  dbg("ERROR "+scriptLines[iLine] ); 
   return false;
 }
 
@@ -799,7 +810,7 @@ boolean parseJump()
   {
     char c;
     do
-    { c=script[iLine].charAt(inext);
+    { c=scriptLines[iLine].charAt(inext);
       if(c=='.')idot=inext;
       inext++;
     }while( (c>' ')&&(c!=',') );
@@ -809,12 +820,12 @@ boolean parseJump()
   int iFrom = currentSubScript; 
   if(idot>0)
   {
-    iFrom = findLabel( 0,script[iLine].substring(iChar,idot) );
+    iFrom = findLabel( 0,scriptLines[iLine].substring(iChar,idot) );
     iChar = idot+1;
   }
   int iLabel=-1;
   if( iFrom>=0 )
-    iLabel = findLabel( iFrom,script[iLine].substring(iChar,inext) );
+    iLabel = findLabel( iFrom,scriptLines[iLine].substring(iChar,inext) );
           
   iChar = inext;  
   if(iLabel>=0)
@@ -829,7 +840,7 @@ boolean parseJump()
     return true;
   }  
 
-  println("LABEL UNKNOWN "+script[iLine]);
+  println("LABEL UNKNOWN "+scriptLines[iLine]);
   return false;      
 }
   
@@ -838,7 +849,7 @@ boolean parseJump()
     eol = false;
     try{
       char c;
-      do{ c=script[iLine].charAt(iChar); iChar++; }
+      do{ c=scriptLines[iLine].charAt(iChar); iChar++; }
       while( (c==' ')||(c=='=')||(c==',') );
       iChar--;
     }catch(Exception e){eol=true;}
@@ -849,7 +860,7 @@ boolean parseJump()
   {
     boolean isnum = false;
     try{
-      char c = script[iLine].charAt(iChar);
+      char c = scriptLines[iLine].charAt(iChar);
       if( (c=='-')||( (c>='0')&&(c<='9') ) )
         isnum = true;
     }catch(Exception e){eol=true;}

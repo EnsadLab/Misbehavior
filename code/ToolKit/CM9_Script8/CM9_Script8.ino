@@ -42,8 +42,8 @@ void setup() {
 
   engines[0].setId(1);
   engines[1].setId(2);
-  //engines[2].setId(3);
-  //engines[3].setId(4);
+  engines[2].setId(3);
+  engines[3].setId(4);
 
   delay(500);
   SERIAL.begin(BAUDS);
@@ -55,7 +55,7 @@ void setup() {
     toggleLED();
     delay(100);
   }
-  SERIAL.println("Start?");
+  SERIAL.println("Start");
   
   /*
   timer.pause(); // Pause the timer while configuration
@@ -82,14 +82,15 @@ void loop()
 {
   unsigned long t = millis();
   unsigned long dt = t-loopTime;
-  if(dt>=50)
+  if(dt>=25)
   {
     loopTime = t;
     if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);SERIAL.println("x");}
     else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
     //else if(dogCount==10)Serial2.println("bee");
 //    cmdPoll(t);
-    engines[0].update(t);
+    for(int i=0;i<nbEngines;i++)
+      engines[i].update(t);
   }
   else
     cmdPoll(t);
@@ -97,7 +98,8 @@ void loop()
   if( digitalRead(BUTTON_PIN) )
   {
     SERIAL.println("BUTTON");
-    engines[0].stop();
+    for(int i=0;i<nbEngines;i++)
+      engines[i].stop();
     delay(500);
   }
   

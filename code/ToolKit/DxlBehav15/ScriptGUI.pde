@@ -141,7 +141,6 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   {
     clearList();
     clearConsole();
-    print("loading "+filename);
     try{ script.load(filename); }
     catch(Exception e){}
     setCurrLine(0,0);
@@ -202,20 +201,23 @@ class ScriptGUI implements ControlListener //implements CallbackListener
     if(current==next)
       clr = 0xFF404040;
     
-    ListBoxItem lbc = listbox.getItem(currLine);
-    if(lbc!=null)
+    ListBoxItem lbc;
+    try //GRRR
     {
+      lbc = listbox.getItem(currLine); //Exception
       lbc.setColorBackground(0xff808080);
       lbc.setColorForeground(0xFF707070);
-    }
+    }catch(Exception e){}
+
     nextLine = next;
     currLine = current;
-    lbc = listbox.getItem(currLine);
-    if(lbc!=null)
+    try //GRRR
     {
+      lbc = listbox.getItem(currLine);
       lbc.setColorBackground(clr);
       lbc.setColorForeground(clr);
     }
+    catch(Exception e){}
   }
 
   
