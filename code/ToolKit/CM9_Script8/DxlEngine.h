@@ -47,6 +47,7 @@ class DxlEngine
   void setId(int id);
   void stop();
   void startScript(const char* name,const char* label=NULL);
+  void donothing();
   bool update(unsigned int t);
   void execTokenDbg(int tok,int value);
   void execToken(int tok,int value);

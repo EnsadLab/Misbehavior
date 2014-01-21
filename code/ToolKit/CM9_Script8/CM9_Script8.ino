@@ -20,9 +20,10 @@ int sensorValue = 0; // Variable to store the value coming from the sensor
 //int ledCount = 5;
 unsigned long loopTime = 0;
 //unsigned long blinkTime = 0;
-//unsigned long blinkBlink = 0x420;
-//HardwareTimer timer(1);
-//#define TIMER_RATE 100000 //1s 1000 000
+unsigned long titime = 0;
+HardwareTimer timer(1);
+#define TIMER_RATE 40000 //1s 1000 000
+//#define TIMER_RATE 50000 //1s 1000 000
 
 void setup() {
 //SERIAL.println(F("Inline Flash mem"));
@@ -57,25 +58,35 @@ void setup() {
   }
   SERIAL.println("Start");
   
-  /*
+  
   timer.pause(); // Pause the timer while configuration
   timer.setPeriod(TIMER_RATE); // in microseconds
   timer.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE); // Set up an interrupt on channel 1
   timer.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
   timer.attachInterrupt(TIMER_CH1, timerHandler); 
   timer.refresh();   // Refresh the timer's count  , prescale, and overflow
+  titime = millis();
   timer.resume(); // Start the timer counting
-  */  
+    
   loopTime = millis();
 }
-/*
+
+
 void timerHandler(void)
 {
-    //!!!!!!! MARCHE PAS !!!!!!!!
-    if(--ledCount<=0){ledCount = 20;digitalWrite(BOARD_LED_PIN, HIGH);} //SERIAL.println("x ");}
-    else if(ledCount==1)digitalWrite(BOARD_LED_PIN, LOW);
+  unsigned long t = millis();
+  if( (t-titime)>5000 )
+  {
+    titime = t;
+    SERIAL.print(";t\n");
+  }
+  else
+  {
+    //for(int i=0;i<nbEngines;i++)
+      engines[0].update(t);
+  } 
 }
-*/
+
 
 int dogCount = 0;
 void loop()
@@ -89,8 +100,10 @@ void loop()
     else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
     //else if(dogCount==10)Serial2.println("bee");
 //    cmdPoll(t);
-    for(int i=0;i<nbEngines;i++)
-      engines[i].update(t);
+  
+    //for(int i=0;i<nbEngines;i++)
+    //  engines[i].update(t);
+  
   }
   else
     cmdPoll(t);

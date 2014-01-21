@@ -10,6 +10,7 @@
 #define TASK_JOINT 1
 #define TASK_WHEEL 2
 #define TASK_PAUSE 3
+#define TASK_TEST  4
 
 Anim::Anim()
 {
@@ -54,9 +55,9 @@ bool Anim::update(unsigned long t)
   unsigned int dt= t-frameTime;  
   frameTime = t;
 
-  if( (currentTask<=0)||(pEngine==NULL)  )
+   if( (currentTask<=0)||(pEngine==NULL)  )
    return false; //stopped
- 
+      
   switch( currentTask )
   {
     case TASK_JOINT:
@@ -67,8 +68,9 @@ bool Anim::update(unsigned long t)
       taskJoint(dt);
       //SERIAL.print("pos ");SERIAL.println(pEngine->fakePos);
       break;
-    case TASK_WHEEL:SERIAL.println("TASK_WHEEL");currentTask=0;break;
+    case TASK_WHEEL:taskWheel(dt);break;
     case TASK_PAUSE:taskPause(dt); break;
+    case TASK_TEST: taskSpeedTest(dt);break;
     default:
       currentTask=0;
 
@@ -118,8 +120,8 @@ void Anim::execTokenDbg(int tok,int value)
     case TOKEN_JOINT:
       pEngine->relax(false);
       wantedGoal=value;duration=0;
+      SERIAL.print(";tok joint ");SERIAL.println(value);
       pEngine->setGoal(value);
-      //Dxl.writeWord(1,P_GOAL_POSITION_L,value);
       currentTask=TASK_JOINT;
       break;
     case TOKEN_JOINT_D:
@@ -129,14 +131,20 @@ void Anim::execTokenDbg(int tok,int value)
       wantedGoal = value;
       wantedTask=TASK_JOINT;
       break;
-    case TOKEN_WHEEL:   pEngine->setWheelSpeed(value);break;
+    case TOKEN_WHEEL:
+      currentTask = 0;
+      pEngine->setWheelSpeed(value);
+      speedValue = float(value);
+      break;
     case TOKEN_WHEEL_D:
       currentTask = 0;
       startValue = speedValue;
       destValue  =(float)value;
-      wantedTask=TASK_JOINT;
+      wantedTask=TASK_WHEEL;
       break;
-    case TOKEN_SPEED:   pEngine->setGoalSpeed(value);break;
+    case TOKEN_SPEED:
+      pEngine->setGoalSpeed(value);
+      break;
     case TOKEN_DURATION: //INTERPOLATION BEGINS
     {
        localTime = 0;
@@ -167,6 +175,14 @@ void Anim::execTokenDbg(int tok,int value)
        localTime = 0; duration = (float)value;
        currentTask=TASK_PAUSE;
        break;
+    case TOKEN_TEST:
+      SERIAL.println("TEST");
+      wSpeed = value;
+      pEngine->setWheelMode();
+      pEngine->setWheelSpeed(value);
+      if( (value>10)||(value<-10) )
+        currentTask = TASK_TEST;
+      break;
     default:
       SERIAL.print("...UNKNOWN");SERIAL.println(cmd);
   }
@@ -224,6 +240,7 @@ bool Anim::taskJoint(unsigned int dt)
 {
   if(duration<1)
   {
+    //SERIAL.println(";joint");
     //A VOIR: MOVING ???
     int pos = pEngine->getPos();
     //SERIAL.print("mv ");SERIAL.print(pEngine->dxlId);SERIAL.print(" ");
@@ -273,11 +290,32 @@ bool Anim::taskWheel(unsigned int dt)
     sendReady();  
     return false;
   }
-  float t1 = duration - t0;
-  float kt = dlt/t0;
-  speedValue+= (destValue - speedValue)*dlt/t0;
+  float fdt = duration - t0;
+  speedValue+= (destValue - speedValue)*dlt/fdt;
   pEngine->setWheelSpeed( (int)speedValue );
+  //DBG("val ");DBGLN(speedValue);
   return true;
+}
+
+void Anim::taskSpeedTest(unsigned long dt)
+{
+  float p1 = (float)pEngine->getPos();
+  float v= (p1-prevPos)*685.0f/(float)dt;
+  prevPos = p1; 
+  SERIAL.print(";v ");SERIAL.print(v);SERIAL.print(" t ");SERIAL.println(dt);
+  if( (wSpeed<0)&&(p1<24) )
+  {
+    //SERIAL.print(";?pos ");SERIAL.println(p1);
+    pEngine->setWheelSpeed(0);
+    sendReady();  
+  }  
+  if( (wSpeed>0)&&(p1>1000) )
+  {
+    //SERIAL.print(";?pos ");SERIAL.println(p1);
+    pEngine->setWheelSpeed(0);
+    sendReady();  
+  }
+  
 }
 
 

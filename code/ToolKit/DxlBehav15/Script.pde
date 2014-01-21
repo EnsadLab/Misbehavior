@@ -20,6 +20,7 @@ class Token
   //static final int ORIGINE
   //static final int TIMECOEF
   //static final int SCALE
+  static final int TEST     =  31;
   static final int PARAM    =  32; //param tout court versus param #0 #1 #2 #3
   static final int SCRIPT   =  PARAM+4; //no value
   static final int LABEL    =  PARAM+5; //no value
@@ -169,7 +170,7 @@ class Script
   int index = 0;
   static final int STACK_MAX = 128;
   int frameTime = 0;
-  int pauseDuration = 40;
+  int pauseDuration = 1;
   int execMode = 0;
   int servoIndex = 0;
   
@@ -209,7 +210,6 @@ class Script
     //scriptGuiArray[index].print(txt);
     if(gui!=null)
       gui.print(txt);
-      
   }
   
   void send( int tok,int value )
@@ -225,7 +225,7 @@ class Script
       
   void start(int line)
   {
-    servoArray.sendDxlId();
+    //servoArray.sendDxlId();
     //arduino.serialSend("MI "+engineIndex+" "+tok+" "+value+"\n");
     iLine = 0;
     iChar = 0;
@@ -268,6 +268,7 @@ class Script
       iToken = 0;    
     execMode = 1;
     waitReady = false;
+    pauseDuration = 0;
   }
 
   
@@ -275,8 +276,16 @@ class Script
   {
     if( (tokens==null)||(iToken<0)||(tokens.size()<=iToken)||(scriptLines==null) )
       return 0;
-      
+    
     execMode = 0;
+    if(waitReady)
+    {
+      waitReady = false;
+      pauseDuration = 0;
+      currLine=tokens.get(iToken).line;
+      return iLine;
+    }
+
     stepToken(1);
     return tokens.get(iToken).line;    
   }
@@ -291,13 +300,20 @@ void rcvMsg(int imot,int cmd)
   
 void update()
 {
+  int t = millis();
+  if( pauseDuration > 10)
+  {
+    if( (t-frameTime)<pauseDuration )
+      return;
+    pauseDuration = 0;
+    waitReady=false;
+    dbg("READY");
+  }
+
   if( waitReady || (iToken<0) )
     return;
-  int t = millis();
-  //if( (t-frameTime)<pauseDuration )
-  //  return;
+    
   frameTime = t;
-  //pauseDuration = 40;
   try{ currLine=tokens.get(iToken).line; }
   catch(Exception e){println("ZOOB "+tokens.size() );}
   
@@ -312,7 +328,7 @@ void update()
 
 void setReady()
 {
-  pauseDuration = 1;
+  pauseDuration = 0;
   waitReady = false;
 }
 
@@ -395,7 +411,7 @@ void stepToken(int countMax)
       case Token.TGOUT:       send(currTok.cmd,getValue());break;
       //case Token.ENGINE:     break;
       //case Token.REG:        break;
-      case Token.PAUSE:      pauseDuration=getValue();waitReady=true;decount=0; break; //waitReady inutile
+      case Token.PAUSE:      pauseDuration=getValue();waitReady=true;decount=0;dbg("PAUSE "+pauseDuration);break;
       case Token.RND:        dbg("??? "+scriptLines[currTok.line]);iToken++;break;
       case Token.EOL:        send(currTok.cmd,getValue());decount=0; break;
       default:
@@ -406,21 +422,6 @@ void stepToken(int countMax)
     tok=currTok.type();
     if(waitReady)
       decount=0;
-    /*
-    if( gotCmd )
-    {
-      switch(tok)
-      {
-        case Token.JOINT:
-        case Token.JOINT_D:
-        case Token.WHEEL:
-        case Token.WHEEL_D:
-        case Token.JUMP:
-        case Token.END:
-          decount = 0;
-      }
-    }
-    */
   }while(--decount>0);
   iLine = tokens.get(iToken).line;
 }

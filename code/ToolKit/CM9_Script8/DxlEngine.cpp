@@ -51,11 +51,16 @@ void DxlEngine::stop()
   relax(true);  
 }
 
+void DxlEngine::donothing()
+{
+}
+
+
 // true = finished / false runningTask
 bool DxlEngine::update(unsigned int t)
 {
   anim.pEngine = this;
-  return anim.update(t); 
+  return anim.update(t);
 }
 
 void DxlEngine::setGoalSpeed(int s)
@@ -97,6 +102,8 @@ void DxlEngine::setGoal(int g,int s)
     }    
     if( status & RELAXED )
       relax(false);    
+
+    SERIAL.print(";goal s ");SERIAL.println(g);
 }
 
 int DxlEngine::getGoal()
@@ -174,5 +181,6 @@ void DxlEngine::setCompliance(int cw,int ccw)
     cpl = 1<<ccw;
   Dxl.writeByte(dxlId,29,cpl); //CCW SLOPE  
 }
+
 
 

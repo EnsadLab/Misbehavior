@@ -177,7 +177,7 @@ void processCmd()
 
 void processScript()
 {
-  SERIAL.print("ANIM ");SERIAL.println(cmdId);
+  //SERIAL.print("ANIM ");SERIAL.println(cmdId);
   if( cmdId[1]!=(char)0 )
     engines[0].anim.execCmd(cmdId,params[1]);
   else if( (parseStep>3)&&(params[1]>=0)&&(params[1]<nbEngines)&&(params[2]>=0) ) 

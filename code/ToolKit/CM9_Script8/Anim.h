@@ -17,6 +17,7 @@
 
 #define TOKEN_DURATION 12
 #define TOKEN_PAUSE 13
+#define TOKEN_TEST  31
 //End Of Line
 #define TOKEN_EOL 63
 
@@ -43,6 +44,9 @@ class Anim
   int   wantedGoal;
   int   goalMargin;
     
+  int   wSpeed;
+  float prevPos;  
+    
   Anim();
   Anim(int id);
   void setDxlId(int id);
@@ -59,6 +63,7 @@ class Anim
   bool taskPause(unsigned long dt);
   bool taskJoint(unsigned int dt);  //wait goal or bezier
   bool taskWheel(unsigned int dt);  //lineaire
+  void taskSpeedTest(unsigned long dt);
 
   
   
