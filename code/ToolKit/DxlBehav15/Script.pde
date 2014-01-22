@@ -92,7 +92,7 @@ class ScriptArray
       if(scriptList[i].servoIndex == iservo )
       {
         scriptList[i].rcvMsg(iservo,cmd);
-        println("RCV "+iservo+" "+i);
+        //println("RCV "+iservo+" "+i);
       }
     }
   }
@@ -236,7 +236,7 @@ class Script
     {
       if(tokens.get(i).line==line)
       {
-        println("got line "+i );
+        //println("got line "+i );
         currLine = line;
         iLine  = line;
         iToken = i;
@@ -246,7 +246,21 @@ class Script
     dbg("Restart "+iLine);
   }
   
-  
+  boolean start(String lbl)
+  {
+    int nbl = labels.size();
+    for(int i=0;i<nbl;i++)
+    {
+      if( lbl.equals(labels.get(i).name) )
+      {
+        currLine = iLine = labels.get(i).iLine;
+        iToken = labels.get(i).iToken;
+        run();
+        return true;  
+      }      
+    }
+    return false;
+  }
   
 
   void pause()
@@ -262,7 +276,7 @@ class Script
 
   void run()
   {
-    dbg("RUN");
+    //dbg("RUN");
     execMode = 0;
     if(iToken<0)
       iToken = 0;    
@@ -320,7 +334,7 @@ void update()
   if( execMode>0 )//0 = step by step
   {
     stepToken(4);
-    dbg("run*********");
+    dbg("...");
   }
   if( gui!=null )
     gui.update();

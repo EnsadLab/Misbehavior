@@ -8,9 +8,6 @@
 #define RELAXED 1
 #define JOINT_MODE 2
 
-
-
-
 int DxlEngineCount = 0;
 
 DxlEngine::DxlEngine()
@@ -39,22 +36,22 @@ void DxlEngine::setId(int id)
   fakePos = -1;
   fakeGoal = -1;
   
-  anim.iDxl = id;
-  anim.pEngine = this;
+  anim.init(this);
   if(id>0)
     relax(true);
+  checkMode();
 }
 
 void DxlEngine::stop()
 {
   anim.stop();
   relax(true);  
+  checkMode();
 }
 
 void DxlEngine::donothing()
 {
 }
-
 
 // true = finished / false runningTask
 bool DxlEngine::update(unsigned int t)
@@ -75,6 +72,9 @@ void DxlEngine::setGoalSpeed(int s)
 
 void DxlEngine::setWheelSpeed(int s)
 {
+   if(jointMode)
+      setWheelMode();
+    
   if(lastSpeed!=s)
   {
     lastSpeed =s;
@@ -94,6 +94,9 @@ void DxlEngine::setGoal(int g)
 
 void DxlEngine::setGoal(int g,int s)
 {
+    if(!jointMode)
+      setJointMode();
+  
     Dxl.writeWord(dxlId,P_GOAL_POSITION_L,g);
     if( (s>0)&&(s!=lastSpeed) )
     {
@@ -103,7 +106,7 @@ void DxlEngine::setGoal(int g,int s)
     if( status & RELAXED )
       relax(false);    
 
-    SERIAL.print(";goal s ");SERIAL.println(g);
+    //SERIAL.print(";goal s ");SERIAL.println(g);
 }
 
 int DxlEngine::getGoal()
@@ -138,8 +141,7 @@ void DxlEngine::relax(bool dorelax)
   else
   {
     int p = Dxl.readWord(dxlId,36); //currPos
-    Dxl.writeWord(dxlId,30,p);      //goal
-    
+    Dxl.writeWord(dxlId,30,p);      //goal    
     Dxl.writeWord(dxlId,34,torqueLimit);
     status &= ~RELAXED;
   }
@@ -147,13 +149,20 @@ void DxlEngine::relax(bool dorelax)
 
 void DxlEngine::setTorque(int tl)
 {
-  if(tl==0)
+  if(tl<=0)
     relax(true);
   else
   {
     torqueLimit = tl;
     relax(false);
   }  
+}
+
+// true = JOINT , false = WHEEL 
+bool DxlEngine::checkMode() //fast: check only CCW
+{
+   jointMode = (Dxl.writeWord(dxlId,8,0)>0 );
+   return jointMode;
 }
 
 void DxlEngine::setWheelMode()

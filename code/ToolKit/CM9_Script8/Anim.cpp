@@ -14,19 +14,11 @@
 
 Anim::Anim()
 {
-  pEngine = NULL;
-  setDxlId(0);
+  this->init(NULL);
 }
 
-Anim::Anim(int id)
+void Anim::init(DxlEngine* pEng)
 {
-  pEngine = NULL;
-  setDxlId(id);
-}
-
-void Anim::setDxlId(int id)
-{
-  iDxl = 0;
   frameTime = 0;
   pauseTime = 0;
   currentTask = 0;
@@ -40,6 +32,7 @@ void Anim::setDxlId(int id)
   bezierOut  = 0.666;
   wantedGoal  = 0;
   goalMargin  = 4;
+  pEngine = pEng;
 }
 
 void Anim::stop()
@@ -184,6 +177,7 @@ void Anim::execTokenDbg(int tok,int value)
         currentTask = TASK_TEST;
       break;
     default:
+      pEngine->checkMode();
       SERIAL.print("...UNKNOWN");SERIAL.println(cmd);
   }
 }

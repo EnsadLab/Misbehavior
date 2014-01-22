@@ -1,46 +1,63 @@
-#include "AAA.h"
+#include "AAA.h" //GLOBAL definitions ... !!!SerialUSB/XBEE!!!
 #include "libpandora_types.h"
-#include "DxlEngine.h"
-
 #include "Dynamixel.h"
-Dynamixel Dxl(1); //Dynamixel on Serial1(USART1)
-
-const int nbEngines = 4;
-DxlEngine engines[nbEngines];
 
 #define BUTTON_PIN 25 //NOT 23 !!! !!!
 
-//const char* PROGMEM test = "Globally declared in Flash mem";
-//#define PGMSTR(x) (__FlashStringHelper*)(x)
-//const char HEADER[] PROGMEM  = { "-- -- ---- -- -- -- ---------  ------  ------"};
+//--------------------------------
+#include "DxlEngine.h"
+Dynamixel Dxl(1); //Dynamixel on Serial1(USART1)
+const int nbEngines = 4;
+DxlEngine engines[nbEngines];
+//--------------------------------
 
-int sensorPin   = 0;
-int sensorValue = 0; // Variable to store the value coming from the sensor
+//--------------------------------
+//PING : PARALLAX utrasound distance sensor
+byte pingPin = -1;  //17; //TODO more than one ... attach interrupts
+unsigned long pingEchoTime  = 0;
+unsigned long pingStartTime = 0;
+byte          pingDistance  = 0;
+//CF  void triggerPingDistance(int pin)
+// && pingInterrupt()
+//--------------------------------
 
-//int ledCount = 5;
+//--------------------------------
+//IR : Sharp GP2Y0A21YK0F
+byte sharpIRPin = -1; //TODO more than one ... attach interrupts
+//CF float getSharpDistance(byte pin)
+//--------------------------------
+
+
 unsigned long loopTime = 0;
-//unsigned long blinkTime = 0;
 unsigned long titime = 0;
 HardwareTimer timer(1);
 #define TIMER_RATE 40000 //1s 1000 000
 //#define TIMER_RATE 50000 //1s 1000 000
 
-void setup() {
-//SERIAL.println(F("Inline Flash mem"));
+//
+void setup()
+{
   pinMode(BOARD_LED_PIN, OUTPUT);
   pinMode(BUTTON_PIN, INPUT_PULLDOWN);
-//  pinMode(sensorPin, INPUT_ANALOG);
-    
-//  clearWatches();
 
-  for(int i=0;i<3;i++)
+  for(int i=0;i<3;i++) //Sigggnal
   {
     toggleLED();
-    delay(1000);
+    delay(500);
   }
-  
-  Dxl.begin(1);
 
+  //init ping sensor
+  if(pingPin > 0)
+    attachInterrupt(pingPin,pingInterrupt,CHANGE);
+
+  //init sharp sensor
+  if( sharpIRPin > 0 )
+    pinMode(sharpIRPin, INPUT_ANALOG);
+  
+
+  //Dxl Engines    
+  clearWatches();  
+  Dxl.begin(1);
   engines[0].setId(1);
   engines[1].setId(2);
   engines[2].setId(3);
@@ -51,14 +68,13 @@ void setup() {
   delay(500);
   //Serial2.begin(57600);
 
-  for(int i=0;i<7;i++)
+  for(int i=0;i<7;i++) //Siggggnal
   {
     toggleLED();
     delay(100);
   }
   SERIAL.println("Start");
-  
-  
+    
   timer.pause(); // Pause the timer while configuration
   timer.setPeriod(TIMER_RATE); // in microseconds
   timer.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE); // Set up an interrupt on channel 1
@@ -75,15 +91,11 @@ void setup() {
 void timerHandler(void)
 {
   unsigned long t = millis();
-  if( (t-titime)>5000 )
+  //if( (t-titime)>5000 ){titime = t;SERIAL.print(";t\n");}
+  //else
   {
-    titime = t;
-    SERIAL.print(";t\n");
-  }
-  else
-  {
-    //for(int i=0;i<nbEngines;i++)
-      engines[0].update(t);
+    for(int i=0;i<nbEngines;i++)
+      engines[i].update(t);
   } 
 }
 
@@ -98,12 +110,6 @@ void loop()
     loopTime = t;
     if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);SERIAL.println("x");}
     else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
-    //else if(dogCount==10)Serial2.println("bee");
-//    cmdPoll(t);
-  
-    //for(int i=0;i<nbEngines;i++)
-    //  engines[i].update(t);
-  
   }
   else
     cmdPoll(t);
@@ -118,4 +124,26 @@ void loop()
   
 }
   
+void triggerPingDistance(int pin){
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, LOW);  
+  delayMicroseconds(5); 
+  digitalWrite(pin, HIGH);
+  delayMicroseconds(5);
+  pinMode(pin, INPUT);
+}
+void pingInterrupt()
+{
+  pingEchoTime  = micros()-pingStartTime;
+  pingStartTime = micros();
+  pingDistance  = pingEchoTime/57;
+}
+
+float getSharpDistance(byte pin)
+{
+  float analogValue = analogRead(pin);
+  float distance = pow((analogValue/4096)*3.3,-1.15)*27.86;
+  return distance;
+}
+
  

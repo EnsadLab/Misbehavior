@@ -26,7 +26,7 @@ class DxlEngine;
 class Anim
 {
   public:
-  int iDxl;
+  //int iDxl;
   DxlEngine* pEngine;
   unsigned long frameTime;
   unsigned long pauseTime;
@@ -48,8 +48,7 @@ class Anim
   float prevPos;  
     
   Anim();
-  Anim(int id);
-  void setDxlId(int id);
+  void init(DxlEngine* pEng);
   //bool startScript(int iscript,const char* plabel);
   //bool startScript(const char* pname,const char* plabel);
   //void start(unsigned long t,AnimKey* pAni);

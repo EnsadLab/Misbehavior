@@ -2,6 +2,9 @@ import themidibus.*;
 import processing.serial.*;
 import controlP5.*;
 
+
+ThreadTest threadTest;
+
 PApplet  mainApp;
 int keyModifier = 0; //1 shift 2ctrl 4alt 
 
@@ -75,16 +78,6 @@ void setup()
   servoGUIarray.buildGUI(350,20,tabNameAdvanced);
   servoGUIarray.buildBasicGui(250,50,tabNameBasic);
     
-  /*
-  //scriptConsole.buildGui(700,150,450); //a suprimer
-  //scriptEditor.buildGui(800,150,450); //a suprimer
-  scriptArray        = new Script[2]; //... TODO : config
-  scriptArray[0]     = new Script();
-  scriptArray[0].buildGUI(350,200,400,tabNameAdvanced);
-  scriptArray[1]    = new Script();
-  scriptArray[1].buildGUI(650,200,400,tabNameAdvanced);
-  scriptArray[0].load("/anims/AnimE1.txt");
-  */
   scriptArray        = new ScriptArray(2); //... TODO : config
   scriptArray.buildGUI(260,160,550,tabNameAdvanced);
   scriptArray.scriptAt(0).load("/anims/AnimE1.txt");
@@ -95,6 +88,10 @@ void setup()
 
   //String[] fonts = PFont.list();
   //println(fonts);
+  
+  //threadTest = new ThreadTest(); //,"le thread");
+  //threadTest.start();
+  
 }
 
 void draw()
@@ -119,16 +116,10 @@ void draw()
   //curve.test(500,100,1300,500);
 }
 
-void close()
-{
-  println("CLOSE");
-}
-
 void exit()
 {
   arduino.close();
-  println("EXIT");
-  
+  println("EXIT");  
   super.exit();  
 }
 

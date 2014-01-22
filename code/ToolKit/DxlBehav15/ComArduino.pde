@@ -8,7 +8,10 @@ class CommArduino implements ControlListener //CallbackListener
   int baudrate = 57600;
   boolean openned = false;
   int action = 0;
+  int rcvCount = 0;
   Serial serial;
+  OpenSerial openSerial;
+  
   //GUI
   Toggle titleButtonBasic;
   Toggle titleButton;
@@ -27,6 +30,8 @@ class CommArduino implements ControlListener //CallbackListener
   {
     this.port = port;
     this.baudrate = baudrate;
+    //openSerial = new OpenSerial(); //thread GRRR 
+    openSerial = null;
   }
      
   // basic GUI: port and bauds must be set in the config.xml file
@@ -141,9 +146,28 @@ class CommArduino implements ControlListener //CallbackListener
   {
     switch(action)
     {
-      case 0: break;
-      case 1: toggleOnOff(titleButton); action=0; break;
-      case 2: toggleOnOff(titleButtonBasic); action=0; break;
+      case 0: break;      
+      case 1: action=2;break;
+      case 2: action=0; break;
+      case 3: //serial openned
+         openSerial = null; //cannot restart;(& I prefer not keeping it running)
+         servoArray.sendDxlId();
+         titleButton.getCaptionLabel().setText("ARDUINO on");
+         titleButtonBasic.getCaptionLabel().setText("ARDUINO on");
+         textArea.append("Openned "+port+" "+baudrate+"\n");
+         action = 0;
+         break;
+     case 4: //serial closed
+        openned = false; 
+        openSerial = null;        
+        titleButtonBasic.getCaptionLabel().setText("ARDUINO off");
+        titleButton.getCaptionLabel().setText("ARDUINO off");
+        togleDog.setState(false);
+        togleDogBasic.setState(false);
+        action = 0;
+      break;
+     default:
+      action = 0;
     }
   }
   
@@ -173,14 +197,37 @@ class CommArduino implements ControlListener //CallbackListener
       //println("arduiEvent "+evName);
       if( evName.equals("ARDUINO") )
       {
+        println("TOGGLE1 "+titleButton.getState()+" "+action);
+        if(action==0)
+        {
+          if(titleButton.getState())
+            open();
+          else
+            close();
+        }
+        /*
         titleButton.getCaptionLabel().setText("WAIT");        
         //arduino.toggleOnOff(); //bloquant ... 
-        action = 1; //will toggle next loop;
+        //action = 1; //will toggle next loop;
+        toggleOnOff(titleButton);
+        */        
       }
       else if(evName.equals("ARDUINObasic") )
       {
-        titleButtonBasic.getCaptionLabel().setText("WAIT"); 
-        action = 2;
+        println("TOGGLE2 "+titleButtonBasic.getState()+" "+action);
+        if(action==0)
+        {
+          if(titleButtonBasic.getState())
+            open();
+          else
+            close();
+        }
+        /*
+        
+        titleButtonBasic.getCaptionLabel().setText("WAIT");
+        toggleOnOff(titleButtonBasic); 
+        //action = 2;
+        */
       }
       else if( evName.equals("SCAN") )
         list();
@@ -240,32 +287,47 @@ class CommArduino implements ControlListener //CallbackListener
     
   }
   
-  void toggleOnOff(Toggle titleButton) //modif cbu
+  /*
+  void toggleOnOff(Toggle button) //modif cbu
   {
-    //println("toggle");
-    if(titleButton.getState())
+    if(button.getState())
     {
-      this.titleButton.setState(true); // We need to ensure that both buttons have the same state, although just one of them had been clicked
-      this.titleButtonBasic.setState(true);
+      //this.titleButton.setState(true); // We need to ensure that both buttons have the same state, although just one of them had been clicked
+      //this.titleButtonBasic.setState(true);
       open();
-      this.titleButton.getCaptionLabel().setText("ARDUINO on");
-      this.titleButtonBasic.getCaptionLabel().setText("ARDUINO on");
+      //this.titleButton.getCaptionLabel().setText("ARDUINO on");
+      //this.titleButtonBasic.getCaptionLabel().setText("ARDUINO on");
     }
     else
     {
-      this.titleButton.setState(false);
-      this.titleButtonBasic.setState(false);
+      //this.titleButton.setState(false);
+      //this.titleButtonBasic.setState(false);
       close();
-      this.titleButton.getCaptionLabel().setText("ARDUINO off");
-      this.titleButtonBasic.getCaptionLabel().setText("ARDUINO off");
+      //this.titleButton.getCaptionLabel().setText("ARDUINO off");
+      //this.titleButtonBasic.getCaptionLabel().setText("ARDUINO off");
     }
   }
+  */
   
   void open()
   {
-    println("openning "+port+" ");
-    close();
+    println("SERIAL OPEN "+action);
+    action = 1;
+    if(openned)  
+      close();
+      
+    if( !titleButton.getState() )
+      titleButton.setState(true); // We need to ensure that both buttons have the same state, although just one of them had been clicked
+    if( !titleButtonBasic.getState() )
+       titleButtonBasic.setState(true);       
+    titleButtonBasic.getCaptionLabel().setText("Wait"); //s'affiche apreés coup
+    titleButton.getCaptionLabel().setText("Wait"); //s'affiche apreés coup
+       
     textArea.append("openning "+port+" "+baudrate+"\n");
+    openSerial = new OpenSerial(); //thread
+    openSerial.start();
+
+    /*
     serial = new Serial(mainApp,port,baudrate);
     if(serial==null)
       println("serial NULL") ;
@@ -274,11 +336,14 @@ class CommArduino implements ControlListener //CallbackListener
     textArea.append("Openned "+port+" "+baudrate+"\n");
     openned = true;
     servoArray.sendDxlId();
+    */
   }
   
   void close()
-  {
+  {    
+    println("SERIAL CLOSE");    
     openned = false;
+    action  = 1; 
     textArea.append("closing "+port+"\n");
     if(serial!=null)
     {
@@ -286,9 +351,13 @@ class CommArduino implements ControlListener //CallbackListener
       serial.stop();
       serial.clear();
       serial = null;
+      rcvCount = 0;
     }
-    togleDog.setState(false);
-    togleDogBasic.setState(false);
+    if( titleButton.getState() )
+      titleButton.setState(false); // We need to ensure that both buttons have the same state, although just one of them had been clicked
+    if( titleButtonBasic.getState() )
+      titleButtonBasic.setState(false);        
+    action = 4;
   }
   
   void serialRcv()
@@ -299,6 +368,7 @@ class CommArduino implements ControlListener //CallbackListener
     String rcv = null;
     try{ rcv = serial.readString(); } //???
     catch(Exception e){return;}       //???
+    rcvCount++;
 
     if(rcv.charAt(0)=='x')
     {
@@ -337,17 +407,50 @@ class CommArduino implements ControlListener //CallbackListener
 
  boolean serialSend(String toSend)
  {
+   //print("send("+rcvCount+")"+toSend);
    try
    {
-     if(openned && (serial!=null) )
+     if(openned && (rcvCount>0) && (serial!=null) ) //Serial is good if received at least once
      {
        textArea.append( ">>>"+toSend );
-       serial.write(toSend);
+       serial.write(toSend); //no exception ????
      }
    }
    catch(Exception e){}
    return openned;   
  }
- 
-  
+
+class OpenSerial extends Thread
+{
+  boolean running;
+  OpenSerial(){}
+  void start(){super.start();}
+  void run()
+  {
+    running = true;
+    openned = false;
+    Serial tmp = null;
+    //textArea.append("RUNNING\n");
+    try
+    { 
+      tmp = new Serial(mainApp,port,baudrate); //GRRR Windows : no exception, no null even if cannot open 
+      serial = tmp;
+      serial.bufferUntil(10);
+      openned = true;
+      action  = 3; //openned
+    }
+    catch(Exception e){action = 4;}//closed
+    //textArea.append("DONE "+openned);
+    running = false;
+    interrupt(); //force stop
+  }
+  void quit()
+  {
+    running = false;
+    interrupt(); //force stop
+  }
 }
+   
+}
+
+

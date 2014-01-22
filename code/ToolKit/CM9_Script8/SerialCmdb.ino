@@ -2,8 +2,9 @@
 
 #include "Anim.h"
 
+boolean echo = false;
+
 boolean polling = false;
-boolean echo = true;
 int currChar = 0;
 char buffer[32];
 int parseStep = 0;
@@ -67,7 +68,7 @@ void addWatch(int imot,int reg)
       watches[i].reg = reg;
       watches[i].val = -1;
       watches[i].imot =imot;
-      SERIAL.print("addWatch ");
+      SERIAL.print("addWatch "); //echo?
       SERIAL.println(i);
       break;
     }
@@ -150,6 +151,15 @@ void parse()
 void processCmd()
 {
   parse(); //dernier chiffre
+  if(  cmdId[0]=='M' )
+    processMotor();
+  else if(  cmdId[0]=='S' )
+    processScript();
+  else if(  cmdId[0]=='Q' )
+    stopMotors();
+  else if(  cmdId[0]=='W' )
+    cmdWatch();
+  parseStep = 0;
 
   if(echo)
   {
@@ -161,17 +171,7 @@ void processCmd()
       SERIAL.print(params[i]);
     }
     SERIAL.println(" ");
-  }
-  
-  if(  cmdId[0]=='M' )
-    processMotor();
-  else if(  cmdId[0]=='S' )
-    processScript();
-  else if(  cmdId[0]=='Q' )
-    stopMotors();
-  else if(  cmdId[0]=='W' )
-    cmdWatch();
-  parseStep = 0;
+  }  
   polling = false;
 }
 
@@ -190,10 +190,10 @@ void processMotor()
 {
   switch((int)cmdId[1])
   {
-    case 'W':
+    case 'W': //write
       dxlWrite(params[1],params[2],params[3]);
       break;
-    case 'R':
+    case 'R': //read
       SERIAL.print("MV ");
       SERIAL.print(params[1]); //Engine ID
       SERIAL.print(" ");
@@ -223,7 +223,7 @@ void processMotor()
       SERIAL.print("MI ");SERIAL.print(params[1]);SERIAL.print(" ");SERIAL.println(engines[params[1]].dxlId);
       break;
 
-    case '?':
+    case '?': //find a motor id M? from // return M? from found
       if(parseStep==2)
         SERIAL.print("M? ");SERIAL.print(params[1]);SERIAL.print(" ");SERIAL.println(dxlFindEngine(params[1]));
       break;

@@ -41,6 +41,8 @@ byte dxlAdrr[50]=
 
 void dxlWrite(int imot,int ireg,int value)
 {
+  if(ireg<=4)
+    return;
   if( dxlAdrr[ireg]==1 )
     Dxl.writeByte(imot,ireg,value);
   else if(dxlAdrr[ireg]==2)
@@ -51,9 +53,17 @@ int dxlRead(int imot,int ireg)
 {
   int r=-1;
   if( dxlAdrr[ireg]==1 )
+  {
     r= Dxl.readByte(imot,ireg);
+    if(r==255)
+      r = -1;
+  } 
   else if(dxlAdrr[ireg]==2)
+  {
     r= Dxl.readWord(imot,ireg);
+    if(r==0xFFFF)
+      r=-1;
+  }
   return r;
 }
 

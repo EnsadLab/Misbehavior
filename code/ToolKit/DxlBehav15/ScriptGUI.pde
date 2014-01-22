@@ -7,9 +7,11 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   
   int scriptIndex = 0;
   int idFile   = 1;
+  long clickTime = 0; //pour double click
   Textfield textFile   = null;
   Textfield textEngine = null;
-  Toggle    togglePlay = null;
+  Button    buttonPlay = null;
+  Button    buttonStop = null;
   Button    buttonStep = null;
   
   ListBox listbox;
@@ -65,19 +67,28 @@ class ScriptGUI implements ControlListener //implements CallbackListener
              .align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER);
 
     
-   togglePlay = cp5.addToggle("SPLAY"+scriptIndex)
+   buttonPlay = cp5.addButton("SPLAY"+scriptIndex)
        .setId(globalID++)
-       .setPosition(x,y)
-       .setSize(50,30)
-       .moveTo(tabName);
-   togglePlay.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
-   togglePlay.getCaptionLabel().setText("PLAY");
-   togglePlay.addListener(this);
+       .setPosition(x+10,y)
+       .setSize(60,30)
+       .moveTo(tabName)
+       .addListener(this);
+   buttonPlay.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER)
+       .setText("PLAY");
+
+  buttonStop = cp5.addButton("SSTOP"+scriptIndex)
+       .setId(globalID++)
+       .setPosition(x+80,y)
+       .setSize(60,30)
+       .moveTo(tabName)
+       .addListener(this);
+   buttonStop.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER)
+       .setText("STOP");
 
    buttonStep = cp5.addButton("SSTEP"+scriptIndex)
        .setId(globalID++)
-       .setPosition(x+100,y)
-       .setSize(50,30)
+       .setPosition(x+150,y)
+       .setSize(60,30)
        .moveTo(tabName);
    buttonStep.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
    buttonStep.getCaptionLabel().setText("STEP");
@@ -162,7 +173,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
     println("curr "+currLine+"next = "+next);
     setCurrLine(currLine,next);
   }
-  
+  /*
   void playStop()
   {
      if( togglePlay.getValue() > 0.5 )
@@ -176,7 +187,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
         togglePlay.getCaptionLabel().setText("PLAY");
      }
   }
-  
+  */
   
    
   void setName(String name)
@@ -202,7 +213,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
       clr = 0xFF404040;
     
     ListBoxItem lbc;
-    try //GRRR
+    try
     {
       lbc = listbox.getItem(currLine); //Exception
       lbc.setColorBackground(0xff808080);
@@ -211,7 +222,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
 
     nextLine = next;
     currLine = current;
-    try //GRRR
+    try
     {
       lbc = listbox.getItem(currLine);
       lbc.setColorBackground(clr);
@@ -224,21 +235,29 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   void controlEvent(ControlEvent evt)
   {
     if (evt.isGroup())
-    {
+    {      
       ControlGroup g = evt.group();
       if( g == listbox )
       {
+        long t = millis();
+        long dt = t-clickTime;
+        clickTime = t;
+        
         int line = (int)g.value();
         setCurrLine(currLine,line);
         script.start(line);
+        //println("click "+dt);
+        if(dt<250) //double click (should check same line?)
+          script.run();
       }
     }
     else if(evt.isController())
     {
       Controller c = evt.getController();
       if( c== textFile ){ load(c.getStringValue()); }
-      else if(c==togglePlay){ playStop(); }
-      else if(c==buttonStep){ scriptStep(); }
+      else if(c==buttonPlay){ script.run();  }
+      else if(c==buttonStop){ script.stop(); }
+      else if(c==buttonStep){ scriptStep();  }
     }
   }
   

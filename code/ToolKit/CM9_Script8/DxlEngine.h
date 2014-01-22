@@ -46,8 +46,10 @@ class DxlEngine
    DxlEngine(int id);
   void setId(int id);
   void stop();
-  void startScript(const char* name,const char* label=NULL);
+  //void startScript(const char* name,const char* label=NULL);
   void donothing();
+  //true=JOINT , false=WHEEL
+  bool checkMode(); //fast: check only CCW
   bool update(unsigned int t);
   void execTokenDbg(int tok,int value);
   void execToken(int tok,int value);
@@ -68,8 +70,7 @@ class DxlEngine
   void relax(bool dorelax);
   void setTorque(int tl);
   void setWheelMode();
-  void setJointMode();
-  
+  void setJointMode();  
   void setCompliance(int cw,int ccw = -1);
   
 
