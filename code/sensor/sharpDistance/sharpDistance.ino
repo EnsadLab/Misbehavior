@@ -15,7 +15,7 @@ void setup() {
 
 void loop() {  
   SerialUSB.println(getSharpDistance(analogInputPin));
-  delay(100);
+  delay(50); // rafraichissement entre 20Hz et 25Hz
 }
 
 float getSharpDistance(int inputPin){
