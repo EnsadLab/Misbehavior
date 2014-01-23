@@ -80,7 +80,7 @@ void setup()
     
   scriptArray        = new ScriptArray(2); //... TODO : config
   scriptArray.buildGUI(260,160,550,tabNameAdvanced);
-  scriptArray.scriptAt(0).load("/anims/AnimE1.txt");
+  scriptArray.scriptAt(0).load("anims/AnimE1.txt");
   
   //listMidiDevices();
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config

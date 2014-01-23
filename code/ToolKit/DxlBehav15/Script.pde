@@ -484,7 +484,7 @@ boolean execReturn()
 
 boolean execJump()
 {
-  dbg("DBG-execJump");
+  //dbg("DBG-execJump");
   if(execLoop())
     return true; //dont push jump
   

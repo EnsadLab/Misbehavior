@@ -168,7 +168,9 @@ class ServoDxl
 
   void startRecording()
   {
-    
+    setWheelMode(true);
+    relax(false);
+
     recording = true;
     currFrame = 0;
     velocities = new JSONArray();
@@ -236,10 +238,11 @@ class ServoDxl
     playing = true;
     currFrame = 0;
     velocities = loadJSONArray(jsonFilenmame);
-    if(!isWheelMode())
+    //if(!isWheelMode())
     {
       setWheelMode(true);
     }
+    relax(false);
   }
   
   void playFrame(int frame)

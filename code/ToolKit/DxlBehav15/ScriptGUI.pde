@@ -170,7 +170,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   void scriptStep()
   {
     int next = script.nextStep();
-    println("curr "+currLine+"next = "+next);
+    //println("curr "+currLine+"next = "+next);
     setCurrLine(currLine,next);
   }
   /*

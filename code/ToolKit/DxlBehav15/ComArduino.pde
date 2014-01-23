@@ -30,8 +30,11 @@ class CommArduino implements ControlListener //CallbackListener
   {
     this.port = port;
     this.baudrate = baudrate;
-    //openSerial = new OpenSerial(); //thread GRRR 
+    serial = null;
     openSerial = null;
+    openned = false;
+    action = 0;
+    rcvCount = 0;
   }
      
   // basic GUI: port and bauds must be set in the config.xml file
@@ -158,6 +161,8 @@ class CommArduino implements ControlListener //CallbackListener
          action = 0;
          break;
      case 4: //serial closed
+         if(openSerial!=null)
+           openSerial.interrupt();
         openned = false; 
         openSerial = null;        
         titleButtonBasic.getCaptionLabel().setText("ARDUINO off");
@@ -176,14 +181,22 @@ class CommArduino implements ControlListener //CallbackListener
     //println("ARDUI EVT");
     if(evt.isGroup()) //dropdown list
     {
-      
-       String gName = evt.getGroup().getName();
-      println("ARDUI GROUP :"+gName);
-       int iselect = (int)evt.getGroup().getValue();
-       if(gName.equals("SerialPort"))
-         println("SERIALPORT :"+iselect ); //useless
-       else if(gName.equals("BAUDRATE"))
-         arduino.baudFromGUI();           //fait dans open
+      ControlGroup g = evt.group();
+      //String gName = evt.getGroup().getName();
+      //println("ARDUI GROUP :"+gName);
+      if( g == listBox )
+      {
+        int line = (int)g.value();
+        port = listBox.getItem(line).getName();
+        textArea.append("select "+port+"\n"+"bauds "+baudrate+"/n");
+        baudrate = 57600;
+      }
+      else if(g == listBauds)
+      {
+        int line = (int)g.value();
+        try{ baudrate = Integer.decode(listBauds.getItem(line).getName()); }catch(Exception e){}
+        textArea.append("select "+port+"\n"+"   bauds "+baudrate+"/n");
+      }
        //println("event from group : "+evt.getGroup().getValue()+" from "+evt.getGroup());
        //println("event from group : "+evt.getGroup().getValue()+" from "+gName);
     }
@@ -277,16 +290,17 @@ class CommArduino implements ControlListener //CallbackListener
   void selectPort(int iselect)
   {
     port = listBox.item(iselect).getName();
+    textArea.append("port:"+port);
     open();
   }
-  
+/*  
   void baudFromGUI()
   {
     String b = listBauds.getCaptionLabel().getText();
     textArea.append("Baudrate : "+b+"\n");
     
   }
-  
+*/  
   /*
   void toggleOnOff(Toggle button) //modif cbu
   {
@@ -341,7 +355,9 @@ class CommArduino implements ControlListener //CallbackListener
   
   void close()
   {    
-    println("SERIAL CLOSE");    
+    println("SERIAL CLOSE");
+     
+    
     openned = false;
     action  = 1; 
     textArea.append("closing "+port+"\n");
@@ -430,7 +446,7 @@ class OpenSerial extends Thread
     running = true;
     openned = false;
     Serial tmp = null;
-    //textArea.append("RUNNING\n");
+    textArea.append("RUNNING\n");
     try
     { 
       tmp = new Serial(mainApp,port,baudrate); //GRRR Windows : no exception, no null even if cannot open 
@@ -440,9 +456,10 @@ class OpenSerial extends Thread
       action  = 3; //openned
     }
     catch(Exception e){action = 4;}//closed
-    //textArea.append("DONE "+openned);
+    //textArea.append(" DONE "+openned+"/n");
+    textArea.append(" DONE "+baudrate+"/n");
     running = false;
-    interrupt(); //force stop
+    //interrupt(); //force stop
   }
   void quit()
   {
