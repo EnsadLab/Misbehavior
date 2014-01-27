@@ -1,12 +1,45 @@
 //#import import themidibus.*;
 
-MidiBus midiBus; // The MidiBus
+static final int  MAX_MIDI_NUM  = 32;
+MidiBus midiBus;
 int midiChannel = 0;
 
 float midiRefSpeed = 0;
 float midiDiffVal = 0;
 float midiDiffCoef = 0.5f;
 float midiDiffOrigin = 0;
+
+class MidiCmd
+{
+  int     servo  = -1;
+  int     type   = 0;
+  float   value  = 0;
+  float   center = 0;
+  float   coef   = 1.0f;
+  int     min = -1024;
+  int     max =  1024;
+  String  cmd = null;
+  void    fromXML(XML xml)
+  {
+    servo  = xml.getInt("servo");
+    value  = xml.getInt("value");
+    center = xml.getInt("center");
+    coef   = xml.getInt("coef");
+    min    = xml.getInt("min");
+    max    = xml.getInt("max");
+    cmd    = xml.getString("cmd");
+    println(toString());
+  }
+  String toString()
+  {
+    return "s:"+servo+" v:"+value+ " str:"+cmd;
+  }
+}
+
+MidiCmd[] midiNoteOnCmd;
+MidiCmd[] midiNoteOffCmd;
+MidiCmd[] midiCtrlChgCmd;
+
 
 void listMidiDevices()
 {
@@ -18,13 +51,62 @@ void openMidi(String in,String out)
   midiBus = new MidiBus(this, in , out );
 }
 
+void loadMidiConfig(String xmlFilePath)
+{
+  midiNoteOnCmd  = new MidiCmd[MAX_MIDI_NUM];for(int i=0;i<32;i++)midiNoteOnCmd[i] =new MidiCmd();
+  midiNoteOffCmd = new MidiCmd[MAX_MIDI_NUM];for(int i=0;i<32;i++)midiNoteOffCmd[i]=new MidiCmd();
+  midiCtrlChgCmd = new MidiCmd[MAX_MIDI_NUM];for(int i=0;i<32;i++)midiCtrlChgCmd[i]=new MidiCmd();
+
+  println("Loading Midi Config file...");
+  XML xml = loadXML(xmlFilePath);
+  if(xml==null)
+    return;      //>>error message ?
+  
+  try{midiInDevice  = xml.getChild("midi").getString("in");}catch(Exception e){}
+  try{midiOutDevice = xml.getChild("midi").getString("out");}catch(Exception e){}
+  println("MIDIin  "+midiInDevice);
+  println("MIDIout "+midiOutDevice);
+
+  XML[] children = xml.getChildren("noteOn");
+  for (int i = 0; i < children.length; i++)
+  {
+    int id = children[i].getInt("id");
+    if( (id>=0)&&(id<32) )
+      midiNoteOnCmd[id].fromXML( children[i] );
+  }
+      
+  children = xml.getChildren("noteOff");
+  for (int i = 0; i < children.length; i++)
+  {
+    int id = children[i].getInt("id");
+    if( (id>=0)&&(id<32) )
+      midiNoteOffCmd[id].fromXML( children[i] );
+  }
+
+  children = xml.getChildren("ctrl");
+  println("CC nb :"+children.length);
+  for (int i = 0; i < children.length; i++)
+  {
+    int id = children[i].getInt("id");
+    if( (id>=0)&&(id<32) )
+    {
+      print("CC"+id+">");
+      midiCtrlChgCmd[id].fromXML( children[i] );
+    }
+  }
+}
+
 void noteOn(int channel, int pitch, int vel)
 {
-  print("on: ");
-  print(" C:"+channel);
-  print(" N:"+pitch);
-  println(" V:"+vel);
-  servoGUIarray.midiValue(pitch-1,64);  
+  print("NOTEON:  C:"+channel+" N:"+pitch+" V:"+vel);
+  //servoGUIarray.midiValue(pitch-1,64);
+  if( pitch<MAX_MIDI_NUM)
+  {
+    MidiCmd cmd = midiNoteOnCmd[pitch];
+    println(cmd.toString()); 
+    //servoArray.onCmd(cmd.servo,cmd.str);
+  }
+  
 }
 
 void noteOff(int channel, int pitch, int vel)
@@ -34,6 +116,17 @@ void noteOff(int channel, int pitch, int vel)
   servoGUIarray.midiValue(pitch-1,64);  
 }
 
+//void midiCtrlChg(int channel, int num, int value)
+void controllerChange(int channel, int num, int value)
+{
+  if( num<MAX_MIDI_NUM)
+  {
+    MidiCmd cmd = midiCtrlChgCmd[num];
+    cmd.value = value;    
+    println("CC "+num+":"+cmd.toString()+" "+cmd.coef*(value-cmd.center)); 
+    servoArray.onCmd(cmd);
+  }
+}
 
 void midiCtrlChange( int inum, int value )
 {
@@ -43,7 +136,7 @@ void midiCtrlChange( int inum, int value )
   }
 }
 
-void controllerChange(int channel, int num, int value)
+void controllerChangeOld(int channel, int num, int value)
 {  
   if(num==1)
     servoGUIarray.midiValue(num-1,value);

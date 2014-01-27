@@ -11,8 +11,6 @@ class ServoGUIarray
     }    
   }
 
-
-
   void buildBasicGui(int x,int y, String tabName)
   {
     for(int i=0;i<servoGUIs.length;i++)

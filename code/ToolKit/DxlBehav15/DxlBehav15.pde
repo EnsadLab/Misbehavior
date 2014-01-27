@@ -2,7 +2,6 @@ import themidibus.*;
 import processing.serial.*;
 import controlP5.*;
 
-
 ThreadTest threadTest;
 
 PApplet  mainApp;
@@ -63,7 +62,8 @@ void setup()
      //.setColorLabel(color(255))
      //.setColorActive(color(255,128,0));
 
-  loadConfig("config_dib.xml");
+  loadConfig("config.xml");
+  loadMidiConfig("config_MIDI.xml");  
   
   arduino = new CommArduino(arduinoPort,arduinoBaudRate);
   arduino.buildBasicGUI(20,50,tabNameBasic);
@@ -91,7 +91,6 @@ void setup()
   
   //threadTest = new ThreadTest(); //,"le thread");
   //threadTest.start();
-  
 }
 
 void draw()
@@ -125,7 +124,6 @@ void exit()
 
 void loadConfig(String xmlFilePath)
 {
-  
   println("Loading Config file...");
   XML xml = loadXML(xmlFilePath);
   if(xml==null)
@@ -159,11 +157,7 @@ void loadConfig(String xmlFilePath)
   try{midiInDevice  = xml.getChild("midi").getString("in");}catch(Exception e){}
   try{midiOutDevice = xml.getChild("midi").getString("out");}catch(Exception e){}
   println("MIDIin  "+midiInDevice);
-  println("MIDIout "+midiOutDevice);
-  
-  
-  
-  
+  println("MIDIout "+midiOutDevice);  
 }
 
 void controlEvent(ControlEvent evt)
@@ -237,6 +231,7 @@ void serialEvent(Serial serial)
   }
   */
 }
+
 
 void keyReleased()
 {

@@ -1,8 +1,11 @@
 #ToolKit
 
-## CM9
+## CM9 (Robotis_OpenCM v1.0.1)
 
 Aller dans EnsadLab/Misbehavior/CM9_Script8/ et charger le script dans la cm9.
+Attention !!!
+  voir AAA.h pour utilisation avec XBee ou par Usb:
+   choisir les bons  #define SERIAL  et  #define BAUDS
 
 ## Processing
 

@@ -53,7 +53,6 @@ class ServoArray
     }        
   }
   
-
   void regValue(int id,int reg,int val)
   {
     for(int i=0;i<servos.length;i++) 
@@ -62,6 +61,13 @@ class ServoArray
         servos[i].regValue(reg,val);
     }        
   }
+
+  void onCmd(MidiCmd cmd)
+  {
+    try{servos[cmd.servo].onCmd(cmd); }
+    catch(Exception e){}
+  }
+
   
   void midiValue(int iServo,int value)
   {
@@ -129,9 +135,12 @@ class ServoDxl
   int currRec = 0;
   ServoKey[] recValue;
 
+  int scriptIndex = 0;  //future work: several scripts ???
+
   ServoDxl(int index,int id)
   {
-    this.index = index;
+    this.index  = index;
+    scriptIndex = index; //default
     recValue = new ServoKey[800];
     for(int i=0;i<800;i++)
       recValue[i]=new ServoKey();
@@ -288,6 +297,31 @@ class ServoDxl
   void sendToken(int tok,int value)
   {
     arduino.serialSend("A "+dxlId+" "+tok+" "+value+"\n"); //Token immediat      
+  }
+  
+  //from sensor or midi //String alows labels
+  void onCmd(MidiCmd cmd)
+  {
+    int v = (int)(cmd.coef * (cmd.value-cmd.center) );
+    if( (v>=cmd.min)&&(v<=cmd.max) )
+      execStringCmd(cmd.cmd,v);    
+  }
+  
+  //from sensor or midi //String alows labels
+  void execStringCmd(String line,int value)
+  {
+      try{
+        char c=line.charAt(0); 
+        switch(c)
+        {
+          case '@': scriptArray.scriptAt(scriptIndex).start(line);break;
+          case 'q': stop();break;
+          case 'j': setGoal(value);  break;
+          case 's': setSpeed(value); break;
+          case 'w': setWheelSpeed(value); break;
+        }
+      }   
+      catch(Exception e){}
   }
     
   void regValue(int reg,int value)

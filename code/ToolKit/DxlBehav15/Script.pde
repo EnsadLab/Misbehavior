@@ -249,18 +249,32 @@ class Script
   boolean start(String lbl)
   {
     int nbl = labels.size();
-    for(int i=0;i<nbl;i++)
+    String lbs[] = lbl.split("[@ \\.]");
+    int ilabel = 0;
+    ScriptLabel found = null;
+    for(int i=0;i<lbs.length;i++)
     {
-      if( lbl.equals(labels.get(i).name) )
+      for(;ilabel<nbl;ilabel++)
       {
-        currLine = iLine = labels.get(i).iLine;
-        iToken = labels.get(i).iToken;
-        run();
-        return true;  
-      }      
+        if( lbs[i].equals(labels.get(ilabel).name) )
+        {
+          found = labels.get(ilabel);
+          ilabel++;
+          break;
+        }
+      }
     }
+    if(found != null)
+    {
+      currLine = iLine = found.iLine;
+      iToken = found.iToken;
+      run();
+      return true;  
+    }      
     return false;
   }
+  
+  
   
 
   void pause()
@@ -550,6 +564,8 @@ boolean execTorque()
   dbg("TORQUE "+getValue());
   return true;
 }
+
+
 
 
 

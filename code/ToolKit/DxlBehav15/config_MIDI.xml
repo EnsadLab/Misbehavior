@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+ <MIDI>
+   <midi in="BCF2000" out="BCF2000"/>
+   <noteOn id="1" servo="0" cmd="Q" /> 
+   <noteOn id="2" servo="0" cmd="@WHEEL.init.zob" /> 
+   <noteOn id="3" servo="0" cmd="@WHEEL.loop " />
+   <noteOn id="4" servo="1" cmd="@zobizoba.json" />
+   <ctrl   id="0" servo="0" cmd="w" center="64" min="-1023" max="1023" coef="16" />
+   <ctrl   id="1" servo="1" cmd="w" center="64" min="-1023" max="1023" coef="16" />
+   <ctrl   id="2" servo="2" cmd="w" center="64" min="-1023" max="1023" coef="16" />
+   <ctrl   id="3" servo="3" cmd="w" center="64" min="-1023" max="1023" coef="16" />
+
+ </MIDI>
+ 
