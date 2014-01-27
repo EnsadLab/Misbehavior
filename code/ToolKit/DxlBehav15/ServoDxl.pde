@@ -122,6 +122,7 @@ class ServoDxl
   float scale  = 0;
   
   boolean recording = false;
+  boolean readyForRecording = false;
   boolean playing = false;
   int currFrame = 0;
   
@@ -155,7 +156,8 @@ class ServoDxl
       delay(10);    
 //      arduino.serialSend("WA "+dxlId+" 36\n"); //add watch pos
       delay(10);
-//      arduino.serialSend("WA "+dxlId+" 38\n"); //add watch speed
+      println("-> add watch speed");
+      arduino.serialSend("WA "+dxlId+" 38\n"); //add watch speed
       delay(10);
       arduino.serialSend("MR "+dxlId+" 6\n"); //CW min
       delay(10);
@@ -171,7 +173,8 @@ class ServoDxl
     setWheelMode(true);
     relax(false);
 
-    recording = true;
+    readyForRecording = true;
+    recording = false;
     currFrame = 0;
     velocities = new JSONArray();
     
@@ -217,8 +220,18 @@ class ServoDxl
      velocities.setJSONObject(frame,vel);
   }
   
+  
+  JSONArray stopGlobalRecording()
+  {
+     readyForRecording = false;
+     recording = false;
+     currFrame = 0;
+     return velocities;
+  }
+  
   String stopRecording()
   {
+    readyForRecording = false;
     recording = false;
     currFrame = 0;
     int d = day();    // Values from 1 - 31
@@ -238,6 +251,18 @@ class ServoDxl
     playing = true;
     currFrame = 0;
     velocities = loadJSONArray(jsonFilenmame);
+    //if(!isWheelMode())
+    {
+      setWheelMode(true);
+    }
+    relax(false);
+  }
+  
+  void startPlaying(JSONArray vel)
+  {
+    playing = true;
+    currFrame = 0;
+    velocities = vel;
     //if(!isWheelMode())
     {
       setWheelMode(true);
@@ -269,14 +294,18 @@ class ServoDxl
 
   void update()
   {
-    if(recording)
+    if(readyForRecording)
     {
+      if(speed != 0) recording = true;
       //println("GOAL : " + float(recValue[currRec].goal));//recValue[currRec].goal);
       //println("POS : " + float(recValue[currRec].pos));
       //println("SPEED : " + currSpeed); 
       //println("SPEED : " + float(recValue[currRec].speed));
-      recordFrame(currFrame);
-      currFrame++;
+      if(recording)
+      {
+        recordFrame(currFrame);
+        currFrame++;
+      }
     }
     if(playing)
     {
@@ -299,7 +328,7 @@ class ServoDxl
       case 30: goal=value; break;
       //case 34: torqueLimit = value; break; //relax
       case 36: currPos = value; break;
-      case 38: currSpeed = value;break;      
+      case 38: currSpeed = value; println(currSpeed); break;      
       //...
     }
   }

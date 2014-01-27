@@ -386,6 +386,7 @@ class CommArduino implements ControlListener //CallbackListener
     catch(Exception e){return;}       //???
     rcvCount++;
 
+    //println("rcv" + rcv);
     if(rcv.charAt(0)=='x')
     {
       if(togleDog.getState()){togleDog.setState(false);togleDogBasic.setState(false); }
