@@ -1,6 +1,13 @@
-class ServoGUIarray
+class ServoGUIarray implements ControlListener
 {
   ServoGUI[] servoGUIs;
+  
+  Toggle recButtonPlayPause;
+  Button[] globalAnimPlayButtons; // Pas envie d'utiliser un toogle... expliquerai de vive voix pourquoi... 
+  Button[] globalAnimStopButtons;
+  JSONArray allVelocities;
+  int xCurrAnimGui;
+  int yCurrAnimGui;
 
   ServoGUIarray(int[] motorIds)
   {
@@ -11,6 +18,87 @@ class ServoGUIarray
     }    
   }
 
+  // constructs the left part of the basic tab gui, global controllers
+  void buildGlobalGui(int x, int y, String tabName)
+  {
+     Textlabel label = cp5.addTextlabel("RECORDING_global") // we keep index as identifier. This way we are completely sure no label has the same identifier. In case user adds twice same motorid in xml.
+              .setText("Recording for all selected motors:\n------------------------------------------ ")
+              .setPosition(x-5,y)
+              .setColorValue(0xFF000000)
+              .setFont(createFont("Verdana",14))
+              .moveTo(tabName);
+              ;
+              
+     y += 40;
+     recButtonPlayPause = cp5.addToggle("RECPLAY_global")
+        .setPosition(x,y)
+        .setColorActive(0xFFCC0000)
+        .setSize(70,35)
+        .moveTo(tabName)
+        .setCaptionLabel("REC");
+     recButtonPlayPause.getCaptionLabel().setFont(createFont("Verdana",14)).align(ControlP5.CENTER,ControlP5.CENTER);
+     recButtonPlayPause.addListener(this);
+     
+     y += 60;
+     label = cp5.addTextlabel("ANIMATIONS_global") // we keep index as identifier. This way we are completely sure no label has the same identifier. In case user adds twice same motorid in xml.
+              .setText("Animations for all selected motors:\n------------------------------------------  ")
+              .setPosition(x-5,y)
+              .setColorValue(0xFF000000)
+              .setFont(createFont("Verdana",14))
+              .moveTo(tabName);
+              ;
+              
+     y += 40;
+     
+     globalAnimPlayButtons = new Button[nbGlobalAnimsMax];
+     globalAnimStopButtons = new Button[nbGlobalAnimsMax];
+     xCurrAnimGui = x;
+     yCurrAnimGui = y;
+     //for(int i=0; i<globalAnimPaths.length; i++) // car ne correspond pas a la liste actuelle... TODO: utiliser append a la place
+     for(int i=0; i<nbGlobalAnims; i++)
+     {  
+       buildGlobalPlayAnimButtons(i,globalAnimPaths[i] + ":",tabName); 
+     }
+     
+  }
+  
+  void buildGlobalPlayAnimButtons(int index, String textLabel, String tabName)
+  {
+     Textlabel label = cp5.addTextlabel("ANIMATION_global_"+index) 
+              .setText(textLabel)
+              .setPosition(xCurrAnimGui-5 ,yCurrAnimGui)
+              .setColorValue(0xFF000000)
+              .setFont(createFont("Verdana",13))
+              .moveTo(tabName);
+              ;
+       yCurrAnimGui += 20;
+       Button animButtonPlay = cp5.addButton("ANIMPLAY_global_"+index)
+          .setPosition(xCurrAnimGui,yCurrAnimGui)
+          .setColorActive(0xFFCC0000)
+          .setSize(40,20)
+          .moveTo(tabName)
+          .setCaptionLabel("PLAY");
+       animButtonPlay.getCaptionLabel().setFont(createFont("Verdana",11)).align(ControlP5.CENTER,ControlP5.CENTER);
+       animButtonPlay.addListener(this);
+       globalAnimPlayButtons[index] = animButtonPlay;
+       //append(globalAnimPlayButtons,animButtonPlay);
+       
+       Button animButtonStop = cp5.addButton("ANIMSTOP_global_"+index)
+          .setPosition(xCurrAnimGui+45,yCurrAnimGui)
+          .setColorActive(0xFFCC0000)
+          .setSize(40,20)
+          .moveTo(tabName)
+          .setCaptionLabel("STOP");
+       animButtonStop.getCaptionLabel().setFont(createFont("Verdana",11)).align(ControlP5.CENTER,ControlP5.CENTER);
+       animButtonStop.addListener(this);
+       globalAnimStopButtons[index] = animButtonStop;
+       //append(globalAnimStopButtons,animButtonStop);
+       
+       yCurrAnimGui += 25;
+
+  }
+
+  // constructs the right part of the basic tab gui, single controllers
   void buildBasicGui(int x,int y, String tabName)
   {
     for(int i=0;i<servoGUIs.length;i++)
@@ -20,6 +108,7 @@ class ServoGUIarray
     }
   }
 
+  // constructs the advanced tab gui
   void buildGUI(int x,int y, String tabName)
   {
     for(int i=0;i<servoGUIs.length;i++)
@@ -62,6 +151,137 @@ class ServoGUIarray
     }
   }
   
+  void startGlobalRecording()
+  {
+    for(int i=0;i<servoGUIs.length;i++)
+    {
+      // TODO: test if this motor is selected for recording
+      ServoDxl servo = servoGUIs[i].getServo();
+      if(servo != null)
+      {
+        servo.startRecording();
+      }
+    }
+  }
+
+  void stopGlobalRecording()
+  {
+    
+    allVelocities = new JSONArray();
+    for(int i=0;i<servoGUIs.length;i++) 
+    {
+      // TODO: test if this motor is selected for recording
+      ServoDxl servo = servoGUIs[i].getServo();
+      if(servo != null)
+      {
+        JSONArray velocities = servo.stopGlobalRecording();
+        // for generating animations...
+        /*JSONArray velocities = new JSONArray();
+        int v = 0;
+        for(int j=0; j<300; j++)
+        {
+          JSONObject vel = new JSONObject();
+          vel.setInt("frame", j);
+          if(i == 0)
+            vel.setInt("vel", v);
+          else
+            vel.setInt("vel", 500-v);
+           
+          velocities.setJSONObject(j,vel);
+          v += 2;
+        }*/
+        JSONObject anim = new JSONObject();
+        anim.setInt("servoIndex", servoGUIs[i].servoIndex);
+        anim.setJSONArray("frames",velocities);
+        allVelocities.setJSONObject(i,anim);
+      } 
+    }
+    int d = day();    // Values from 1 - 31
+    int m = month();
+    int s = second();  // Values from 0 - 59
+    int min = minute();  // Values from 0 - 59
+    int h = hour();    // Values from 0 - 23
+    String path = "anims/globanim_" + d + "-"+ m + "_" + h + "-" + min + ".json";
+    println("Saving animation into " + path);
+    saveJSONArray(allVelocities, path);
+    nbGlobalAnims++;
+    if(nbGlobalAnims < nbGlobalAnimsMax)
+    {
+      globalAnimPaths[nbGlobalAnims-1] = path;
+      buildGlobalPlayAnimButtons(nbGlobalAnims-1,path + ":",tabNameBasic); 
+    }
+  }
+
+void startGlobalPlaying(String jsonFilenmame)
+{
+  allVelocities = loadJSONArray(jsonFilenmame);
+  for(int i=0; i<allVelocities.size(); i++)
+  {
+     JSONObject anim = allVelocities.getJSONObject(i);
+     int servoIndex = anim.getInt("servoIndex");
+     ServoDxl servo = servoArray.getByIndex(servoIndex);
+     if(servo != null)
+     {
+       println("-> Starting animation on servoIndex " + servoIndex);
+       servo.startPlaying(anim.getJSONArray("frames"));
+     }  
+  }
+}
+
+
+void stopGlobalPlaying()
+{
+  for(int i=0;i<servoGUIs.length;i++) // 
+  {
+    ServoDxl servo = servoGUIs[i].getServo();
+    if(servo != null && servo.playing)
+    {
+      servo.stopPlaying();
+    }
+  }
+}
+
+  
+  void controlEvent(ControlEvent evt)
+  {
+    if(!evt.isController())
+      return;
+      
+    Controller c = evt.getController();
+    //int id = c.getId();
+    String addr = c.getAddress();
+    if(addr.startsWith("/RECPLAY_global")) 
+    {
+      println("button RECORD GLOBAL PLAY" );
+      if(recButtonPlayPause.getState())
+      {
+        println("start global recording");
+        recButtonPlayPause.setCaptionLabel("STOP");
+        startGlobalRecording();
+      }
+      else
+      {
+        println("stop recording");
+        recButtonPlayPause.setCaptionLabel("REC");
+        stopGlobalRecording(); 
+      }
+    }
+    else if(addr.startsWith("/ANIMPLAY_global"))
+    {
+      for(int i=0; i<globalAnimPlayButtons.length; i++)
+      {
+        if(c == globalAnimPlayButtons[i])
+        {
+          startGlobalPlaying(globalAnimPaths[i]);
+        }
+      }
+    }
+    else if(addr.startsWith("/ANIMSTOP_global"))
+    {
+       stopGlobalPlaying();
+    }
+  }
+  
 };
 
 class ServoGUI implements ControlListener
@@ -89,9 +309,14 @@ ServoGUI(int index,int dxlid)
   motorId = dxlid;
 }
 
+ServoDxl getServo()
+{
+  return servoArray.getByIndex(servoIndex);
+}
+
 void startRecording()
 {
-  if( motorId>0 )
+  if( motorId>0 ) // cbu: ce test est du coup inutile, non?
    {
      //ServoDxl servo = servoArray.getById(motorId);
      ServoDxl servo = servoArray.getByIndex(servoIndex);
@@ -311,7 +536,7 @@ void buildBasicGUI(int x,int y, String tabName)
      y += 40;
      yAnimGui = y;
      x += 5;
-     //for(int i=0; i<animPaths.length; i++) // car ne correspond pas a la liste actuelle... ok je vais faire un vecteur... fais a la vite...
+     //for(int i=0; i<animPaths.length; i++) // car ne correspond pas a la liste actuelle... TODO: utiliser append a la place
      for(int i=0; i<nbAnims; i++)
      {
      

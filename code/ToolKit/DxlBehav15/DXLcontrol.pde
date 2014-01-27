@@ -118,13 +118,6 @@ class DxlControl implements ControlListener //CallbackListener
     }    
   }
 
-
- 
- /*
-  // DIDIER? est-ce que c'est moi qui l'ai mis en commentaire par hasard? ou ça vient de toi?
-  //DE MOI !!!!
-  // ... C'est Moi (Didier) ... supprimé
-*/
  
  void update( )
  {

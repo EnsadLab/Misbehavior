@@ -28,6 +28,10 @@ int[] motorIds;
 String[] animPaths;
 int nbAnims = 0;
 int nbAnimsMax = 18; 
+String[] globalAnimPaths;
+int nbGlobalAnims = 0;
+int nbGlobalAnimsMax = 11;
+
 String arduinoPort = "COM13";
 int arduinoBaudRate = 57600;
 
@@ -38,7 +42,9 @@ String midiOutDevice = null;
 void setup()
 {
   mainApp = this;
-  size(1150,800); //P3D OPENGL
+  size(1250,825); //P3D OPENGL
+  
+  frame.setTitle("Misbehaviors toolkit");
   
   println("Path:"+sketchPath);
   
@@ -62,8 +68,10 @@ void setup()
      //.setColorLabel(color(255))
      //.setColorActive(color(255,128,0));
 
-  loadConfig("config.xml");
+  //loadConfig("config.xml");
   loadMidiConfig("config_MIDI.xml");  
+  loadConfig("config_dib.xml");
+  //loadConfig("config_cbu.xml");
   
   arduino = new CommArduino(arduinoPort,arduinoBaudRate);
   arduino.buildBasicGUI(20,50,tabNameBasic);
@@ -76,7 +84,8 @@ void setup()
   
   servoGUIarray = new ServoGUIarray(motorIds);
   servoGUIarray.buildGUI(350,20,tabNameAdvanced);
-  servoGUIarray.buildBasicGui(250,50,tabNameBasic);
+  servoGUIarray.buildBasicGui(350,50,tabNameBasic);
+  servoGUIarray.buildGlobalGui(20,160,tabNameBasic);
     
   scriptArray        = new ScriptArray(2); //... TODO : config
   scriptArray.buildGUI(260,160,550,tabNameAdvanced);
@@ -127,7 +136,10 @@ void loadConfig(String xmlFilePath)
   println("Loading Config file...");
   XML xml = loadXML(xmlFilePath);
   if(xml==null)
-    return;      //>>error message ?
+  {
+    println("[ERROR]: config file " + xmlFilePath + " could not be loaded");
+    return;    
+  }
   
   XML[] children = xml.getChildren("motor");
   
@@ -141,6 +153,16 @@ void loadConfig(String xmlFilePath)
     int id = children[i].getInt("id");
     motorIds[i] = id;
     println("-> adding motor with id " + id);
+  }
+  
+  children = xml.getChildren("globalanim");
+  nbGlobalAnims = children.length;
+  globalAnimPaths = new String[nbGlobalAnimsMax]; // TODO: use append instead....
+  for(int i=0; i<children.length; i++)
+  {
+    String globalAnimPath = children[i].getString("path");
+    globalAnimPaths[i] = globalAnimPath;
+    println("-> adding global anim with path " + globalAnimPath);
   }
   
   children = xml.getChildren("anim");

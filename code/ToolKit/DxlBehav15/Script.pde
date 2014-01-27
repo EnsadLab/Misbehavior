@@ -386,7 +386,7 @@ void setReady()
       case Token.TORQUE:     result="TORQUE";break;
       case Token.DURATION:   result="DURATION";break;
       case Token.PAUSE:      result="PAUSE";break;
-      case Token.EOL:        result="EOL";break;
+      case Token.EOL:        result="EOL";break;  
       default:result="ERROR";break;
     }
     if( (tok & Token.RND)!=0 )
