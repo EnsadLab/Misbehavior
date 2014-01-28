@@ -336,8 +336,7 @@ class ServoDxl
         char c=line.charAt(0); 
         switch(c)
         {
-          case '@':    println("DBG "+line);
- scriptArray.scriptAt(scriptIndex).start(line);break;
+          case '@': scriptArray.scriptAt(scriptIndex).start(line);break;
           case 'q': stop();break;
           case 'j': setGoal(value);  break;
           case 's': setSpeed(value); break;

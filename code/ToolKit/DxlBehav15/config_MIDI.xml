@@ -5,7 +5,7 @@
    <noteOn id="1" servo="0" cmd="@WHEEL" /> 
    <noteOn id="2" servo="0" cmd="@WHEEL_RND " />
    <noteOn id="3" servo="1" cmd="@zobizoba.json" />
-   <ctrl   id="0" servo="0" cmd="w" center="63.5" min="-1023" max="1023" coef="16" />
+   <ctrl   id="0" servo="0" cmd="j" center="0" min="0"  max="1024" coef="8" />
    <ctrl   id="1" servo="1" cmd="w" center="63.5" min="-1023" max="1023" coef="16" />
    <ctrl   id="2" servo="2" cmd="w" center="63.5" min="-1023" max="1023" coef="16" />
    <ctrl   id="3" servo="3" cmd="w" center="63.5" min="-1023" max="1023" coef="16" />
