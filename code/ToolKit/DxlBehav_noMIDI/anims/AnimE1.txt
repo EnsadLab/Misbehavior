@@ -1,0 +1,82 @@
+<WHEEL
+#init
+t 1023
+w 0
+#loop
+w 100 d 2000
+w 500 d 1000
+@loop
+>
+
+<WHEEL_RND
+#init
+t 1023
+w 0
+#loop
+w [-500 500] d[100 2000]
+p [10 50]
+@loop
+>
+
+<PAUSE
+#init
+s 0
+t 1023
+#loop
+j 300
+p 5000
+j 600
+p 2000
+@loop
+>
+
+
+<TEST
+#init
+w1000
+w0
+w-1000
+w0
+w 100
+w0
+w-100
+w0
+@init
+>
+
+
+<RNDWAVE
+# init1
+c 4 t 1023
+#loop
+s [100 1023]
+j [512 1000]
+s [100 1023]
+j [20 512]
+@loop
+>
+
+<SAW
+# init
+i33 o33
+c 4 s 0
+t 1023
+#loop
+i33 o33
+j 300 d500
+i0 o0
+j 700 d500
+@loop
+>
+>
+>
+>
+>
+>
+>
+>
+>
+>
+>
+>
+--------------

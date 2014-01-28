@@ -61,13 +61,13 @@ class ServoArray
         servos[i].regValue(reg,val);
     }        
   }
-
+/*
   void onCmd(SensorEvt cmd)
   {
     if( (cmd.servo>=0)&&(cmd.servo<servos.length) )
       servos[cmd.servo].onCmd(cmd);
   }
-  
+*/  
   void update()
   {
     long t = millis();    
@@ -322,12 +322,14 @@ class ServoDxl
   }
   
   //from sensor or midi //String alows labels
+  /*
   void onCmd(SensorEvt cmd)
   {
     int v = (int)(cmd.coef * (cmd.value-cmd.center) );
     if( (v>=cmd.min)&&(v<=cmd.max) )
       execStringCmd(cmd.cmd,v);    
   }
+  */
   
   //from sensor or midi //String alows labels
   void execStringCmd(String line,int value)
