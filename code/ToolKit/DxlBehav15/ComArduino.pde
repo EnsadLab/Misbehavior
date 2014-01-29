@@ -394,12 +394,23 @@ class CommArduino implements ControlListener //CallbackListener
       return;
     }
       
-    textArea.append("---"+rcv);
-    textArea.scroll(1.0);
     
     String[] toks = rcv.replaceAll("[\\n\\r]","").split(" "); //GRRRR sinon parseInt exception
-    if(toks.length>=4)
+    if(toks.length==3)
     {
+      if(toks[0].equals("P")) //sensor (Pin)
+      { 
+        try{ 
+          int   sensor = Integer.parseInt(toks[1]);
+          float value  = Float.parseFloat(toks[2]);
+          sensorArray.rcvValue(sensor,value);
+        }catch(Exception e){}
+      }
+    }
+    else if(toks.length>=4)
+    {
+      textArea.append("---"+rcv,200);
+      textArea.scroll(1.0);
       if(toks[0].equals("MV"))
       { 
         try{ 
@@ -419,6 +430,11 @@ class CommArduino implements ControlListener //CallbackListener
         int icmd = Integer.parseInt(toks[2]); //GRRR
         scriptArray.rcvMsg(imot,icmd);
         }catch(Exception e){}
+    }
+    else
+    {
+      textArea.append("---"+rcv,200);
+      textArea.scroll(1.0);
     }
   }
 

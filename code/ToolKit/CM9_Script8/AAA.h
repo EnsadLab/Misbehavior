@@ -7,12 +7,12 @@ extern Dynamixel Dxl;
 #include "HardwareSerial.h"
 
 //!!! SerialUSB n'a pas de param Baudrate
-#define SERIAL SerialUSB
-#define BAUDS
+//#define SERIAL SerialUSB
+//#define BAUDS
 
 //Xbee communication
-//#define SERIAL Serial2
-//#define BAUDS 57600
+#define SERIAL Serial2
+#define BAUDS 57600
 
 #define DBG SERIAL.print
 #define DBGln SERIAL.println

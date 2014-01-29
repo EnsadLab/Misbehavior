@@ -10,11 +10,14 @@ int keyModifier = 0; //1 shift 2ctrl 4alt
 PFont courrierFont; // = createFont("Arial",20,true); // use true/false for smooth/no-smooth
 PFont verdanaFont; //
 
-CommArduino    arduino;
-DxlControl     dxlGui;
-ServoArray     servoArray;
-ServoGUIarray  servoGUIarray;
-ScriptArray    scriptArray;
+CommArduino     arduino;
+DxlControl      dxlGui;
+ServoArray      servoArray;
+ServoGUIarray   servoGUIarray;
+ScriptArray     scriptArray;
+SensorArray     sensorArray;
+SensorGUIarray  sensorGUI;
+
 
 ControlP5 cp5;
 int globalID = 0;
@@ -83,14 +86,18 @@ void setup()
   dxlGui.buildGUI(1100,90,tabNameAdvanced);
   
   servoGUIarray = new ServoGUIarray(motorIds);
-  servoGUIarray.buildGUI(350,20,tabNameAdvanced);
+  servoGUIarray.buildGUI(350,40,tabNameAdvanced);
   servoGUIarray.buildBasicGui(350,50,tabNameBasic);
   servoGUIarray.buildGlobalGui(20,160,tabNameBasic);
     
   scriptArray        = new ScriptArray(2); //... TODO : config
-  scriptArray.buildGUI(260,160,550,tabNameAdvanced);
+  scriptArray.buildGUI(260,180,550,tabNameAdvanced);
   scriptArray.scriptAt(0).load("anims/AnimE1.txt");
   
+  sensorArray = new SensorArray();
+  sensorGUI = new SensorGUIarray();
+  sensorGUI.buildGUI(280,5,tabNameAdvanced);
+    
   //listMidiDevices();
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config
     openMidi(midiInDevice,midiOutDevice);

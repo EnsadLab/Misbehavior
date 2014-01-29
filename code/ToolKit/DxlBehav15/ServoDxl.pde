@@ -324,9 +324,16 @@ class ServoDxl
   //from sensor or midi //String alows labels
   void onCmd(SensorEvt cmd)
   {
-    int v = (int)(cmd.coef * (cmd.value-cmd.center) );
-    if( (v>=cmd.min)&&(v<=cmd.max) )
-      execStringCmd(cmd.cmd,v);    
+    if( cmd.type==0)
+    {
+      int v = (int)(cmd.coef * (cmd.value-cmd.center) );
+      if( (v>=cmd.min)&&(v<=cmd.max) )
+        execStringCmd(cmd.cmd,v);
+    }
+    else //state change
+    {
+      //TODO ..........
+    }    
   }
   
   //from sensor or midi //String alows labels
