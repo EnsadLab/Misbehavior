@@ -132,6 +132,8 @@ class ServoDxl
   boolean playing = false;
   int currFrame = 0;
   
+  String oldModus = "none";
+  
   JSONArray velocities;
   int currRec = 0;
   ServoKey[] recValue;
@@ -183,7 +185,8 @@ class ServoDxl
     relax(false);
 
     readyForRecording = true;
-    recording = false;
+    recording = true;
+    //recording = false;
     currFrame = 0;
     velocities = new JSONArray();
     
@@ -224,7 +227,18 @@ class ServoDxl
   {
      JSONObject vel = new JSONObject();
      vel.setInt("frame", frame);
-     vel.setInt("vel", speed);
+     if(isWheelMode())
+     {
+       vel.setString("modus","wheel");
+       vel.setInt("vel", speed);
+     }
+     else
+     {
+       vel.setString("modus","joint");
+       vel.setInt("vel", goal);
+     }
+     
+     
      //vel.setInt("vel", recValue[currRec].speed);
      velocities.setJSONObject(frame,vel);
   }
@@ -261,9 +275,9 @@ class ServoDxl
     currFrame = 0;
     velocities = loadJSONArray(jsonFilenmame);
     //if(!isWheelMode())
-    {
-      setWheelMode(true);
-    }
+    //{
+    //  setWheelMode(true);
+    //}
     relax(false);
   }
   
@@ -273,9 +287,9 @@ class ServoDxl
     currFrame = 0;
     velocities = vel;
     //if(!isWheelMode())
-    {
+    //{
       setWheelMode(true);
-    }
+    //}
     relax(false);
   }
   
@@ -284,20 +298,46 @@ class ServoDxl
     if(frame <  velocities.size())
     {
       JSONObject vel = velocities.getJSONObject(frame); 
+      String modus = vel.getString("modus","wheel");
+      //println("modus: " + modus + " " + oldModus);
+      if(modus.equals("wheel") && !oldModus.equals(modus))
+      {
+        setWheelMode(true);
+      }
+      else if(modus.equals("joint") && !oldModus.equals("joint"))
+      {
+        setWheelMode(false);
+      }
       int v = vel.getInt("vel");
-      println("v: " + v);
-      setSpeed(v);
+      
+      if(modus.equals("wheel"))
+      {
+        println("vel: " + v);
+        setSpeed(v);
+      }
+      else
+      {
+        //println("goal: " + v + " " + goal);
+        if(v != goal)
+        {
+          println("goal: " + v);
+          setGoal(v);
+        }
+      }
+      oldModus = modus;
     }
     else if(frame == velocities.size())
     {
       stopPlaying();
     }
+    
   }
 
   void stopPlaying()
   {
     playing = false;
     currFrame = 0;
+    oldModus = "none";
     setSpeed(0);
   }
 
@@ -305,7 +345,7 @@ class ServoDxl
   {
     if(readyForRecording)
     {
-      if(speed != 0) recording = true;
+      //if(speed != 0) recording = true;
       //println("GOAL : " + float(recValue[currRec].goal));//recValue[currRec].goal);
       //println("POS : " + float(recValue[currRec].pos));
       //println("SPEED : " + currSpeed); 
