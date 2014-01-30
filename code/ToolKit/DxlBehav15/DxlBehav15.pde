@@ -98,7 +98,7 @@ void setup()
   sensorGUI = new SensorGUIarray();
   sensorGUI.buildGUI(280,5,tabNameAdvanced);
     
-  //listMidiDevices();
+  listMidiDevices();
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config
     openMidi(midiInDevice,midiOutDevice);
 

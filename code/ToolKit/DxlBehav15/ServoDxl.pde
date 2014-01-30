@@ -62,10 +62,10 @@ class ServoArray
     }        
   }
 
-  void onCmd(SensorEvt cmd)
+  void onSensor(SensorEvt cmd)
   {
     if( (cmd.servo>=0)&&(cmd.servo<servos.length) )
-      servos[cmd.servo].onCmd(cmd);
+      servos[cmd.servo].onSensor(cmd);
   }
   
   void update()
@@ -362,18 +362,46 @@ class ServoDxl
   }
   
   //from sensor or midi //String alows labels
-  void onCmd(SensorEvt cmd)
+  void onSensor(SensorEvt cmd)
   {
-    if( cmd.type==0)
+    int v = (int)(cmd.coef * (cmd.value-cmd.center) );
+    switch( cmd.type )
     {
-      int v = (int)(cmd.coef * (cmd.value-cmd.center) );
-      if( (v>=cmd.min)&&(v<=cmd.max) )
-        execStringCmd(cmd.cmd,v);
+      case 0: // inside range
+        if( (v>=cmd.min)&&(v<=cmd.max) )
+          execStringCmd(cmd.cmd,v);
+        break;
+      case 1: //hysteresis down
+        if( (cmd.state!=1)&&(v<cmd.min) )
+        {
+          cmd.state=1;
+          execStringCmd(cmd.cmd,v);        
+        }
+        else if( (cmd.state!=2)&&(v>cmd.max) )
+          cmd.state = 2;
+        break;
+      case 2: //hysteresis up
+        if( (cmd.state!=1)&&(v<cmd.min) )
+          cmd.state=1;
+        else if( (cmd.state!=2)&&(v>cmd.max) )
+        {
+          cmd.state = 2;
+          execStringCmd(cmd.cmd,v);        
+        }
+        break;
+      case 3: //hysteresis change
+        if( (cmd.state!=1)&&(v<cmd.min) )
+        {
+          cmd.state=1;
+          execStringCmd(cmd.cmd,v);        
+        }
+        else if( (cmd.state!=2)&&(v>cmd.max) )
+        {
+          cmd.state = 2;
+          execStringCmd(cmd.cmd,v);        
+        }
+        break;      
     }
-    else //state change
-    {
-      //TODO ..........
-    }    
   }
   
   //from sensor or midi //String alows labels

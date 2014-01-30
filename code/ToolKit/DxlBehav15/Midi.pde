@@ -102,7 +102,7 @@ void noteOn(int channel, int pitch, int vel)
     SensorEvt cmd = midiNoteOnCmd[pitch];
     println(cmd.toString()); 
     cmd.value = vel;    
-    servoArray.onCmd(cmd);
+    servoArray.onSensor(cmd);
   }
 }
 
@@ -114,7 +114,7 @@ void noteOff(int channel, int pitch, int vel)
     SensorEvt cmd = midiNoteOffCmd[pitch];
     println(cmd.toString());    
     cmd.value = vel;    
-    servoArray.onCmd(cmd);
+    servoArray.onSensor(cmd);
   }
 }
 
@@ -125,7 +125,7 @@ void controllerChange(int channel, int num, int value)
     SensorEvt cmd = midiCtrlChgCmd[num];
     cmd.value = value;    
     println("CC "+num+":"+cmd.toString()+" "+cmd.coef*(value-cmd.center)); 
-    servoArray.onCmd(cmd);
+    servoArray.onSensor(cmd);
   }
 }
 

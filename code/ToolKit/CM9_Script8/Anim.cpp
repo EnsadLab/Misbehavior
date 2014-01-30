@@ -217,13 +217,15 @@ void DxlEngine::execToken(int tok,int value)
 //true finished // false pausing
 bool Anim::taskPause(unsigned long dt)
 {
+  //SERIAL.print("%p ");SERIAL.println(localTime);
+    
   float dlt = timeCoef*(float)dt;
   float t0  = localTime;
   localTime += dlt;
   if( localTime<duration )
     return false;
   
-  SERIAL.print("localTime ");SERIAL.println(localTime);
+  //SERIAL.print("localTime ");SERIAL.println(localTime);
   sendReady();
   return true;
 }
@@ -277,6 +279,7 @@ bool Anim::taskWheel(unsigned int dt)
   float dlt = timeCoef*(float)dt;
   float t0  = localTime;
   localTime += dlt;
+ 
   if( localTime>=duration )
   {
     speedValue = destValue;

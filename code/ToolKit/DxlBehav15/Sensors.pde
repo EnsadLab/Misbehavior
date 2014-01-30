@@ -95,7 +95,7 @@ class SensorArray
       if(sensorEvts[index].servo>=0 )
       {
         sensorEvts[index].value = value;    
-        servoArray.onCmd(sensorEvts[index]);
+        servoArray.onSensor(sensorEvts[index]);
       }
       sensorGUI.showValue( index,value );      
     }

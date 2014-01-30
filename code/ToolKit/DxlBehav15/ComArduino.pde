@@ -393,8 +393,7 @@ class CommArduino implements ControlListener //CallbackListener
       else {togleDog.setState(true);togleDogBasic.setState(true);}
       return;
     }
-      
-    
+          
     String[] toks = rcv.replaceAll("[\\n\\r]","").split(" "); //GRRRR sinon parseInt exception
     if(toks.length==3)
     {
@@ -405,6 +404,21 @@ class CommArduino implements ControlListener //CallbackListener
           float value  = Float.parseFloat(toks[2]);
           sensorArray.rcvValue(sensor,value);
         }catch(Exception e){}
+      }
+      else if(toks[0].equals("ok")) //TODO TODO
+      {   
+        textArea.append("READY"+rcv,200);
+        try{ 
+        int imot = Integer.parseInt(toks[1]); //GRRR
+        int icmd = Integer.parseInt(toks[2]); //GRRR
+        scriptArray.rcvMsg(imot,icmd);
+        textArea.append("READY! "+imot+" "+icmd);
+        }catch(Exception e){}
+      }
+      else
+      {
+        textArea.append("---"+rcv,200);
+        textArea.scroll(1.0);
       }
     }
     else if(toks.length>=4)
@@ -424,7 +438,8 @@ class CommArduino implements ControlListener //CallbackListener
       }
     }
     else if(toks[0].equals("ok")) //TODO TODO
-    {      
+    {   
+      println("ready");  
         try{ 
         int imot = Integer.parseInt(toks[1]); //GRRR
         int icmd = Integer.parseInt(toks[2]); //GRRR
