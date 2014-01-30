@@ -9,5 +9,5 @@
    <anim path="anims/anim3.json"/>
    <anim path="anims/anim3.json"/>
    <anim path="anims/anim_13-1_23-11.json"/>
-   <midi in="BCF2000" out="BCF2000"/>
+   <midi in="BCR2000" out="BCR2000"/>
  </config>

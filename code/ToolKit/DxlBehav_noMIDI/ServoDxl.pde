@@ -61,13 +61,13 @@ class ServoArray
         servos[i].regValue(reg,val);
     }        
   }
-
+/*
   void onCmd(SensorEvt cmd)
   {
     if( (cmd.servo>=0)&&(cmd.servo<servos.length) )
       servos[cmd.servo].onCmd(cmd);
   }
-  
+*/  
   void update()
   {
     long t = millis();    
@@ -125,8 +125,6 @@ class ServoDxl
   boolean playing = false;
   int currFrame = 0;
   
-  String oldModus = "none";
-  
   JSONArray velocities;
   int currRec = 0;
   ServoKey[] recValue;
@@ -178,8 +176,7 @@ class ServoDxl
     relax(false);
 
     readyForRecording = true;
-    recording = true;
-    //recording = false;
+    recording = false;
     currFrame = 0;
     velocities = new JSONArray();
     
@@ -220,18 +217,7 @@ class ServoDxl
   {
      JSONObject vel = new JSONObject();
      vel.setInt("frame", frame);
-     if(isWheelMode())
-     {
-       vel.setString("modus","wheel");
-       vel.setInt("vel", speed);
-     }
-     else
-     {
-       vel.setString("modus","joint");
-       vel.setInt("vel", goal);
-     }
-     
-     
+     vel.setInt("vel", speed);
      //vel.setInt("vel", recValue[currRec].speed);
      velocities.setJSONObject(frame,vel);
   }
@@ -268,9 +254,9 @@ class ServoDxl
     currFrame = 0;
     velocities = loadJSONArray(jsonFilenmame);
     //if(!isWheelMode())
-    //{
-    //  setWheelMode(true);
-    //}
+    {
+      setWheelMode(true);
+    }
     relax(false);
   }
   
@@ -280,9 +266,9 @@ class ServoDxl
     currFrame = 0;
     velocities = vel;
     //if(!isWheelMode())
-    //{
+    {
       setWheelMode(true);
-    //}
+    }
     relax(false);
   }
   
@@ -291,46 +277,20 @@ class ServoDxl
     if(frame <  velocities.size())
     {
       JSONObject vel = velocities.getJSONObject(frame); 
-      String modus = vel.getString("modus","wheel");
-      //println("modus: " + modus + " " + oldModus);
-      if(modus.equals("wheel") && !oldModus.equals(modus))
-      {
-        setWheelMode(true);
-      }
-      else if(modus.equals("joint") && !oldModus.equals("joint"))
-      {
-        setWheelMode(false);
-      }
       int v = vel.getInt("vel");
-      
-      if(modus.equals("wheel"))
-      {
-        println("vel: " + v);
-        setSpeed(v);
-      }
-      else
-      {
-        //println("goal: " + v + " " + goal);
-        if(v != goal)
-        {
-          println("goal: " + v);
-          setGoal(v);
-        }
-      }
-      oldModus = modus;
+      println("v: " + v);
+      setSpeed(v);
     }
     else if(frame == velocities.size())
     {
       stopPlaying();
     }
-    
   }
 
   void stopPlaying()
   {
     playing = false;
     currFrame = 0;
-    oldModus = "none";
     setSpeed(0);
   }
 
@@ -338,7 +298,7 @@ class ServoDxl
   {
     if(readyForRecording)
     {
-      //if(speed != 0) recording = true;
+      if(speed != 0) recording = true;
       //println("GOAL : " + float(recValue[currRec].goal));//recValue[currRec].goal);
       //println("POS : " + float(recValue[currRec].pos));
       //println("SPEED : " + currSpeed); 
@@ -362,19 +322,14 @@ class ServoDxl
   }
   
   //from sensor or midi //String alows labels
+  /*
   void onCmd(SensorEvt cmd)
   {
-    if( cmd.type==0)
-    {
-      int v = (int)(cmd.coef * (cmd.value-cmd.center) );
-      if( (v>=cmd.min)&&(v<=cmd.max) )
-        execStringCmd(cmd.cmd,v);
-    }
-    else //state change
-    {
-      //TODO ..........
-    }    
+    int v = (int)(cmd.coef * (cmd.value-cmd.center) );
+    if( (v>=cmd.min)&&(v<=cmd.max) )
+      execStringCmd(cmd.cmd,v);    
   }
+  */
   
   //from sensor or midi //String alows labels
   void execStringCmd(String line,int value)
@@ -383,7 +338,8 @@ class ServoDxl
         char c=line.charAt(0); 
         switch(c)
         {
-          case '@': scriptArray.scriptAt(scriptIndex).start(line);break;
+          case '@':    println("DBG "+line);
+ scriptArray.scriptAt(scriptIndex).start(line);break;
           case 'q': stop();break;
           case 'j': setGoal(value);  break;
           case 's': setSpeed(value); break;
