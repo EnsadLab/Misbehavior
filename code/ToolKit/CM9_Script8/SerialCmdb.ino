@@ -12,6 +12,8 @@ char cmdId[32];
 int params[16];
 int charCount = 0;
 int cmdCount = 0;
+boolean sending = false;
+char outBuffer[128];
 
 char* getSerialCmd()
 {
@@ -20,6 +22,73 @@ char* getSerialCmd()
 int getCmdParam(int i)
 {
   return params[i];
+}
+
+char* sprint(char* sce,char* dest) //!!! no security at all
+{
+  do
+  {
+    *dest = *sce; dest++; sce++;
+  }while(*sce!=0);
+  return dest;
+}
+
+char* sprint(int num,char* dest)
+{
+  if(num==0){*dest='0';return ++dest;}
+  itoa(num,dest,10);
+  while(*dest!=0){dest++;}
+  return dest;  
+}
+
+void serialSend(const char* str)
+{
+  while(sending){}
+  sending = true;
+  SERIAL.print(str);
+  sending = false;
+}
+
+void serialSend(char* cmd,int i0,char*buffer)
+{
+  char* dest = sprint(cmd,buffer);
+  dest[0]=' ';dest++;
+  dest = sprint(i0,dest);
+  dest[0]=13;dest[1]=10;dest[2]=0;
+  while(sending){}
+  //sending = true;
+  SERIAL.print(buffer);
+  sending = false;
+}
+
+void serialSend(char* cmd,int i0,int i1,char*buffer)
+{
+  char* dest = sprint(cmd,buffer);
+  dest[0]=' ';dest++;
+  dest = sprint(i0,dest);
+  dest[0]=' ';dest++;
+  dest = sprint(i1,dest);
+  dest[0]=13;dest[1]=10;dest[2]=0;
+  while(sending){}
+  //sending = true;
+  SERIAL.print(buffer);
+  sending = false;
+}
+
+void serialSend(char* cmd,int i0,int i1,int i2,char*buffer)
+{
+  char* dest = sprint(cmd,buffer);
+  dest[0]=' ';dest++;
+  dest = sprint(i0,dest);
+  dest[0]=' ';dest++;
+  dest = sprint(i1,dest);
+  dest[0]=' ';dest++;
+  dest = sprint(i2,dest);
+  dest[0]=13;dest[1]=10;dest[2]=0;
+  while(sending){}
+  //sending = true;
+  SERIAL.print(buffer);
+  sending = false;
 }
 
 //watch:  nom a revoir dbg
@@ -36,12 +105,15 @@ class watch
     if( v != val )
     { 
       val = v;
+      serialSend("MV",imot,reg,v,outBuffer);
+      /*
       SERIAL.print("MV ");
       SERIAL.print(imot);
       SERIAL.print(" ");
       SERIAL.print(reg);
       SERIAL.print(" ");
       SERIAL.println(v);
+      */
     }    
   }
 };
@@ -194,12 +266,15 @@ void processMotor()
       dxlWrite(params[1],params[2],params[3]);
       break;
     case 'R': //read
+      serialSend("MV",params[1],params[2],dxlRead(params[1],params[2]),outBuffer);
+      /*
       SERIAL.print("MV ");
       SERIAL.print(params[1]); //Engine ID
       SERIAL.print(" ");
       SERIAL.print(params[2]); //Engine MemAdrr
       SERIAL.print(" ");
       SERIAL.println( dxlRead(params[1],params[2]) );
+      */
       break;
 
     case 'T': //token  engineIndex tok value

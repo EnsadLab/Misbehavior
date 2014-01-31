@@ -1,6 +1,6 @@
 //#import import themidibus.*;
 
-static final int  MAX_MIDI_NUM  = 32;
+static final int  MAX_MIDI_NUM  = 128;
 MidiBus midiBus;
 int midiChannel = 0;
 
@@ -70,7 +70,7 @@ void loadMidiConfig(String xmlFilePath)
   for (int i = 0; i < children.length; i++)
   {
     int id = children[i].getInt("id");
-    if( (id>=0)&&(id<32) )
+    if( (id>=0)&&(id<MAX_MIDI_NUM) )
       midiNoteOnCmd[id].fromXML( children[i] );
   }
       
@@ -78,7 +78,7 @@ void loadMidiConfig(String xmlFilePath)
   for (int i = 0; i < children.length; i++)
   {
     int id = children[i].getInt("id");
-    if( (id>=0)&&(id<32) )
+    if( (id>=0)&&(id<MAX_MIDI_NUM) )
       midiNoteOffCmd[id].fromXML( children[i] );
   }
 
@@ -86,7 +86,7 @@ void loadMidiConfig(String xmlFilePath)
   for (int i = 0; i < children.length; i++)
   {
     int id = children[i].getInt("id");
-    if( (id>=0)&&(id<32) )
+    if( (id>=0)&&(id<MAX_MIDI_NUM) )
     {
       print("CC"+id+">");
       midiCtrlChgCmd[id].fromXML( children[i] );
@@ -124,7 +124,8 @@ void controllerChange(int channel, int num, int value)
   {
     SensorEvt cmd = midiCtrlChgCmd[num];
     cmd.value = value;    
-    println("CC "+num+":"+cmd.toString()+" "+cmd.coef*(value-cmd.center)); 
+    println("CC "+num+":"+cmd.toString()+" "+cmd.coef*(value-cmd.center));
+    println(cmd.toString() ); 
     servoArray.onSensor(cmd);
   }
 }

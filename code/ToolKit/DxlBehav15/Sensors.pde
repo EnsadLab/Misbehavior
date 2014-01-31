@@ -61,31 +61,39 @@ class SensorGUIarray
 
 class SensorArray
 {
+  int nbSensors = 16;  
   SensorEvt[] sensorEvts;
   SensorArray()
   {
-     sensorEvts = new SensorEvt[64];
-     for(int i=0;i<64;i++)
+     sensorEvts = new SensorEvt[nbSensors];
+     for(int i=0;i<nbSensors;i++)
        sensorEvts[i] = new SensorEvt();
   }
 
-  void loadXmlConfig(String xmlFilePath)
+  void loadConfig(String xmlFilePath)
   {
     println("Loading Sensor Config file...");
     XML xml = loadXML(xmlFilePath);
     if(xml==null)
       return;      //>>error message ?
 
-     for(int i=0;i<64;i++)
-       sensorEvts[i].servo = -1;
-  
-    XML[] children = xml.getChildren("sensor");
-    for (int i = 0; i < children.length; i++)
+    for(int i=0;i<16;i++)
+      sensorEvts[i].servo = -1;
+
+    XML dist = xml.getChild("DISTANCE");
+    if( dist!=null)
     {
-      int id = children[i].getInt("id");
-      if( (id>=0)&&(id<64) )
-        sensorEvts[id].fromXML( children[i] );
-    }
+      XML x[] = dist.getChildren("sensor");
+      int nb = x.length;
+      println("  nb sensors "+ nb);
+    
+      for (int i = 0; i < nb; i++)
+      {
+        int id = x[i].getInt("id");
+        if( (id>=0)&&(id<nbSensors) )
+          sensorEvts[id].fromXML( x[i] );
+      }
+    }    
   }
   
   void rcvValue(int index,float value)

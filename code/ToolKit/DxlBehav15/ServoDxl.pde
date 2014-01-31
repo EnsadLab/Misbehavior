@@ -364,7 +364,11 @@ class ServoDxl
   //from sensor or midi //String alows labels
   void onSensor(SensorEvt cmd)
   {
+  }
+  void onSensor2(SensorEvt cmd)
+  {
     int v = (int)(cmd.coef * (cmd.value-cmd.center) );
+    println("TYPE "+cmd.type);
     switch( cmd.type )
     {
       case 0: // inside range
@@ -375,10 +379,14 @@ class ServoDxl
         if( (cmd.state!=1)&&(v<cmd.min) )
         {
           cmd.state=1;
-          execStringCmd(cmd.cmd,v);        
+          //execStringCmd(cmd.cmd,v);
+          println("STATE 1");        
         }
         else if( (cmd.state!=2)&&(v>cmd.max) )
+        {
           cmd.state = 2;
+          println("STATE 2");        
+        }
         break;
       case 2: //hysteresis up
         if( (cmd.state!=1)&&(v<cmd.min) )
@@ -412,7 +420,7 @@ class ServoDxl
         switch(c)
         {
           case '@': scriptArray.scriptAt(scriptIndex).start(line);break;
-          case 'q': stop();break;
+          case 'Q': case 'q': stop();break;
           case 'j': setGoal(value);  break;
           case 's': setSpeed(value); break;
           case 'w': setWheelSpeed(value); break;
@@ -420,7 +428,7 @@ class ServoDxl
       }   
       catch(Exception e){}
   }
-    
+ 
   void regValue(int reg,int value)
   {
     switch(reg)

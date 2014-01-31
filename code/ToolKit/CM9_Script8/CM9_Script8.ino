@@ -25,7 +25,7 @@ int pingDistances[3];
 //IR : Sharp GP2Y0A21YK0F
 int  analogSensorId = 3; //!!!!!!!!
 int  analogIndex    = 0;
-int  analogPins[]   = {17,18,19}; //{-1,-1,-1}; //TODO more than one ... attach interrupts
+int  analogPins[]   = {-1,-1,-1}; //{7,8,9}; //
 //--------------------------------
 
 unsigned long loopTime = 0;
@@ -34,10 +34,11 @@ HardwareTimer timer(1);
 #define TIMER_RATE 40000 //1s 1000 000
 //#define TIMER_RATE 50000 //1s 1000 000
 
-//char sendbuffer[128];
+char sendbuffer[128];
 //
 void setup()
 {
+  SERIAL.end();
   for(int i=0;i<3;i++) //Sigggnal
   {
     toggleLED();
@@ -70,7 +71,6 @@ void setup()
   delay(500);
   SERIAL.begin(BAUDS);
   delay(500);
-  //Serial2.begin(57600);
 
   for(int i=0;i<7;i++) //Siggggnal
   {
@@ -91,6 +91,7 @@ void setup()
 }
 
 int stepCount = 0;
+int dogCount  = 0;
 void timerHandler(void)
 {
   //TODO Sensors here ???
@@ -99,15 +100,10 @@ void timerHandler(void)
     for(int i=0;i<nbEngines;i++)
       engines[i].update(t);
   }
-  if(++stepCount & 1)
-    sendAnalogDistance();
-  else
-  {
-    triggerPingDistance();
-  }
+  if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);serialSend("x");}
+  else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
 }
 
-int dogCount = 0;
 void loop()
 {
   unsigned long t = millis();
@@ -115,23 +111,22 @@ void loop()
   if(dt>=25)
   {
     loopTime = t;
-    /*
     if(++stepCount & 1)
       sendAnalogDistance();
     else
     {
       triggerPingDistance();
     }
-    */
-    if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);SERIAL.println("x");}
-    else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
+//    if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);SERIAL.println("x");}
+//    else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
   }
   else
     cmdPoll(t);
  
   if( digitalRead(BUTTON_PIN) )
   {
-    SERIAL.println("BUTTON"); //TODO use interrupt?
+    //SERIAL.println("BUTTON"); //TODO use interrupt?
+    serialSend("BUTTON");
     for(int i=0;i<nbEngines;i++)
       engines[i].stop();
     delay(500); //
@@ -144,13 +139,9 @@ void sendAnalogDistance()
   int pin = analogPins[ analogIndex ];
   if(pin>=0)
   {
-    float value = (float)analogRead(pin);
-    float distance = pow((value*3.3)/4096,-1.15)*27.86; //pow! wow!
-    SERIAL.print("P "); // "Pin" // S is for script !!!
-    SERIAL.print(analogSensorId+analogIndex);
-    SERIAL.print(" ");
-    //SERIAL.println(distance);
-    SERIAL.println(random(0,2000));
+    int value = analogRead(pin);
+    //float distance = pow((value*3.3)/4096,-1.15)*27.86; //pow! wow!
+    serialSend("&",analogSensorId+analogIndex,value,sendbuffer);
   }   
   if(++analogIndex>=3)
     analogIndex=0;
@@ -160,14 +151,8 @@ void sendAnalogDistance()
 void triggerPingDistance()
 {
   if( pingPins[pingIndex]>=0 ) //send previous ping
-  {
-    SERIAL.print("P "); // "=Pin" // S is for script !!!
-    SERIAL.print(pingSensorId+pingIndex);
-    SERIAL.print(" ");
-    //SERIAL.println(pingDistances[pingIndex]);
-    SERIAL.println(random(0,2000));
-
-  }  
+    serialSend("P",analogSensorId+pingIndex,pingDistances[pingIndex],sendbuffer);
+    
   if(++pingIndex>=3)
     pingIndex=0;
   byte pin = pingPins[pingIndex];

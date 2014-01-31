@@ -340,24 +340,12 @@ class CommArduino implements ControlListener //CallbackListener
     textArea.append("openning "+port+" "+baudrate+"\n");
     openSerial = new OpenSerial(); //thread
     openSerial.start();
-
-    /*
-    serial = new Serial(mainApp,port,baudrate);
-    if(serial==null)
-      println("serial NULL") ;
-    serial.bufferUntil(10);
-    println("openned "+port); 
-    textArea.append("Openned "+port+" "+baudrate+"\n");
-    openned = true;
-    servoArray.sendDxlId();
-    */
   }
   
   void close()
   {    
     println("SERIAL CLOSE");
-     
-    
+         
     openned = false;
     action  = 1; 
     textArea.append("closing "+port+"\n");
@@ -365,8 +353,8 @@ class CommArduino implements ControlListener //CallbackListener
     {
       //serial.clear();
       serial.stop();
-      serial.clear();
-      serial = null;
+      //serial.clear();
+      //serial = null;
       rcvCount = 0;
     }
     if( titleButton.getState() )
@@ -382,8 +370,8 @@ class CommArduino implements ControlListener //CallbackListener
       return;
 
     String rcv = null;
-    try{ rcv = serial.readString(); } //???
-    catch(Exception e){return;}       //???
+    try{ rcv = serial.readString(); }
+    catch(Exception e){return;}
     rcvCount++;
 
     //println("rcv" + rcv);

@@ -7,6 +7,8 @@
 #include "Anim.h"
 #include "DxlEngine.h"
 
+extern void serialSend(char* str,int i0,int i1,char* buffer);
+
 #define TASK_JOINT 1
 #define TASK_WHEEL 2
 #define TASK_PAUSE 3
@@ -78,7 +80,8 @@ void Anim::sendReady()
   currentTask=0;
   duration  = 0;
   localTime = 0;
-  SERIAL.print("ok ");SERIAL.print(pEngine->index);SERIAL.println(" 0"); //READY 
+  //SERIAL.print("ok ");SERIAL.print(pEngine->index);SERIAL.println(" 0"); //READY
+ serialSend("ok",pEngine->index,0,strBuffer);
 }
 
 void Anim::execCmd(const char* strcmd,int value)
@@ -113,7 +116,7 @@ void Anim::execTokenDbg(int tok,int value)
     case TOKEN_JOINT:
       pEngine->relax(false);
       wantedGoal=value;duration=0;
-      SERIAL.print(";tok joint ");SERIAL.println(value);
+      //SERIAL.print(";tok joint ");SERIAL.println(value);
       pEngine->setGoal(value);
       currentTask=TASK_JOINT;
       break;
@@ -148,11 +151,11 @@ void Anim::execTokenDbg(int tok,int value)
     break;
     case TOKEN_TGIN:
       bezierIn  = 0.01f*(float)value;
-      SERIAL.print("bIn ");SERIAL.println(bezierIn);
+      //SERIAL.print("bIn ");SERIAL.println(bezierIn);
       break;
     case TOKEN_TGOUT:
       bezierOut = 0.01f*(float)(100-value);
-      SERIAL.print("bOut ");SERIAL.println(bezierOut);
+      //SERIAL.print("bOut ");SERIAL.println(bezierOut);
       break;
     case TOKEN_MARGIN:
       goalMargin = value;
@@ -162,7 +165,7 @@ void Anim::execTokenDbg(int tok,int value)
       break;
     case TOKEN_TORQUE:
       pEngine->setTorque(value);
-      SERIAL.print("torque ");SERIAL.println(value);
+      //SERIAL.print("torque ");SERIAL.println(value);
       break;      
     case TOKEN_PAUSE:
        localTime = 0; duration = (float)value;

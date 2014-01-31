@@ -18,7 +18,6 @@ ScriptArray     scriptArray;
 SensorArray     sensorArray;
 SensorGUIarray  sensorGUI;
 
-
 ControlP5 cp5;
 int globalID = 0;
 
@@ -72,9 +71,9 @@ void setup()
      //.setColorActive(color(255,128,0));
 
   //loadConfig("config.xml");
-  loadMidiConfig("config_MIDI.xml");  
   loadConfig("config_dib.xml");
   //loadConfig("config_cbu.xml");
+  loadMidiConfig("config_MIDI.xml"); //will change : sensors  
   
   arduino = new CommArduino(arduinoPort,arduinoBaudRate);
   arduino.buildBasicGUI(20,50,tabNameBasic);
@@ -95,6 +94,7 @@ void setup()
   scriptArray.scriptAt(0).load("anims/AnimE1.txt");
   
   sensorArray = new SensorArray();
+  sensorArray.loadConfig("config_MIDI.xml");
   sensorGUI = new SensorGUIarray();
   sensorGUI.buildGUI(280,5,tabNameAdvanced);
     

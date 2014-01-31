@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
  <config>
-   <arduino port="COM42" bauds="57600" />
-   <motor id="10"/>
-   <motor id="15"/>
+   <arduino port="COM13" bauds="57600" />
+   <motor id="1"/>
+   <motor id="2"/>
    <anim path="anims/animTemp.json"/>
    <anim path="anims/anim.json"/>
    <anim path="anims/anim2.json"/>

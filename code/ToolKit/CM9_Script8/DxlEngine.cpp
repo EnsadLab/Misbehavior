@@ -67,7 +67,7 @@ void DxlEngine::setGoalSpeed(int s)
     Dxl.writeWord(dxlId,32,s);
     lastSpeed=s;
   }
-  SERIAL.print("goalSpeed ");SERIAL.println(s);  
+  //SERIAL.print("goalSpeed ");SERIAL.println(s);  
 }
 
 void DxlEngine::setWheelSpeed(int s)
