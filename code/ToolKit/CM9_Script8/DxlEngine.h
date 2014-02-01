@@ -6,6 +6,7 @@
 //#include "Parser.h"
 
 
+
 class DxlEngine
 {
   public:
@@ -17,9 +18,6 @@ class DxlEngine
   int minPos,maxPos;
   int torqueLimit;
   
-  int fakeGoal;
-  int fakePos;
-
   //anim
   unsigned int frameTime;
   unsigned int pauseTime;
@@ -39,13 +37,18 @@ class DxlEngine
   int wantedSpeed;
   int wantedWheel;
   int wantedDuration;
+  char myBuffer[32];
    
   Anim anim;
   
  DxlEngine();
    DxlEngine(int id);
   void setId(int id);
+  void init();
+  int getIdFromFlash();
   void stop();
+  void onCmd(const char* cmd,int p1,int p2,int p3 );
+
   //void startScript(const char* name,const char* label=NULL);
   void donothing();
   //true=JOINT , false=WHEEL
@@ -72,7 +75,8 @@ class DxlEngine
   void setWheelMode();
   void setJointMode();  
   void setCompliance(int cw,int ccw = -1);
-  
+  void setDxlValue(int addr,int val);
+
 
   
 };

@@ -364,9 +364,6 @@ class ServoDxl
   //from sensor or midi //String alows labels
   void onSensor(SensorEvt cmd)
   {
-  }
-  void onSensor2(SensorEvt cmd)
-  {
     int v = (int)(cmd.coef * (cmd.value-cmd.center) );
     println("TYPE "+cmd.type);
     switch( cmd.type )
@@ -480,7 +477,6 @@ class ServoDxl
   
   int setKnobValue(int val)
   {
-    //println("DXL MODE "+mode);
     if( mode == DXL_JOIN )
     {
       setGoal(val+512);

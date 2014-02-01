@@ -34,7 +34,7 @@ void Anim::init(DxlEngine* pEng)
   bezierOut  = 0.666;
   wantedGoal  = 0;
   goalMargin  = 4;
-  pEngine = pEng;
+  pEngine     = pEng;
 }
 
 void Anim::stop()
@@ -180,7 +180,7 @@ void Anim::execTokenDbg(int tok,int value)
         currentTask = TASK_TEST;
       break;
     default:
-      pEngine->checkMode();
+      //pEngine->checkMode();
       SERIAL.print("...UNKNOWN");SERIAL.println(cmd);
   }
 }

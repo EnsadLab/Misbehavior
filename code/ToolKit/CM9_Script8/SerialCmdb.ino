@@ -129,6 +129,7 @@ void clearWatches()
 }
 void addWatch(int imot,int reg)
 {
+  /*
   for(int i=0;i<16;i++)
     if((imot==watches[i].imot)&&(reg==watches[i].reg))
       return;
@@ -145,6 +146,7 @@ void addWatch(int imot,int reg)
       break;
     }
   }
+  */
 }
 
 void removeWatch(int imot,int reg)
@@ -252,7 +254,7 @@ void processScript()
   //SERIAL.print("ANIM ");SERIAL.println(cmdId);
   if( cmdId[1]!=(char)0 )
     engines[0].anim.execCmd(cmdId,params[1]);
-  else if( (parseStep>3)&&(params[1]>=0)&&(params[1]<nbEngines)&&(params[2]>=0) ) 
+  else if( (parseStep>3)&&(params[1]>=0)&&(params[1]<NBENGINES)&&(params[2]>=0) ) 
     engines[params[1]].anim.execTokenDbg(params[2],params[3]);
   else
    SERIAL.println(" invalid");
@@ -267,19 +269,11 @@ void processMotor()
       break;
     case 'R': //read
       serialSend("MV",params[1],params[2],dxlRead(params[1],params[2]),outBuffer);
-      /*
-      SERIAL.print("MV ");
-      SERIAL.print(params[1]); //Engine ID
-      SERIAL.print(" ");
-      SERIAL.print(params[2]); //Engine MemAdrr
-      SERIAL.print(" ");
-      SERIAL.println( dxlRead(params[1],params[2]) );
-      */
       break;
 
     case 'T': //token  engineIndex tok value
       SERIAL.println("TOKEN ");
-      if( (parseStep>3)&&(params[1]>=0)&&(params[1]<nbEngines)&&(params[2]>=0) ) 
+      if( (parseStep>3)&&(params[1]>=0)&&(params[1]<NBENGINES)&&(params[2]>=0) ) 
         engines[params[1]].anim.execTokenDbg(params[2],params[3]);
       else
         SERIAL.println(" invalid");
@@ -288,20 +282,26 @@ void processMotor()
     case 'Q':
       if(parseStep<2)
         stopMotors();
-      else if( (params[1]>=0)&&(params[1]<nbEngines) )
+      else if( (params[1]>=0)&&(params[1]<NBENGINES) )
         engines[params[1]].stop();
     break;
             
     case 'I':
       if( (params[1]>=0)&&(params[1]<4) )
         engines[params[1]].setId(params[2]);
-      SERIAL.print("MI ");SERIAL.print(params[1]);SERIAL.print(" ");SERIAL.println(engines[params[1]].dxlId);
+      //SERIAL.print("MI ");SERIAL.print(params[1]);SERIAL.print(" ");SERIAL.println(engines[params[1]].dxlId);
+      break;
+
+    case 'i':
+      if( (params[1]>=0)&&(params[1]<4) )
+      serialSend("Mi",params[1],engines[params[1]].getIdFromFlash(),engines[params[1]].dxlId,outBuffer);
       break;
 
     case '?': //find a motor id M? from // return M? from found
       if(parseStep==2)
         SERIAL.print("M? ");SERIAL.print(params[1]);SERIAL.print(" ");SERIAL.println(dxlFindEngine(params[1]));
       break;
+
       
   }
 }
@@ -327,7 +327,7 @@ void processAnim()
 
 void stopMotors()
 {
-  for(int i=0;i<nbEngines;i++)
+  for(int i=0;i<NBENGINES;i++)
     engines[i].stop();
 }
 

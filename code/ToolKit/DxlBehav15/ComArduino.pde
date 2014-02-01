@@ -415,19 +415,23 @@ class CommArduino implements ControlListener //CallbackListener
       textArea.scroll(1.0);
       if(toks[0].equals("MV"))
       { 
-        try{ 
-        int imot = Integer.parseInt(toks[1]); //GRRR
-        int ireg = Integer.parseInt(toks[2]); //GRRR
-        int val  = Integer.parseInt(toks[3]); //GRRRRRRRRRR
-        servoArray.regValue(imot,ireg,val);
-        servoGUIarray.setValue(imot,ireg,val);
-        dxlGui.setValue(imot,ireg,val);
+        try
+        { 
+          int imot = Integer.parseInt(toks[1]); //GRRR
+          int ireg = Integer.parseInt(toks[2]); //GRRR
+          int val  = Integer.parseInt(toks[3]); //GRRRRRRRRRR
+          if(val>=0)
+          {
+            servoArray.regValue(imot,ireg,val);
+            servoGUIarray.setDxlValue(imot,ireg,val);
+            dxlGui.setValue(imot,ireg,val);
+          }
         }catch(Exception e){println("TOK EXCEPTION");}
       }
     }
     else if(toks[0].equals("ok")) //TODO TODO
     {   
-      println("ready");  
+        //println("DBG ready");  
         try{ 
         int imot = Integer.parseInt(toks[1]); //GRRR
         int icmd = Integer.parseInt(toks[2]); //GRRR
@@ -476,7 +480,6 @@ class OpenSerial extends Thread
       action  = 3; //openned
     }
     catch(Exception e){action = 4;}//closed
-    //textArea.append(" DONE "+openned+"/n");
     textArea.append(" DONE "+baudrate+"/n");
     running = false;
     //interrupt(); //force stop

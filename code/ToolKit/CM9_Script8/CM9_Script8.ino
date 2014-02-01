@@ -1,14 +1,18 @@
 #include "AAA.h" //GLOBAL definitions ... !!!SerialUSB/XBEE!!!
 #include "libpandora_types.h"
 #include "Dynamixel.h"
+#include "EEPROM.h"
+
+const int NBENGINES = 4; // global scope !
 
 #define BUTTON_PIN 25 //NOT 23 !!! !!!
 
 //--------------------------------
+EEPROM CM9_EEPROM;
+//--------------------------------
 #include "DxlEngine.h"
 Dynamixel Dxl(1); //Dynamixel on Serial1(USART1)
-const int nbEngines = 4;
-DxlEngine engines[nbEngines];
+DxlEngine engines[NBENGINES];
 //--------------------------------
 
 //--------------------------------
@@ -38,6 +42,7 @@ char sendbuffer[128];
 //
 void setup()
 {
+  CM9_EEPROM.begin();
   SERIAL.end();
   for(int i=0;i<3;i++) //Sigggnal
   {
@@ -63,16 +68,17 @@ void setup()
   //Dxl Engines    
   clearWatches();  
   Dxl.begin(1);
-  engines[0].setId(1);
-  engines[1].setId(2);
-  engines[2].setId(3);
-  engines[3].setId(4);
-
+  delay(1000);
+  for(int i=0;i<NBENGINES;i++)
+  {
+    engines[i].init();
+    delay(50);
+  }
+  
   delay(500);
   SERIAL.begin(BAUDS);
-  delay(500);
-
-  for(int i=0;i<7;i++) //Siggggnal
+  //wait wait wait wait, please
+  for(int i=0;i<99;i++) //Siggggnal
   {
     toggleLED();
     delay(100);
@@ -97,10 +103,10 @@ void timerHandler(void)
   //TODO Sensors here ???
   unsigned long t = millis();
   {
-    for(int i=0;i<nbEngines;i++)
+    for(int i=0;i<NBENGINES;i++)
       engines[i].update(t);
   }
-  if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);serialSend("x");}
+  if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);serialSend("x\n");}
   else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
 }
 
@@ -127,7 +133,7 @@ void loop()
   {
     //SERIAL.println("BUTTON"); //TODO use interrupt?
     serialSend("BUTTON");
-    for(int i=0;i<nbEngines;i++)
+    for(int i=0;i<NBENGINES;i++)
       engines[i].stop();
     delay(500); //
   }  
