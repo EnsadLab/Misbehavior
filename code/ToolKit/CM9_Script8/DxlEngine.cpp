@@ -2,8 +2,11 @@
 #include "Arduino-compatibles.h"
 #include "Dynamixel.h"
 #include "dxl_constants.h"
+#include "EEPROM.h"
 #include "DxlEngine.h"
 #include "AAA.h"
+
+extern EEPROM CM9_EEPROM;
 
 #define RELAXED 1
 #define JOINT_MODE 2
@@ -14,39 +17,58 @@ DxlEngine::DxlEngine()
 {
   index = DxlEngineCount++;
   anim.pEngine = this;
-  setId(0);
-}
-
-DxlEngine::DxlEngine(int id)
-{
-  index = DxlEngineCount++;
-  anim.pEngine = this;
-  setId(id);  
+  dxlId = -1;
 }
 
 void DxlEngine::setId(int id)
 {
-  dxlId = id;
-  status = RELAXED;
-  jointMode = true;
-  torqueLimit = 1023;
-  minPos = 0;
-  maxPos = 1023;
-  
-  fakePos = -1;
-  fakeGoal = -1;
+  dxlId = id;    
+  init();
+  if(dxlId>0)
+    CM9_EEPROM.write(index,(uint16)dxlId);
   
   anim.init(this);
   if(id>0)
     relax(true);
-  checkMode();
+}
+
+int DxlEngine::getIdFromFlash()
+{
+  return CM9_EEPROM.read(index);// read data from virtual address 0~9  
+}
+
+void DxlEngine::init()
+{
+  status = RELAXED;
+  jointMode = true;
+  lastSpeed = 0;
+  minPos = 0;
+  maxPos = 1023;
+  torqueLimit = 1023;
+  anim.init(this);    
+  
+  int id = CM9_EEPROM.read(index);
+  if( (id>0)&&(id<255) )
+    dxlId = id;
+  if( dxlId<=0 )
+    return;
+  
+  int rid = Dxl.readByte(dxlId,P_ID);
+  if( rid != dxlId ) //rid = FF 
+  {
+     dxlId = -1;
+     return;
+  }
+  relax(true);
+  jointMode = (Dxl.readWord(dxlId,P_CCW_ANGLE_LIMIT_L)>0 );
+  anim.init(this);    
 }
 
 void DxlEngine::stop()
 {
   anim.stop();
   relax(true);  
-  checkMode();
+  //checkMode();
 }
 
 void DxlEngine::donothing()
@@ -56,9 +78,71 @@ void DxlEngine::donothing()
 // true = finished / false runningTask
 bool DxlEngine::update(unsigned int t)
 {
+  if(dxlId <= 0)
+    return true; //finished  
   anim.pEngine = this;
   return anim.update(t);
 }
+
+void  DxlEngine::onCmd(const char* cmd,int i1,int i2,int i3 )//i1 = engine index
+{
+  if( cmd[1]=='I')
+  {
+    setId(i2);
+    return;
+  }
+  
+  if(dxlId<=0)
+    return;
+    
+  if( cmd[1]=='W')
+  {
+    setDxlValue(i2,i3);
+    return;
+  }    
+}
+
+void DxlEngine::setDxlValue(int addr,int val)
+{
+  if(dxlId<=0)
+    return;
+  
+  switch(addr)
+  {
+    case P_CW_ANGLE_LIMIT_L:
+      if((val>=0)&&(val<1024))
+        Dxl.writeWord(dxlId,P_CW_ANGLE_LIMIT_L,val);
+      break;
+
+    case P_CCW_ANGLE_LIMIT_L:  
+      if(val>1023) val = 1023;
+      if(val<=0) setWheelMode();  //!!! assume cw limit == 0 !!!
+      else { maxPos=val ; setJointMode(); } 
+      break;
+
+    case P_CW_COMPLIANCE_SLOPE:
+        Dxl.writeByte(dxlId,P_CW_COMPLIANCE_SLOPE,val);
+        break;
+    
+    case P_CCW_COMPLIANCE_SLOPE:
+        Dxl.writeByte(dxlId,P_CCW_COMPLIANCE_SLOPE,val);
+        break;
+
+    case P_GOAL_POSITION_L:
+        setGoal(val);
+        break;
+
+    case P_GOAL_SPEED_L:
+        setGoalSpeed(val);  //Wheel ... +-1024 ...
+        break;
+        
+    case P_TORQUE_LIMIT_L :
+        setTorque(val);
+        break;
+  }
+}
+
+
 
 void DxlEngine::setGoalSpeed(int s)
 {
@@ -67,7 +151,6 @@ void DxlEngine::setGoalSpeed(int s)
     Dxl.writeWord(dxlId,32,s);
     lastSpeed=s;
   }
-  SERIAL.print("goalSpeed ");SERIAL.println(s);  
 }
 
 void DxlEngine::setWheelSpeed(int s)
@@ -105,8 +188,6 @@ void DxlEngine::setGoal(int g,int s)
     }    
     if( status & RELAXED )
       relax(false);    
-
-    //SERIAL.print(";goal s ");SERIAL.println(g);
 }
 
 int DxlEngine::getGoal()
@@ -135,14 +216,15 @@ void DxlEngine::relax(bool dorelax)
 {
   if(dorelax)
   {
-    Dxl.writeWord(dxlId,34,0);
+    Dxl.writeWord(dxlId,P_TORQUE_LIMIT_L,0);
     status |= RELAXED;
   }
   else
   {
-    int p = Dxl.readWord(dxlId,36); //currPos
-    Dxl.writeWord(dxlId,30,p);      //goal    
-    Dxl.writeWord(dxlId,34,torqueLimit);
+    int p = Dxl.readWord(dxlId,P_PRESENT_POSITION_L);  //currPos
+    Dxl.writeWord(dxlId,P_GOAL_POSITION_L,p);          //goal = currPos
+    Dxl.writeWord(dxlId,P_GOAL_SPEED_L,0);             //speed 0 !!!!!! max ?    
+    Dxl.writeWord(dxlId,P_TORQUE_LIMIT_L,torqueLimit);              //
     status &= ~RELAXED;
   }
 }
@@ -158,26 +240,22 @@ void DxlEngine::setTorque(int tl)
   }  
 }
 
-// true = JOINT , false = WHEEL 
-bool DxlEngine::checkMode() //fast: check only CCW
-{
-   jointMode = (Dxl.writeWord(dxlId,8,0)>0 );
-   return jointMode;
-}
 
 void DxlEngine::setWheelMode()
 {
     //devrai mettre speed à 0 ... 1 ???
-    Dxl.writeWord(dxlId,6,0);
-    Dxl.writeWord(dxlId,8,0);
+    Dxl.writeWord(dxlId,P_CW_ANGLE_LIMIT_L,0);
+    Dxl.writeWord(dxlId,P_CCW_ANGLE_LIMIT_L,0);
     jointMode = false;  
 }
 void DxlEngine::setJointMode()
 {
-    //devrait mettre goal à pos
-    //speed ?
-    Dxl.writeWord(dxlId,6,minPos);
-    Dxl.writeWord(dxlId,8,maxPos);  
+    int p = Dxl.readWord(dxlId,P_PRESENT_POSITION_L);  //currPos
+    Dxl.writeWord(dxlId,P_GOAL_POSITION_L,p);          //goal = currPos
+    Dxl.writeWord(dxlId,P_GOAL_SPEED_L,0);             //speed 0 !!!!!! max ?    
+    
+    Dxl.writeWord(dxlId,P_CW_ANGLE_LIMIT_L ,minPos);
+    Dxl.writeWord(dxlId,P_CCW_ANGLE_LIMIT_L,maxPos);  
     jointMode = true;  
 }
 
@@ -185,10 +263,10 @@ void DxlEngine::setCompliance(int cw,int ccw)
 {
   if(cw>7)cw=7;
   int cpl = 1<<cw;
-  Dxl.writeByte(dxlId,28,cpl); //CW SLOPE
+  Dxl.writeByte(dxlId,P_CW_COMPLIANCE_SLOPE,cpl); //CW SLOPE
   if(ccw>0)
     cpl = 1<<ccw;
-  Dxl.writeByte(dxlId,29,cpl); //CCW SLOPE  
+  Dxl.writeByte(dxlId,P_CCW_COMPLIANCE_SLOPE,cpl); //CCW SLOPE  
 }
 
 

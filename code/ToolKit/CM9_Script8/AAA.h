@@ -6,6 +6,7 @@ extern Dynamixel Dxl;
 
 #include "HardwareSerial.h"
 
+
 //!!! SerialUSB n'a pas de param Baudrate
 //#define SERIAL SerialUSB
 //#define BAUDS
@@ -17,6 +18,7 @@ extern Dynamixel Dxl;
 #define DBG SERIAL.print
 #define DBGln SERIAL.println
 #define DBGLN SERIAL.println
+
 
 #endif
 

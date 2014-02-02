@@ -46,6 +46,7 @@ class Anim
     
   int   wSpeed;
   float prevPos;  
+  char strBuffer[64];
     
   Anim();
   void init(DxlEngine* pEng);

@@ -340,24 +340,12 @@ class CommArduino implements ControlListener //CallbackListener
     textArea.append("openning "+port+" "+baudrate+"\n");
     openSerial = new OpenSerial(); //thread
     openSerial.start();
-
-    /*
-    serial = new Serial(mainApp,port,baudrate);
-    if(serial==null)
-      println("serial NULL") ;
-    serial.bufferUntil(10);
-    println("openned "+port); 
-    textArea.append("Openned "+port+" "+baudrate+"\n");
-    openned = true;
-    servoArray.sendDxlId();
-    */
   }
   
   void close()
   {    
     println("SERIAL CLOSE");
-     
-    
+         
     openned = false;
     action  = 1; 
     textArea.append("closing "+port+"\n");
@@ -365,8 +353,8 @@ class CommArduino implements ControlListener //CallbackListener
     {
       //serial.clear();
       serial.stop();
-      serial.clear();
-      serial = null;
+      //serial.clear();
+      //serial = null;
       rcvCount = 0;
     }
     if( titleButton.getState() )
@@ -382,8 +370,8 @@ class CommArduino implements ControlListener //CallbackListener
       return;
 
     String rcv = null;
-    try{ rcv = serial.readString(); } //???
-    catch(Exception e){return;}       //???
+    try{ rcv = serial.readString(); }
+    catch(Exception e){return;}
     rcvCount++;
 
     //println("rcv" + rcv);
@@ -393,8 +381,7 @@ class CommArduino implements ControlListener //CallbackListener
       else {togleDog.setState(true);togleDogBasic.setState(true);}
       return;
     }
-      
-    
+          
     String[] toks = rcv.replaceAll("[\\n\\r]","").split(" "); //GRRRR sinon parseInt exception
     if(toks.length==3)
     {
@@ -406,6 +393,21 @@ class CommArduino implements ControlListener //CallbackListener
           sensorArray.rcvValue(sensor,value);
         }catch(Exception e){}
       }
+      else if(toks[0].equals("ok")) //TODO TODO
+      {   
+        textArea.append("READY"+rcv,200);
+        try{ 
+        int imot = Integer.parseInt(toks[1]); //GRRR
+        int icmd = Integer.parseInt(toks[2]); //GRRR
+        scriptArray.rcvMsg(imot,icmd);
+        textArea.append("READY! "+imot+" "+icmd);
+        }catch(Exception e){}
+      }
+      else
+      {
+        textArea.append("---"+rcv,200);
+        textArea.scroll(1.0);
+      }
     }
     else if(toks.length>=4)
     {
@@ -413,18 +415,23 @@ class CommArduino implements ControlListener //CallbackListener
       textArea.scroll(1.0);
       if(toks[0].equals("MV"))
       { 
-        try{ 
-        int imot = Integer.parseInt(toks[1]); //GRRR
-        int ireg = Integer.parseInt(toks[2]); //GRRR
-        int val  = Integer.parseInt(toks[3]); //GRRRRRRRRRR
-        servoArray.regValue(imot,ireg,val);
-        servoGUIarray.setValue(imot,ireg,val);
-        dxlGui.setValue(imot,ireg,val);
+        try
+        { 
+          int imot = Integer.parseInt(toks[1]); //GRRR
+          int ireg = Integer.parseInt(toks[2]); //GRRR
+          int val  = Integer.parseInt(toks[3]); //GRRRRRRRRRR
+          if(val>=0)
+          {
+            servoArray.regValue(imot,ireg,val);
+            servoGUIarray.setDxlValue(imot,ireg,val);
+            dxlGui.setValue(imot,ireg,val);
+          }
         }catch(Exception e){println("TOK EXCEPTION");}
       }
     }
     else if(toks[0].equals("ok")) //TODO TODO
-    {      
+    {   
+        //println("DBG ready");  
         try{ 
         int imot = Integer.parseInt(toks[1]); //GRRR
         int icmd = Integer.parseInt(toks[2]); //GRRR
@@ -473,7 +480,6 @@ class OpenSerial extends Thread
       action  = 3; //openned
     }
     catch(Exception e){action = 4;}//closed
-    //textArea.append(" DONE "+openned+"/n");
     textArea.append(" DONE "+baudrate+"/n");
     running = false;
     //interrupt(); //force stop

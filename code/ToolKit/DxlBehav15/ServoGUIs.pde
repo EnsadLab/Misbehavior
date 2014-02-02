@@ -128,8 +128,11 @@ class ServoGUIarray implements ControlListener
   }
 
 
-  void setValue(int imot,int reg,int val)
+  void setDxlValue(int imot,int reg,int val)
   {
+    if(val<0)
+      return;
+    
     for(int i=0;i<servoGUIs.length;i++) 
     {
       if(servoGUIs[i].motorId==imot)

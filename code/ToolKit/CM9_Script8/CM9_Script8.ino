@@ -1,14 +1,18 @@
 #include "AAA.h" //GLOBAL definitions ... !!!SerialUSB/XBEE!!!
 #include "libpandora_types.h"
 #include "Dynamixel.h"
+#include "EEPROM.h"
+
+const int NBENGINES = 4; // global scope !
 
 #define BUTTON_PIN 25 //NOT 23 !!! !!!
 
 //--------------------------------
+EEPROM CM9_EEPROM;
+//--------------------------------
 #include "DxlEngine.h"
 Dynamixel Dxl(1); //Dynamixel on Serial1(USART1)
-const int nbEngines = 4;
-DxlEngine engines[nbEngines];
+DxlEngine engines[NBENGINES];
 //--------------------------------
 
 //--------------------------------
@@ -16,16 +20,16 @@ DxlEngine engines[nbEngines];
 //TODO test attach/detach interrupts
 int  pingSensorId = 0;
 int  pingIndex    = 0;
-byte pingPins[]   = {-1,-1,-1}; //{ 17,18,19 };
+int  pingPins[]   = {-1,-1,-1}; //{ 17,18,19 };
 unsigned long pingEchoTimes[3];  //TODO: may share same long ?
 unsigned long pingStartTimes[3]; //TODO: may share same long ?
 int pingDistances[3];
 
 //--------------------------------
 //IR : Sharp GP2Y0A21YK0F
-int  analogSensorId = 10;
+int  analogSensorId = 3; //!!!!!!!!
 int  analogIndex    = 0;
-byte analogPins[]   = {-1,-1,-1}; //TODO more than one ... attach interrupts
+int  analogPins[]   = {-1,-1,-1}; //{7,8,9}; //
 //--------------------------------
 
 unsigned long loopTime = 0;
@@ -38,6 +42,8 @@ char sendbuffer[128];
 //
 void setup()
 {
+  CM9_EEPROM.begin();
+  SERIAL.end();
   for(int i=0;i<3;i++) //Sigggnal
   {
     toggleLED();
@@ -62,17 +68,17 @@ void setup()
   //Dxl Engines    
   clearWatches();  
   Dxl.begin(1);
-  engines[0].setId(1);
-  engines[1].setId(2);
-  engines[2].setId(3);
-  engines[3].setId(4);
-
+  delay(1000);
+  for(int i=0;i<NBENGINES;i++)
+  {
+    engines[i].init();
+    delay(50);
+  }
+  
   delay(500);
   SERIAL.begin(BAUDS);
-  delay(500);
-  //Serial2.begin(57600);
-
-  for(int i=0;i<7;i++) //Siggggnal
+  //wait wait wait wait, please
+  for(int i=0;i<99;i++) //Siggggnal
   {
     toggleLED();
     delay(100);
@@ -86,24 +92,24 @@ void setup()
   timer.attachInterrupt(TIMER_CH1, timerHandler); 
   timer.refresh();   // Refresh the timer's count  , prescale, and overflow
   titime = millis();
-  timer.resume(); // Start the timer counting
-    
+  timer.resume(); // Start the timer counting    
   loopTime = millis();
 }
 
-
+int stepCount = 0;
+int dogCount  = 0;
 void timerHandler(void)
 {
   //TODO Sensors here ???
   unsigned long t = millis();
   {
-    for(int i=0;i<nbEngines;i++)
+    for(int i=0;i<NBENGINES;i++)
       engines[i].update(t);
-  }  
+  }
+  if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);serialSend("x\n");}
+  else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
 }
 
-int dogCount = 0;
-int stepCount = 0;
 void loop()
 {
   unsigned long t = millis();
@@ -111,23 +117,23 @@ void loop()
   if(dt>=25)
   {
     loopTime = t;
-    if(stepCount & 1)
+    if(++stepCount & 1)
       sendAnalogDistance();
     else
     {
       triggerPingDistance();
     }
-    
-    if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);SERIAL.println("x");}
-    else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
+//    if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);SERIAL.println("x");}
+//    else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
   }
   else
     cmdPoll(t);
  
   if( digitalRead(BUTTON_PIN) )
   {
-    SERIAL.println("BUTTON"); //TODO use interrupt?
-    for(int i=0;i<nbEngines;i++)
+    //SERIAL.println("BUTTON"); //TODO use interrupt?
+    serialSend("BUTTON");
+    for(int i=0;i<NBENGINES;i++)
       engines[i].stop();
     delay(500); //
   }  
@@ -139,12 +145,9 @@ void sendAnalogDistance()
   int pin = analogPins[ analogIndex ];
   if(pin>=0)
   {
-    float value = (float)analogRead(pin);
-    float distance = pow((value*3.3)/4096,-1.15)*27.86; //pow! wow! 
-    SERIAL.print("P "); // "Pin" // S is for script !!!
-    SERIAL.print(pingSensorId+analogIndex);
-    SERIAL.print(" ");
-    SERIAL.println(distance);
+    int value = analogRead(pin);
+    //float distance = pow((value*3.3)/4096,-1.15)*27.86; //pow! wow!
+    serialSend("&",analogSensorId+analogIndex,value,sendbuffer);
   }   
   if(++analogIndex>=3)
     analogIndex=0;
@@ -154,12 +157,8 @@ void sendAnalogDistance()
 void triggerPingDistance()
 {
   if( pingPins[pingIndex]>=0 ) //send previous ping
-  {
-    SERIAL.print("P "); // "=Pin" // S is for script !!!
-    SERIAL.print(pingSensorId+pingIndex);
-    SERIAL.print(" ");
-    SERIAL.println(pingDistances[pingIndex]);
-  }  
+    serialSend("P",analogSensorId+pingIndex,pingDistances[pingIndex],sendbuffer);
+    
   if(++pingIndex>=3)
     pingIndex=0;
   byte pin = pingPins[pingIndex];
