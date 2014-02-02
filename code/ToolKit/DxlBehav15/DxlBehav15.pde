@@ -73,8 +73,8 @@ void setup()
 
   //loadConfig("config.xml");
   loadMidiConfig("config_MIDI.xml");  
-  loadConfig("config_dib.xml");
-  //loadConfig("config_cbu.xml");
+  //loadConfig("config_dib.xml");
+  loadConfig("config_cbu.xml");
   
   arduino = new CommArduino(arduinoPort,arduinoBaudRate);
   arduino.buildBasicGUI(20,50,tabNameBasic);
