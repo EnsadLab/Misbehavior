@@ -77,8 +77,13 @@ class ServoArray
       for(int i=0;i<servos.length;i++)
       { 
         servos[i].recKey(t);
-        servos[i].update(); // mouais... pas très logique d'appeler un update pas à chaque update... je changerai prob par la suite
+        //servos[i].update(); // mouais... pas très logique d'appeler un update pas à chaque update... je changerai prob par la suite
       }
+    }
+    
+    for(int i=0;i<servos.length;i++)
+    { 
+      servos[i].update(); 
     }
   }
 
@@ -93,6 +98,8 @@ class ServoArray
       }
       */
   }
+  
+
   
 };
 
@@ -122,6 +129,7 @@ class ServoDxl
   
   boolean recording = false;
   boolean readyForRecording = false;
+  boolean enableRecording = false;
   boolean playing = false;
   int currFrame = 0;
   
@@ -130,6 +138,10 @@ class ServoDxl
   JSONArray velocities;
   int currRec = 0;
   ServoKey[] recValue;
+  long recframeTime;
+  long playframeTime;
+  long recRate = 20;
+  long playRate = 20;
 
   int scriptIndex = 0;  //future work: several scripts ???
 
@@ -171,17 +183,32 @@ class ServoDxl
     }
     
   }
-
-  void startRecording()
+  
+  void enableRecording()
   {
-    setWheelMode(true);
-    relax(false);
+    enableRecording = true;
+  }
+  
+  void disableRecording()
+  {
+    enableRecording = false;
+  }
 
-    readyForRecording = true;
-    recording = true;
-    //recording = false;
-    currFrame = 0;
-    velocities = new JSONArray();
+  void startRecording(boolean isGlobal)
+  {
+    
+    println("start record enable: " + enableRecording + " " + index);
+    if((isGlobal && enableRecording) || !isGlobal)
+    {
+      setWheelMode(true);
+      relax(false);
+  
+      readyForRecording = true;
+      recording = true;
+      //recording = false;
+      currFrame = 0;
+      velocities = new JSONArray();
+    }
     
     /* to generate animations....
     int v = 250;
@@ -266,7 +293,10 @@ class ServoDxl
   {
     playing = true;
     currFrame = 0;
+    long t1 = millis();
     velocities = loadJSONArray(jsonFilenmame);
+    long t2 = millis()-t1;
+    println("finished loading in " + t2 + " milliseconds");
     //if(!isWheelMode())
     //{
     //  setWheelMode(true);
@@ -274,14 +304,16 @@ class ServoDxl
     relax(false);
   }
   
-  void startPlaying(JSONArray vel)
+  void startPlaying(JSONArray vel, float speed)
   {
+    playRate = (int)((float)recRate*speed);
+    println("-> animation playrate = " + playRate);
     playing = true;
     currFrame = 0;
     velocities = vel;
     //if(!isWheelMode())
     //{
-      setWheelMode(true);
+      // setWheelMode(true); // is done now in play frame
     //}
     relax(false);
   }
@@ -305,7 +337,7 @@ class ServoDxl
       
       if(modus.equals("wheel"))
       {
-        println("vel: " + v);
+        //println("vel: " + v);
         setSpeed(v);
       }
       else
@@ -313,7 +345,7 @@ class ServoDxl
         //println("goal: " + v + " " + goal);
         if(v != goal)
         {
-          println("goal: " + v);
+          //println("goal: " + v);
           setGoal(v);
         }
       }
@@ -331,6 +363,7 @@ class ServoDxl
     playing = false;
     currFrame = 0;
     oldModus = "none";
+    setWheelMode(true);
     setSpeed(0);
   }
 
@@ -345,14 +378,24 @@ class ServoDxl
       //println("SPEED : " + float(recValue[currRec].speed));
       if(recording)
       {
-        recordFrame(currFrame);
-        currFrame++;
+        long t = millis();    
+        if( (t-recframeTime)>=recRate ) // ou controller depuis ServoDxl Array.... arf...
+        {
+          recframeTime = t;
+          recordFrame(currFrame);
+          currFrame++;
+        }
       }
     }
     if(playing)
     {
-      playFrame(currFrame);
-      currFrame++;
+      long t = millis();    
+      if( (t-playframeTime)>=playRate )
+      {
+          playframeTime = t;
+          playFrame(currFrame);
+          currFrame++;
+      }
     }
   }
 
@@ -526,7 +569,7 @@ class ServoDxl
   }
   void setWheelMode(boolean wheel)
   {
-    println("setWheelMode "+wheel);
+    //println("setWheelMode "+wheel);
     if(!wheel)
     {
       println("JOINT ");

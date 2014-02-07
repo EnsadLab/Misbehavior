@@ -3,8 +3,9 @@
    <arduino port="/dev/tty.usbmodemfa141" bauds="9600" />
    <motor id="7"/>
    <motor id="17"/>
-   <!--<motor id="23"/>-->
-   <globalanim path="anims/globanim_26-1_15-17.json"/>
+   <!--<motor id="27"/>
+   <motor id="37"/>-->
+   <globalanim path="anims/globanim_3-2_20-22.json"/>
    <globalanim path="anims/globanim_26-1_15-18.json"/>
    <anim path="anims/animTemp.json"/>
    <anim path="anims/anim.json"/>

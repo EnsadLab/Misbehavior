@@ -57,7 +57,8 @@ void setup()
      //.setColorLabel(color(255))
      //.setColorActive(color(255,128,0));
      
-  loadConfig("config_dib.xml");
+  //loadConfig("config_dib.xml");
+  loadConfig("config_cbu.xml");
   
   arduino = new CommIno(arduinoPort,arduinoBaudRate);
   arduino.buildGUI(150,20,tabNameAdvanced);

@@ -40,9 +40,15 @@ int arduinoBaudRate = 57600;
 String midiInDevice = null; 
 String midiOutDevice = null;
 
+int guiHeight;
+
 
 void setup()
 {
+  
+ // WavEncoder wavEncoder = new WavEncoder();
+ // wavEncoder.writeWav  ();
+  
   mainApp = this;
   size(1250,825); //P3D OPENGL
   
@@ -65,14 +71,15 @@ void setup()
   cp5.getTab("default")
      .setLabel("BASIC")
      .activateEvent(true)
+     .setMoveable(true)
      .setId(1);
      //.setColorBackground(color(0, 160, 100))
      //.setColorLabel(color(255))
      //.setColorActive(color(255,128,0));
 
   //loadConfig("config.xml");
-  loadConfig("config_dib.xml");
-  //loadConfig("config_cbu.xml");
+  //loadConfig("config_dib.xml");
+  loadConfig("config_cbu.xml");
   loadMidiConfig("config_MIDI.xml"); //will change : sensors  
   
   arduino = new CommArduino(arduinoPort,arduinoBaudRate);
@@ -86,7 +93,7 @@ void setup()
   
   servoGUIarray = new ServoGUIarray(motorIds);
   servoGUIarray.buildGUI(350,40,tabNameAdvanced);
-  servoGUIarray.buildBasicGui(350,50,tabNameBasic);
+  guiHeight = servoGUIarray.buildBasicGui(350,50,tabNameBasic);
   servoGUIarray.buildGlobalGui(20,160,tabNameBasic);
     
   scriptArray        = new ScriptArray(2); //... TODO : config
@@ -107,6 +114,7 @@ void setup()
   
   //threadTest = new ThreadTest(); //,"le thread");
   //threadTest.start();
+  
 }
 
 void draw()
@@ -323,10 +331,25 @@ void keyPressed()
     
 /*  
   if( (key=='s')||(key=='S') )
-  {
+  {  
     println(" kmod "+keyModifier );
   }
 */  
   
+}
+
+PVector pos = new PVector(0.0,0.0);
+
+// enable scrolling in the basic tab
+void mouseWheel(MouseEvent event) {
+  float e = event.getAmount();
+  pos.y = pos.y -e;
+  float newY = pos.y -e;//*10.0;
+  if(pos.y < -guiHeight+getHeight()) pos.y = -guiHeight+getHeight();
+  else if(pos.y > 0) pos.y = 0;
+  //servoGUIarray.setPos(0,(int)pos.y);
+  //cp5.getTab("default").setPosition(pos.x,newY);
+  //cp5.getTab(tabNameBasic).setPosition(pos.x,newY);
+  //println(e);
 }
 

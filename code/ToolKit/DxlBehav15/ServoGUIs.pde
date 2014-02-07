@@ -5,6 +5,9 @@ class ServoGUIarray implements ControlListener
   Toggle recButtonPlayPause;
   Button[] globalAnimPlayButtons; // Pas envie d'utiliser un toogle... expliquerai de vive voix pourquoi... 
   Button[] globalAnimStopButtons;
+  DropdownList animSpeedDD;
+  float[] speeds = { 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0 }; // ou a generer...
+  float animSpeed = 1.0;
   JSONArray allVelocities;
   int xCurrAnimGui;
   int yCurrAnimGui;
@@ -48,7 +51,11 @@ class ServoGUIarray implements ControlListener
               .moveTo(tabName);
               ;
               
-     y += 40;
+     y += 60;
+     
+    float yAnimSpeed = y; // save the value. We'll draw it later so that the dropdown menu is drawn on top of other buttons
+          
+     y += 60;
      
      globalAnimPlayButtons = new Button[nbGlobalAnimsMax];
      globalAnimStopButtons = new Button[nbGlobalAnimsMax];
@@ -59,6 +66,34 @@ class ServoGUIarray implements ControlListener
      {  
        buildGlobalPlayAnimButtons(i,globalAnimPaths[i] + ":",tabName); 
      }
+     
+     
+    label = cp5.addTextlabel("ANIMATIONS_globalSpeed") // we keep index as identifier. This way we are completely sure no label has the same identifier. In case user adds twice same motorid in xml.
+              .setText("Animation speed: ")
+              .setPosition(x-5,yAnimSpeed)
+              .setColorValue(0xFF000000)
+              .setFont(createFont("Verdana",14))
+              .moveTo(tabName);
+              ;
+             
+     animSpeedDD = cp5.addDropdownList("SPEED")
+          .setPosition(x+140, yAnimSpeed+20)
+          .setSize(50,150)
+          .moveTo(tabName)
+          .setItemHeight(20)
+          .addListener(this)
+          .setBarHeight(20);
+          animSpeedDD.captionLabel().style().marginTop = 5;
+          animSpeedDD.captionLabel().style().marginLeft = 5;
+          animSpeedDD.valueLabel().style().marginTop = 5;
+          
+      //float speed = 0.3;
+      for(int i=0; i<speeds.length; i++)
+      {
+        animSpeedDD.addItem(""+speeds[i], i);
+        //speed += 0.1;
+      }
+      animSpeedDD.setIndex(8);
      
   }
   
@@ -99,13 +134,14 @@ class ServoGUIarray implements ControlListener
   }
 
   // constructs the right part of the basic tab gui, single controllers
-  void buildBasicGui(int x,int y, String tabName)
+  int buildBasicGui(int x,int y, String tabName)
   {
     for(int i=0;i<servoGUIs.length;i++)
     {
       servoGUIs[i].buildBasicGUI(x,y-5,tabName);
       y+=380;
     }
+    return y;
   }
 
   // constructs the advanced tab gui
@@ -162,7 +198,7 @@ class ServoGUIarray implements ControlListener
       ServoDxl servo = servoGUIs[i].getServo();
       if(servo != null)
       {
-        servo.startRecording();
+        servo.startRecording(true);
       }
     }
   }
@@ -171,11 +207,13 @@ class ServoGUIarray implements ControlListener
   {
     
     allVelocities = new JSONArray();
+    int index = 0;
     for(int i=0;i<servoGUIs.length;i++) 
     {
       // TODO: test if this motor is selected for recording
       ServoDxl servo = servoGUIs[i].getServo();
-      if(servo != null)
+      println("test: " + servo.enableRecording);
+      if(servo != null && servo.enableRecording)
       {
         JSONArray velocities = servo.stopGlobalRecording();
         // for generating animations...
@@ -196,7 +234,8 @@ class ServoGUIarray implements ControlListener
         JSONObject anim = new JSONObject();
         anim.setInt("servoIndex", servoGUIs[i].servoIndex);
         anim.setJSONArray("frames",velocities);
-        allVelocities.setJSONObject(i,anim);
+        allVelocities.setJSONObject(index,anim);
+        index++;
       } 
     }
     int d = day();    // Values from 1 - 31
@@ -217,7 +256,10 @@ class ServoGUIarray implements ControlListener
 
 void startGlobalPlaying(String jsonFilenmame)
 {
+  long t1 = millis();
   allVelocities = loadJSONArray(jsonFilenmame);
+  long t2 = millis()-t1;
+  println("finished loading in " + t2 + " milliseconds");
   for(int i=0; i<allVelocities.size(); i++)
   {
      JSONObject anim = allVelocities.getJSONObject(i);
@@ -226,7 +268,7 @@ void startGlobalPlaying(String jsonFilenmame)
      if(servo != null)
      {
        println("-> Starting animation on servoIndex " + servoIndex);
-       servo.startPlaying(anim.getJSONArray("frames"));
+       servo.startPlaying(anim.getJSONArray("frames"),animSpeed);
      }  
   }
 }
@@ -234,9 +276,11 @@ void startGlobalPlaying(String jsonFilenmame)
 
 void stopGlobalPlaying()
 {
+  println("stop global playing");
   for(int i=0;i<servoGUIs.length;i++) // 
   {
     ServoDxl servo = servoGUIs[i].getServo();
+    println("servo.playing " + servo.playing);
     if(servo != null && servo.playing)
     {
       servo.stopPlaying();
@@ -244,12 +288,37 @@ void stopGlobalPlaying()
   }
 }
 
+  void setPos(int x, int y) // debile..... mais j'en ai ma claque de ce tab...
+  {
+    for(int i=0;i<servoGUIs.length;i++)
+    { 
+      servoGUIs[i].setPos(y);
+    }
+  }
   
   void controlEvent(ControlEvent evt)
   {
+    
+    if(evt.isGroup()) //dropdown list
+    {
+      ControlGroup g = evt.group();
+      if( g == animSpeedDD )
+      {
+        int line = (int)g.value();
+        if(line >= 0 && line < speeds.length)
+        {
+          animSpeed = speeds[line];
+          println("-> selected new animation speed: " + animSpeed);
+        }
+        //port = listBox.getItem(line).getName();
+        //textArea.append("select "+port+"\n"+"bauds "+baudrate+"/n");
+        //baudrate = 57600;
+      }
+    }
     if(!evt.isController())
       return;
       
+   
     Controller c = evt.getController();
     //int id = c.getId();
     String addr = c.getAddress();
@@ -283,6 +352,10 @@ void stopGlobalPlaying()
     {
        stopGlobalPlaying();
     }
+    else if(addr.startsWith("/SPEED"))
+    {
+      println("speed selected");
+    }
   }
   
 };
@@ -300,6 +373,7 @@ class ServoGUI implements ControlListener
   Knob watch;
   
   Toggle recButtonPlayPause;
+  Toggle toggleRecord;
   Button[] animPlayButtons; // Pas envie d'utiliser un toogle... expliquerai de vive voix pourquoi... 
   Button[] animStopButtons;
   int xCurrAnimGui;
@@ -325,7 +399,7 @@ void startRecording()
      ServoDxl servo = servoArray.getByIndex(servoIndex);
      if(servo != null)
      {
-       servo.startRecording();
+       servo.startRecording(false);
      }
    }
 }
@@ -424,6 +498,15 @@ void buildNewPlayAnimButton(int index, String animPath, String tabName)
      
 }
 
+void setPos(int offsetY)
+{
+  toggleRecord.setPosition(toggleRecord.getPosition().x,toggleRecord.getPosition().y+offsetY);
+  cp5.getController("POSITIONKNOB"+servoIndex).setPosition(cp5.getController("POSITIONKNOB"+servoIndex).getPosition().x,cp5.getController("POSITIONKNOB"+servoIndex).getPosition().y+offsetY);
+  cp5.getController("SLIDERVEL"+servoIndex).setPosition(cp5.getController("SLIDERVEL"+servoIndex).getPosition().x,cp5.getController("SLIDERVEL"+servoIndex).getPosition().y+offsetY);
+  cp5.getController("RECPLAY"+servoIndex).setPosition(cp5.getController("RECPLAY"+servoIndex).getPosition().x,cp5.getController("RECPLAY"+servoIndex).getPosition().y+offsetY);
+  // j'arrete... c'est trop debile...
+}
+
 void buildBasicGUI(int x,int y, String tabName)
 {
   Textlabel label = cp5.addTextlabel("MOTORBASIC"+servoIndex) // we keep index as identifier. This way we are completely sure no label has the same identifier. In case user adds twice same motorid in xml.
@@ -431,21 +514,28 @@ void buildBasicGUI(int x,int y, String tabName)
               .setPosition(x,y)
               .setColorValue(0xFF000000)
               .setFont(createFont("Verdana",14))
-              .moveTo(tabName);
+              .moveTo(tabName)
               ;
-    
-    
      
-     /*recButtonStop = cp5.addButton("RECSTOP"+index)
-        .setPosition(posRecButton+55,y-5)
-        .setColorActive(0xFFCC0000)
-        .setSize(50,25)
-        .moveTo(tabName)
-        .setCaptionLabel("STOP");
-     recButtonStop.getCaptionLabel().setFont(createFont("Verdana",12)).align(ControlP5.CENTER,ControlP5.CENTER);
-     recButtonStop.addListener(this);
-     */
+     toggleRecord = cp5.addToggle("SELECT_TOGGLE"+servoIndex)
+     .setPosition(x+200,y)
+     .setCaptionLabel("X")
+     .setSize(20,20)
+     .setValue(true)
+     .setColorActive(color(0,255,0))
+     .setState(false)
+     //.setMode(ControlP5.SWITCH)
+     .moveTo(tabName)
+     .addListener(this)
+     ;
      
+    label = cp5.addTextlabel("ToggleLegend"+servoIndex) // we keep index as identifier. This way we are completely sure no label has the same identifier. In case user adds twice same motorid in xml.
+            .setText("Select motor for global recording (green = selected)")
+            .setPosition(x+225,y)
+            .setColorValue(0xFF000000)
+            .setFont(createFont("Verdana",14))
+            .moveTo(tabName)
+            ;
   
               
   y += 50;
@@ -843,6 +933,22 @@ void controlEvent(ControlEvent evt)
     else if(addr.startsWith("/ANIMSTOP"))
     {
        stopPlaying();
+    }
+    else if(addr.startsWith("/SELECT_TOGGLE"))
+    {
+      println("select toggle");
+       ServoDxl servo = servoArray.getByIndex(servoIndex);
+       if(servo != null)
+       {
+         if(toggleRecord.getState())
+         {
+           servo.enableRecording();
+         }
+         else
+         {
+           servo.disableRecording();
+         }
+       }
     }
 
 }
