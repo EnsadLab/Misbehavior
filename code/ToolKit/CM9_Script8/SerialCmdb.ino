@@ -35,6 +35,18 @@ void serialInterrupt0(uint8 c)
   //todo bufferTail overFlow
 }
 
+
+void serialInterruptUSB(uint8* pb,uint8 c)
+{
+  for(int i;i<c;i++)
+  {
+    serialInterrupt1(*pb);pb++;
+  }
+}
+
+
+
+
 //pour Test : 4 line buffers
 void serialInterrupt1(uint8 c)
 {

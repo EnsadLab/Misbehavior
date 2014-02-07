@@ -43,7 +43,7 @@ char sendbuffer[128];
 void setup()
 {
   CM9_EEPROM.begin();
-  SERIAL.end();
+//  SERIAL.end();
   SERIAL.begin(BAUDS);
   for(int i=0;i<3;i++) //Sigggnal
   {
@@ -82,10 +82,16 @@ void setup()
     toggleLED();
     delay(100);
   }
-  SERIAL.flush();
-  SERIAL.attachInterrupt(serialInterrupt1);
-  SERIAL.println("Start");
   
+  #ifdef USE_SERIALUSB
+    SERIAL.attachInterrupt(serialInterruptUSB);  
+  #else
+    SERIAL.flush();
+    SERIAL.attachInterrupt(serialInterrupt1);
+  #endif
+
+  SERIAL.println("Start");
+/*  
   timer.pause(); // Pause the timer while configuration
   timer.setPeriod(TIMER_RATE); // in microseconds
   timer.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE); // Set up an interrupt on channel 1
@@ -94,7 +100,7 @@ void setup()
   timer.refresh();   // Refresh the timer's count  , prescale, and overflow
   titime = millis();
   timer.resume(); // Start the timer counting 
-  
+*/  
   loopTime = millis();
 }
 
@@ -110,8 +116,8 @@ void timerHandler(void)
       engines[i].update(t);
   }
   */
-  if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);serialSend("x\n");}
-  else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
+  //if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);serialSend("x\n");}
+  //else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
 }
 
 void loop()
@@ -130,8 +136,8 @@ void loop()
     else if( stepCount==1 )
        triggerPingDistance();
 
-    //if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);SERIAL.println("x");}
-    //else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
+    if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);SERIAL.println("x");}
+    else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
   }
   delay(1);
     //cmdPoll2(t);
