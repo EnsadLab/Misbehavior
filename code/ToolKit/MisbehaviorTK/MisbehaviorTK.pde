@@ -2,8 +2,6 @@ import themidibus.*;
 import processing.serial.*;
 import controlP5.*;
 
-ThreadTest threadTest;
-
 PApplet  mainApp;
 int keyModifier = 0; //1 shift 2ctrl 4alt 
 
@@ -78,8 +76,8 @@ void setup()
      //.setColorActive(color(255,128,0));
 
   //loadConfig("config.xml");
-  //loadConfig("config_dib.xml");
-  loadConfig("config_cbu.xml");
+  loadConfig("config_dib.xml");
+  //loadConfig("config_cbu.xml");
   loadMidiConfig("config_MIDI.xml"); //will change : sensors  
   
   arduino = new CommArduino(arduinoPort,arduinoBaudRate);
@@ -100,8 +98,8 @@ void setup()
     
   scriptArray = new ScriptArray(motorIds.length );
   scriptArray.buildGUI(260,180,550,tabNameAdvanced);  //TODO ... more than 2 scripts
-  scriptArray.scriptAt(0).load("anims/Script00.txt"); //<<< TODO config.xml
-  scriptArray.scriptAt(1).load("anims/Script00.txt"); //<<< TODO config.xml
+  scriptArray.scriptAt(0).load("scripts/Script00.txt"); //<<< TODO config.xml
+  scriptArray.scriptAt(1).load("scripts/Script00.txt"); //<<< TODO config.xml
   
   sensorArray = new SensorArray();
   sensorArray.loadConfig("config_MIDI.xml");
