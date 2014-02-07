@@ -758,7 +758,7 @@ void buildGUI(int index,int x,int y,String tabName)
      .setRange(0,1024)
      .setValue(0)
      .moveTo(tabName)
-     ;//.addListener(this);
+     .addListener(this);
     advSliderSpeed.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setText("SPEED");
     
     advSliderWheel = cp5.addSlider("ADVWHEEL"+servoIndex)
@@ -767,7 +767,7 @@ void buildGUI(int index,int x,int y,String tabName)
      .setRange(0,1024)
      .setValue(0)
      .moveTo(tabName)
-     ;//.addListener(this);
+     .addListener(this);
     advSliderWheel.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setText("WHEEL");
     
 
@@ -819,9 +819,10 @@ void setValue(int reg,int value)
 
 void controlEvent(ControlEvent evt)
 {
+ 
   if(!evt.isController())
     return;
-      
+  
   Controller c = evt.getController();
   //int id = c.getId();
   String addr = c.getAddress();
@@ -923,6 +924,7 @@ void controlEvent(ControlEvent evt)
     }*/
     else if(addr.startsWith("/SLIDERVEL"))
     {
+      
        if( motorId>0 )
        {
          //DxlServo servo = servoArray.getServo(motorId);
@@ -934,7 +936,9 @@ void controlEvent(ControlEvent evt)
              servo.setWheelMode(true);
            }
            //servo.setKnobValue( (int)c.getValue() );
-           servo.setGoal( (int)c.getValue() + 512 );
+           //servo.setGoal( (int)c.getValue() + 512 );
+           servo.setSpeed((int) c.getValue());
+           println("test speed " + c.getValue());
          }
        }
     }

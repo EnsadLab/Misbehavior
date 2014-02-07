@@ -554,6 +554,7 @@ class ServoDxl
   {
     speed = val;
     wantedSpeed = val;
+    println("setSpeed: " + val);
     arduino.serialSend("EW "+index+" 32 "+val+"\n");
     delay(1);
   }

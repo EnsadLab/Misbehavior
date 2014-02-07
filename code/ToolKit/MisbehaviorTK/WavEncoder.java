@@ -55,21 +55,57 @@ public class WavEncoder{
   
   public void writeWav()
   {
-    
+    System.out.printf("WRITE WAV");
     
     try
     {
       int sampleRate = 50;//44100;    // Samples per second
-      double duration = 5.0;    // Seconds
+      
 
       // Calculate the number of frames required for specified duration
-      long numFrames = (long)(duration * sampleRate);
+      long numFrames = 500;//(long)(duration * sampleRate);
+      
+      double duration = numFrames/sampleRate;//5.0;    // Seconds
+      
+      double[] velocities = new double[(int)numFrames];
+      
+      int v = -1023;
+      boolean down = false;
+      for(int i=0; i<numFrames; i++)
+      {
+        velocities[i] = (v+1024.0)*2.0/2028.0 - 1.0;
+        double temp = (v+1024.0)*2.0/2028.0 ;
+       // println("v: " + v + " " + temp + " " + velocities[i]);
+        System.out.printf("v: %d  %f %f\n",v, temp, velocities[i]);
+        if(down)
+        {
+          v -= 30;
+          if(v < -1023)
+          {
+            v = -1023;
+            down = false;
+          }
+        }
+        else
+        {
+          v += 30;
+          if(v > 1023)
+          {
+            v = 1023;
+            down = true;
+          }
+        }
+       
+      }
+      
+      
+      
 
       // Create a wav file with the name specified as the first argument
-      WavFile wavFile = WavFile.newWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/DxlBehav15/testWrite.wav"), 6, numFrames, 16, sampleRate);
+      WavFile wavFile = WavFile.newWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/testWrite.wav"), 2, numFrames, 16, sampleRate);
 
       // Create a buffer of 100 frames
-      double[][] buffer = new double[6][100];
+      double[][] buffer = new double[2][100];
 
       // Initialise a local frame counter
       long frameCounter = 0;
@@ -90,12 +126,12 @@ public class WavEncoder{
           //buffer[1][s] = -130;//Math.sin(2.0 * Math.PI * 500 * frameCounter / sampleRate);
           if(goingUp) {dataTest += 0.01; if(dataTest >= 1.0) goingUp = false; }
           else {dataTest -= 0.01; if(dataTest <= -1.0) goingUp = true;}
-          buffer[0][s] = dataTest;
-          buffer[1][s] = dataTest;
-          buffer[2][s] = dataTest;
-          buffer[3][s] = dataTest;
-          buffer[4][s] = dataTest;
-          buffer[5][s] = dataTest;
+          buffer[0][s] = velocities[(int)frameCounter];
+          buffer[1][s] = velocities[(int)frameCounter];
+          //buffer[2][s] = dataTest;
+          //buffer[3][s] = dataTest;
+          //buffer[4][s] = dataTest;
+          //buffer[5][s] = dataTest;
           
         }
 

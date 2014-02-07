@@ -2,7 +2,6 @@ import themidibus.*;
 import processing.serial.*;
 import controlP5.*;
 
-ThreadTest threadTest;
 
 PApplet  mainApp;
 int keyModifier = 0; //1 shift 2ctrl 4alt 
@@ -46,8 +45,8 @@ int guiHeight;
 void setup()
 {
   
- // WavEncoder wavEncoder = new WavEncoder();
- // wavEncoder.writeWav  ();
+  WavEncoder wavEncoder = new WavEncoder();
+  wavEncoder.writeWav  ();
   
   mainApp = this;
   size(1250,825); //P3D OPENGL
