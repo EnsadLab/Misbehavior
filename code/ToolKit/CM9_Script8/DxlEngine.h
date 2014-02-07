@@ -17,7 +17,8 @@ class DxlEngine
   int lastSpeed;
   int minPos,maxPos;
   int torqueLimit;
-  int cmdSpeed;
+  int cmdGoal;
+  int cmdSpeed;  
   int maxLoad;
   
   //anim
