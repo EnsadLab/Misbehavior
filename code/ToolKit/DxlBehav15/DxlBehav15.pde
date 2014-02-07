@@ -89,22 +89,25 @@ void setup()
   servoArray = new ServoArray(motorIds);
        
   dxlGui = new DxlControl();
-  dxlGui.buildGUI(1100,90,tabNameAdvanced);
+  dxlGui.buildGUI(1050,90,tabNameAdvanced);
+  //dxlGui.buildGUI(20,70,tabNameAdvanced);
   
   servoGUIarray = new ServoGUIarray(motorIds);
+
   servoGUIarray.buildGUI(350,40,tabNameAdvanced);
   guiHeight = servoGUIarray.buildBasicGui(350,50,tabNameBasic);
   servoGUIarray.buildGlobalGui(20,160,tabNameBasic);
     
-  scriptArray        = new ScriptArray(2); //... TODO : config
-  scriptArray.buildGUI(260,180,550,tabNameAdvanced);
-  scriptArray.scriptAt(0).load("anims/AnimE1.txt");
+  scriptArray = new ScriptArray(motorIds.length );
+  scriptArray.buildGUI(260,180,550,tabNameAdvanced);  //TODO ... more than 2 scripts
+  scriptArray.scriptAt(0).load("anims/Script00.txt"); //<<< TODO config.xml
+  scriptArray.scriptAt(1).load("anims/Script00.txt"); //<<< TODO config.xml
   
   sensorArray = new SensorArray();
   sensorArray.loadConfig("config_MIDI.xml");
   sensorGUI = new SensorGUIarray();
   sensorGUI.buildGUI(280,5,tabNameAdvanced);
-    
+
   listMidiDevices();
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config
     openMidi(midiInDevice,midiOutDevice);

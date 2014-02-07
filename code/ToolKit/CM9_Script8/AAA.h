@@ -13,7 +13,7 @@ extern Dynamixel Dxl;
 
 //Xbee communication
 #define SERIAL Serial2
-#define BAUDS 57600
+#define BAUDS 115200
 
 #define DBG SERIAL.print
 #define DBGln SERIAL.println

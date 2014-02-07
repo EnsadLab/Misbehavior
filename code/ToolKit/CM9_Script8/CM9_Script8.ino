@@ -3,7 +3,7 @@
 #include "Dynamixel.h"
 #include "EEPROM.h"
 
-const int NBENGINES = 4; // global scope !
+const int NB_ENGINES = 4; // global scope !
 
 #define BUTTON_PIN 25 //NOT 23 !!! !!!
 
@@ -12,7 +12,7 @@ EEPROM CM9_EEPROM;
 //--------------------------------
 #include "DxlEngine.h"
 Dynamixel Dxl(1); //Dynamixel on Serial1(USART1)
-DxlEngine engines[NBENGINES];
+DxlEngine engines[NB_ENGINES];
 //--------------------------------
 
 //--------------------------------
@@ -20,7 +20,7 @@ DxlEngine engines[NBENGINES];
 //TODO test attach/detach interrupts
 int  pingSensorId = 0;
 int  pingIndex    = 0;
-int  pingPins[]   = {-1,-1,-1}; //{ 17,18,19 };
+int  pingPins[]   = {13,-1,-1}; //{ 17,18,19 };
 unsigned long pingEchoTimes[3];  //TODO: may share same long ?
 unsigned long pingStartTimes[3]; //TODO: may share same long ?
 int pingDistances[3];
@@ -44,6 +44,7 @@ void setup()
 {
   CM9_EEPROM.begin();
   SERIAL.end();
+  SERIAL.begin(BAUDS);
   for(int i=0;i<3;i++) //Sigggnal
   {
     toggleLED();
@@ -66,25 +67,25 @@ void setup()
   }
 
   //Dxl Engines    
-  clearWatches();  
   Dxl.begin(1);
   delay(1000);
-  for(int i=0;i<NBENGINES;i++)
+  for(int i=0;i<NB_ENGINES;i++)
   {
     engines[i].init();
     delay(50);
   }
   
   delay(500);
-  SERIAL.begin(BAUDS);
   //wait wait wait wait, please
   for(int i=0;i<99;i++) //Siggggnal
   {
     toggleLED();
     delay(100);
   }
+  SERIAL.flush();
+  SERIAL.attachInterrupt(serialInterrupt1);
   SERIAL.println("Start");
-    
+  
   timer.pause(); // Pause the timer while configuration
   timer.setPeriod(TIMER_RATE); // in microseconds
   timer.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE); // Set up an interrupt on channel 1
@@ -92,7 +93,8 @@ void setup()
   timer.attachInterrupt(TIMER_CH1, timerHandler); 
   timer.refresh();   // Refresh the timer's count  , prescale, and overflow
   titime = millis();
-  timer.resume(); // Start the timer counting    
+  timer.resume(); // Start the timer counting 
+  
   loopTime = millis();
 }
 
@@ -101,11 +103,13 @@ int dogCount  = 0;
 void timerHandler(void)
 {
   //TODO Sensors here ???
+  /*
   unsigned long t = millis();
   {
-    for(int i=0;i<NBENGINES;i++)
+    for(int i=0;i<NB_ENGINES;i++)
       engines[i].update(t);
   }
+  */
   if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);serialSend("x\n");}
   else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
 }
@@ -115,25 +119,36 @@ void loop()
   unsigned long t = millis();
   unsigned long dt = t-loopTime;
   if(dt>=25)
-  {
+  {    
     loopTime = t;
-    if(++stepCount & 1)
-      sendAnalogDistance();
-    else
-    {
-      triggerPingDistance();
-    }
-//    if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);SERIAL.println("x");}
-//    else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
+    for(int i=0;i<NB_ENGINES;i++)
+      engines[i].update(t);
+    
+    stepCount = (++stepCount)&7;
+    if( stepCount==0 )
+        sendAnalogDistance();
+    else if( stepCount==1 )
+       triggerPingDistance();
+
+    //if(--dogCount<=0){dogCount = 25;digitalWrite(BOARD_LED_PIN, HIGH);SERIAL.println("x");}
+    //else if(dogCount==1)digitalWrite(BOARD_LED_PIN, LOW);
   }
-  else
-    cmdPoll(t);
- 
+  delay(1);
+    //cmdPoll2(t);
+    sendLastBuffer();
+/*
+   if(serialCount>10)
+   {
+     serialCount = 0;
+     SERIAL.println("&serialCount");
+   }
+*/ 
+
   if( digitalRead(BUTTON_PIN) )
   {
     //SERIAL.println("BUTTON"); //TODO use interrupt?
     serialSend("BUTTON");
-    for(int i=0;i<NBENGINES;i++)
+    for(int i=0;i<NB_ENGINES;i++)
       engines[i].stop();
     delay(500); //
   }  
@@ -147,7 +162,7 @@ void sendAnalogDistance()
   {
     int value = analogRead(pin);
     //float distance = pow((value*3.3)/4096,-1.15)*27.86; //pow! wow!
-    serialSend("&",analogSensorId+analogIndex,value,sendbuffer);
+    serialSend("P",analogSensorId+analogIndex,value,sendbuffer);
   }   
   if(++analogIndex>=3)
     analogIndex=0;
@@ -157,7 +172,7 @@ void sendAnalogDistance()
 void triggerPingDistance()
 {
   if( pingPins[pingIndex]>=0 ) //send previous ping
-    serialSend("P",analogSensorId+pingIndex,pingDistances[pingIndex],sendbuffer);
+    serialSend("P",pingSensorId+pingIndex,pingDistances[pingIndex],sendbuffer);
     
   if(++pingIndex>=3)
     pingIndex=0;

@@ -17,6 +17,8 @@ class DxlEngine
   int lastSpeed;
   int minPos,maxPos;
   int torqueLimit;
+  int cmdSpeed;
+  int maxLoad;
   
   //anim
   unsigned int frameTime;
@@ -47,7 +49,7 @@ class DxlEngine
   void init();
   int getIdFromFlash();
   void stop();
-  void onCmd(const char* cmd,int p1,int p2,int p3 );
+  void  onCmd(const char* cmd,int* pParam,int nbp );
 
   //void startScript(const char* name,const char* label=NULL);
   void donothing();
@@ -62,6 +64,7 @@ class DxlEngine
 
   void parse(char* pScript = NULL);
   void execCmd(int* pIntCmd);
+  void setSpeed(int s);
   void setGoalSpeed(int s);
   void setGoal(int g);
   void setGoal(int g,int s);

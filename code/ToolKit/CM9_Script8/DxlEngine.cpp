@@ -7,6 +7,10 @@
 #include "AAA.h"
 
 extern EEPROM CM9_EEPROM;
+extern void serialSend(char* cmd,int i0,char*buffer);
+extern void serialSend(char* cmd,int i0,int i1,char*buffer);
+extern void serialSend(char* cmd,int i0,int i1,int i2,char*buffer);
+
 
 #define RELAXED 1
 #define JOINT_MODE 2
@@ -23,13 +27,14 @@ DxlEngine::DxlEngine()
 void DxlEngine::setId(int id)
 {
   dxlId = id;    
-  init();
   if(dxlId>0)
     CM9_EEPROM.write(index,(uint16)dxlId);
+
+  init();
   
   anim.init(this);
   if(id>0)
-    relax(true);
+    relax(true);    
 }
 
 int DxlEngine::getIdFromFlash()
@@ -41,24 +46,31 @@ void DxlEngine::init()
 {
   status = RELAXED;
   jointMode = true;
+  cmdSpeed = 0;
   lastSpeed = 0;
   minPos = 0;
   maxPos = 1023;
   torqueLimit = 1023;
+  maxLoad = 0;
   anim.init(this);    
-  
-  int id = CM9_EEPROM.read(index);
-  if( (id>0)&&(id<255) )
-    dxlId = id;
+
+  if( dxlId<=0 )
+  {
+    int id = CM9_EEPROM.read(index);
+    if( (id>0)&&(id<255) )
+      dxlId = id;
+  }
   if( dxlId<=0 )
     return;
-  
+/*  
   int rid = Dxl.readByte(dxlId,P_ID);
   if( rid != dxlId ) //rid = FF 
   {
      dxlId = -1;
      return;
   }
+*/
+
   relax(true);
   jointMode = (Dxl.readWord(dxlId,P_CCW_ANGLE_LIMIT_L)>0 );
   anim.init(this);    
@@ -80,24 +92,46 @@ bool DxlEngine::update(unsigned int t)
 {
   if(dxlId <= 0)
     return true; //finished  
+  
+  if(cmdSpeed!=lastSpeed)
+  {
+    setSpeed(cmdSpeed);
+  } 
+  /*
+    int load = Dxl.readWord(dxlId,P_PRESENT_LOAD_L);
+    if((load>maxLoad)&&(load<65535) )
+    {
+      maxLoad = load;
+      serialSend("&*****",load,myBuffer);
+    }
+  */
+
   anim.pEngine = this;
   return anim.update(t);
 }
 
-void  DxlEngine::onCmd(const char* cmd,int i1,int i2,int i3 )//i1 = engine index
+void  DxlEngine::onCmd(const char* cmd,int* pParam,int nbp )
 {
   if( cmd[1]=='I')
   {
-    setId(i2);
+    if(nbp==1)
+      setId(pParam[2]);
+    serialSend("& setID ",dxlId,myBuffer);
     return;
   }
-  
+   
   if(dxlId<=0)
     return;
     
   if( cmd[1]=='W')
   {
-    setDxlValue(i2,i3);
+    if(nbp==2)
+    {
+      if(pParam[0]==P_CCW_ANGLE_LIMIT_L)
+        serialSend("DBG t?",index,pParam[0],pParam[1],myBuffer);
+    
+      setDxlValue(pParam[0],pParam[1]);
+    }
     return;
   }    
 }
@@ -117,7 +151,10 @@ void DxlEngine::setDxlValue(int addr,int val)
     case P_CCW_ANGLE_LIMIT_L:  
       if(val>1023) val = 1023;
       if(val<=0) setWheelMode();  //!!! assume cw limit == 0 !!!
-      else { maxPos=val ; setJointMode(); } 
+      else {
+      maxPos=val ;
+      setJointMode();
+      } 
       break;
 
     case P_CW_COMPLIANCE_SLOPE:
@@ -133,7 +170,8 @@ void DxlEngine::setDxlValue(int addr,int val)
         break;
 
     case P_GOAL_SPEED_L:
-        setGoalSpeed(val);  //Wheel ... +-1024 ...
+        cmdSpeed = val;
+        //setWheelSpeed(val);  //Wheel ... +-1024 ...
         break;
         
     case P_TORQUE_LIMIT_L :
@@ -142,23 +180,50 @@ void DxlEngine::setDxlValue(int addr,int val)
   }
 }
 
+void DxlEngine::setSpeed(int s)
+{
+  if(s>=0)
+  {
+    if(s>2047) s=2047;     //TODO
+    Dxl.writeWord(dxlId,32,s);
+  }
+  else
+  {
+    if(s<-1023)s=-1023;
+    Dxl.writeWord(dxlId,32,1024-s);
+  }
+  serialSend("& idxl speed ",dxlId,s,myBuffer);
+  lastSpeed = s;
+}
 
 
 void DxlEngine::setGoalSpeed(int s)
 {
+  if(s<0) s=0; //TODO 0=MAX !!!
+  else if(s>1023)s=1023;
+   cmdSpeed = s;
+/*  
   if( (s>=0)&&(s!=lastSpeed) )
   {
+    if( s>2043 ) s=2043;
     Dxl.writeWord(dxlId,32,s);
     lastSpeed=s;
   }
+*/
 }
 
 void DxlEngine::setWheelSpeed(int s)
 {
    if(jointMode)
       setWheelMode();
-    
-  if(lastSpeed!=s)
+   
+   cmdSpeed = s;
+/*    
+   if( s>1023 ) s=1023;
+   else if(s<-1023) s=-1023; 
+        serialSend("__engWheel",dxlId,s,myBuffer);
+
+  //if(lastSpeed!=s)
   {
     lastSpeed =s;
     if(s>=0)
@@ -166,6 +231,7 @@ void DxlEngine::setWheelSpeed(int s)
     else
       Dxl.writeWord(dxlId,32,1024-s);
   }
+*/
   if( status & RELAXED )
     relax(false);    
 }
@@ -214,6 +280,10 @@ int DxlEngine::getCurrSpeed()
 }
 void DxlEngine::relax(bool dorelax)
 {
+   serialSend("&*relax*",maxLoad,myBuffer);
+
+  
+  maxLoad = 0;
   if(dorelax)
   {
     Dxl.writeWord(dxlId,P_TORQUE_LIMIT_L,0);
@@ -243,6 +313,8 @@ void DxlEngine::setTorque(int tl)
 
 void DxlEngine::setWheelMode()
 {
+   serialSend("&*wheel*",maxLoad,myBuffer);
+  maxLoad = 0;
     //devrai mettre speed à 0 ... 1 ???
     Dxl.writeWord(dxlId,P_CW_ANGLE_LIMIT_L,0);
     Dxl.writeWord(dxlId,P_CCW_ANGLE_LIMIT_L,0);
@@ -250,6 +322,8 @@ void DxlEngine::setWheelMode()
 }
 void DxlEngine::setJointMode()
 {
+  serialSend("&*joint*",maxLoad,myBuffer);
+  maxLoad = 0;
     int p = Dxl.readWord(dxlId,P_PRESENT_POSITION_L);  //currPos
     Dxl.writeWord(dxlId,P_GOAL_POSITION_L,p);          //goal = currPos
     Dxl.writeWord(dxlId,P_GOAL_SPEED_L,0);             //speed 0 !!!!!! max ?    

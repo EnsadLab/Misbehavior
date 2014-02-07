@@ -28,6 +28,7 @@ class Token
   static final int CALL     =  PARAM+7;
   static final int JUMP     =  PARAM+8;
   static final int COUNT    =  PARAM+9;
+  static final int ANIM     =  PARAM+10;
   static final int EOL      =  63;
   static final int RND      =  64;
 
@@ -150,6 +151,16 @@ class ScriptLabel
   int iLine;
 }
 
+class ScriptAnim
+{
+  ScriptAnim(String n,int tok,int l){name=n;iToken=tok;iLine=l;}
+  String name;
+  int iToken;
+  int iLine;
+}
+
+
+
 class ScriptStack
 {
   int lineSce;
@@ -171,13 +182,14 @@ class Script
   static final int STACK_MAX = 128;
   int frameTime = 0;
   int pauseDuration = 1;
-  int execMode = 0;
-  int servoIndex = 0;
+  int execMode    = 0;
+  int servoIndex  = 0;
+  int servoIndexB = -1;
   
   boolean waitReady = true;
   boolean verbose   = false;
-  int currLine = 0;
-  int iToken = -1;
+  int currLine =  0;
+  int iToken   = -1;
   ArrayList<Token> tokens = new ArrayList<Token>();
   int iStack=-1;
   ScriptStack stack[] = new ScriptStack[STACK_MAX];
@@ -189,6 +201,7 @@ class Script
   boolean eol = false; //EndOfLine
   String scriptLines[];
   ArrayList<ScriptLabel> labels = new ArrayList<ScriptLabel>();
+  ArrayList<ScriptAnim>  anims  = new ArrayList<ScriptAnim>();
   
   Script(int idx)
   {
@@ -221,12 +234,20 @@ class Script
     }
     dbg(cmdToString(tok)+" "+value);
   }
+  void sendB( int tok,int value )
+  {
+    //dbg("SEND:"+"S "+servoIndex+" "+tok+" "+value);
+    if(servoIndexB>=0)
+    {
+      arduino.serialSend("S "+servoIndexB+" "+tok+" "+value+"\n");
+    }
+    dbg(cmdToString(tok)+" "+value);
+  }
   
-      
+  
   void start(int line)
   {
     //servoArray.sendDxlId();
-    //arduino.serialSend("MI "+engineIndex+" "+tok+" "+value+"\n");
     iLine = 0;
     iChar = 0;
     iToken = 0;
@@ -257,7 +278,7 @@ class Script
     {
       if(lbs[i].length()>0)
       {
-        println("DBG find "+lbs.length);
+        //println("DBG find "+lbs.length);
         for(;ilabel<nbl;ilabel++)
         {
           if( lbs[i].equals(labels.get(ilabel).name) )
@@ -280,9 +301,6 @@ class Script
     return false;
   }
   
-  
-  
-
   void pause()
   {
     execMode = 0;
@@ -291,6 +309,7 @@ class Script
   void stop()
   {
     execMode = 0;
+    servoArray.getByIndex(index).stopPlaying();
     arduino.serialSend("Q "+servoIndex+"\n");    
   }
 
@@ -304,7 +323,6 @@ class Script
     waitReady = false;
     pauseDuration = 0;
   }
-
   
   int nextStep()
   {
@@ -319,15 +337,13 @@ class Script
       currLine=tokens.get(iToken).line;
       return iLine;
     }
-
     stepToken(1);
     return tokens.get(iToken).line;    
   }
 
 void rcvMsg(int imot,int cmd)
 {
-  //TODO
-  
+  //TODO  
   waitReady = false;
   dbg("READY");
 }
@@ -349,7 +365,7 @@ void update()
     
   frameTime = t;
   try{ currLine=tokens.get(iToken).line; }
-  catch(Exception e){println("ZOOB "+tokens.size() );}
+  catch(Exception e){println("TOKEN OVERFLOW "+tokens.size() );}
   
   if( execMode>0 )//0 = step by step
   {
@@ -402,6 +418,19 @@ void setReady()
     
   }
   
+void startAnim(int iAnim)
+{
+  //TODO  nbLoops , ... READY ???
+  try
+  { 
+    servoArray.getByIndex(servoIndex).startPlaying(anims.get(iAnim).name);
+    waitReady = true;
+  }
+  catch(Exception e)
+  {
+    dbg("ANIM ERROR "+iAnim);
+  }  
+}
 
 //===========================EXEC
 void stepToken(int countMax)
@@ -409,7 +438,7 @@ void stepToken(int countMax)
   Token currTok=tokens.get(iToken);
   int  tok = currTok.type();  
   int  line= -1;
-  boolean gotCmd=false;
+  boolean gotCmd = false;
   int decount=countMax; //prevent infinite loop
   do
   {
@@ -419,6 +448,7 @@ void stepToken(int countMax)
       line=currLine;
       dbg("("+currTok.line+")"+scriptLines[line]);
     }
+    int v;
     switch(tok)
     {
       case Token.SCRIPT:
@@ -433,9 +463,9 @@ void stepToken(int countMax)
       case Token.END:        execReturn(); decount=0;break;
       case Token.JOINT:      send(currTok.cmd,getValue());waitReady=true;gotCmd=true;break;
       case Token.JOINT_D:    send(currTok.cmd,getValue());decount+=4;gotCmd=true;break;
-      case Token.WHEEL:      send(currTok.cmd,getValue());gotCmd=true;break;
-      case Token.WHEEL_D:    send(currTok.cmd,getValue());decount+=4;gotCmd=true;break;
-      case Token.DURATION:   send(currTok.cmd,getValue());waitReady=true;decount=0;gotCmd=true;break;
+      case Token.WHEEL:      v = getValue();send(currTok.cmd,v);sendB(currTok.cmd,-v);gotCmd=true;break;
+      case Token.WHEEL_D:    v = getValue();send(currTok.cmd,v);sendB(currTok.cmd,-v);decount+=4;gotCmd=true;break;
+      case Token.DURATION:   v = getValue();send(currTok.cmd,v);sendB(currTok.cmd, v);waitReady=true;decount=0;gotCmd=true;break;
       case Token.SPEED:      send(currTok.cmd,getValue());break;
       //case Token.BEZIER:     dbg("??? "+script[currTok.line]);iToken++;break;
       case Token.MARGIN:     send(currTok.cmd,getValue()); break;
@@ -445,6 +475,7 @@ void stepToken(int countMax)
       case Token.TGOUT:       send(currTok.cmd,getValue());break;
       //case Token.ENGINE:     break;
       //case Token.REG:        break;
+      case Token.ANIM:       startAnim(getValue());break;
       case Token.PAUSE:      pauseDuration=getValue();waitReady=true;decount=0;dbg("PAUSE "+pauseDuration);break;
       case Token.RND:        dbg("??? "+scriptLines[currTok.line]);iToken++;break;
       case Token.EOL:        send(currTok.cmd,getValue());decount=0; break;
@@ -628,23 +659,30 @@ void parse()
   iStack=-1;
   tokens.clear();
   labels.clear();
+  anims.clear();
   if(scriptLines==null)
     return;
   
-  //build label list
+  //build label list & 
   int nbl = scriptLines.length;
   char c;
   for(int i=0;i<nbl;i++)
   {
     try{
       c=scriptLines[i].charAt(0);
-      if( (c=='#')||(c=='<') )
+      if( (c=='#')||(c=='<') ) //script label or sub label
       {
         String lbl=scriptLines[i].substring(1).trim();
         ScriptLabel lab = new ScriptLabel(lbl,-1,i) ; //token still unkown
         labels.add( lab ); //token still unkown
         dbg("LABEL["+i+"] "+lbl);
       }
+      if( c=='a' ) //anim
+      {
+        String lbl=scriptLines[i].substring(1).trim();
+        anims.add( new ScriptAnim(lbl,-1,i) );
+        dbg("ANIM["+i+"] "+lbl);
+      }      
     }catch(Exception e){}      
   }
   
@@ -714,6 +752,7 @@ void parseLine()
           case 't': parseValue(Token.TORQUE,1203);break;
           case 'i': parseValue(Token.TGIN,40);break;
           case 'o': parseValue(Token.TGOUT,60);break;
+          case 'a': parseAnim(Token.ANIM);done=true;break;
         }
     }
   }
@@ -836,6 +875,29 @@ boolean parseLabel(int tok)
   dbg("ERROR "+scriptLines[iLine] ); 
   return false;
 }
+
+boolean parseAnim(int tok)
+{
+  int nbl = anims.size();
+  int ianim = -1;
+  for(int i=0;i<nbl;i++)
+  {
+    if(anims.get(i).iLine==iLine)
+    {
+      ianim = i;
+      break;
+    }
+  }
+  if( ianim>=0 )
+  {
+    anims.get(ianim).iToken = tokens.size(); //inutile ?
+    tokens.add( new Token( tok,ianim,iLine) );
+    return true;
+  }
+  dbg("ERROR "+scriptLines[iLine] ); 
+  return false;
+}
+
 
 boolean parseJump()
 {
