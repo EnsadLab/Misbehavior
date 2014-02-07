@@ -92,7 +92,7 @@ void setup()
   
   servoGUIarray = new ServoGUIarray(motorIds);
 
-  servoGUIarray.buildGUI(350,40,tabNameAdvanced);
+  servoGUIarray.buildGUI(260,40,tabNameAdvanced);
   guiHeight = servoGUIarray.buildBasicGui(350,50,tabNameBasic);
   servoGUIarray.buildGlobalGui(20,160,tabNameBasic);
     

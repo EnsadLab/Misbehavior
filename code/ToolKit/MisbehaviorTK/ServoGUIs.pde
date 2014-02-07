@@ -675,7 +675,6 @@ void buildBasicGUI(int x,int y, String tabName)
      yCurrAnimGui = y;
 }
 
-
 void buildGUI(int index,int x,int y,String tabName)
 {
   int id0 = globalID;
@@ -700,7 +699,6 @@ void buildGUI(int index,int x,int y,String tabName)
    toggleJoin.getCaptionLabel().setText("JOIN");
    toggleJoin.addListener(this);
 
-
   toggleRelax = cp5.addToggle("RELAX"+index)
        .setId(globalID++)
        .setPosition(x+250,y)
@@ -709,7 +707,6 @@ void buildGUI(int index,int x,int y,String tabName)
    toggleRelax.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
    toggleRelax.getCaptionLabel().setText("RELAX");
    toggleRelax.addListener(this);
-
 
   //y+=30;
   /*
@@ -764,7 +761,7 @@ void buildGUI(int index,int x,int y,String tabName)
     advSliderWheel = cp5.addSlider("ADVWHEEL"+servoIndex)
      .setPosition(x,y+85)
      .setSize(300,15)
-     .setRange(0,1024)
+     .setRange(-1024,1024)
      .setValue(0)
      .moveTo(tabName)
      .addListener(this);
