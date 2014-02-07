@@ -373,6 +373,8 @@ class CommArduino implements ControlListener //CallbackListener
     try{ rcv = serial.readString(); }
     catch(Exception e){return;}
     rcvCount++;
+    if(rcvCount==2)
+      servoArray.initAll();
 
     //println("rcv" + rcv);
     if(rcv.charAt(0)=='x')

@@ -51,6 +51,21 @@ class ServoArray
         arduino.serialSend("EI "+i+" "+servos[i].dxlId+"\n");      
     }        
   }
+
+  void initAll()
+  {
+    sendDxlId();
+    delay(10);    
+    for(int i=0;i<servos.length;i++)
+    {
+      if(servos[i].dxlId>0)
+      {
+        servos[i].setWheelMode(true);
+        servos[i].relax(false);
+      }
+    }        
+  }
+
   
   void regValue(int id,int reg,int val)
   {
