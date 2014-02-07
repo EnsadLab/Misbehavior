@@ -1,3 +1,11 @@
+<TEST_ANIM
+w 0
+a anims/anim2.json
+w 0
+a toto
+>
+
+
 <WHEEL
 #init
 t 1023

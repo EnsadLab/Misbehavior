@@ -297,7 +297,9 @@ class ServoGUI implements ControlListener
   Toggle toggleRelax;
   Toggle toggleJoin;
   Knob knob;
-  Knob watch;
+  Slider advSliderSpeed;
+  Slider advSliderWheel;
+  //Knob watch;
   
   Toggle recButtonPlayPause;
   Button[] animPlayButtons; // Pas envie d'utiliser un toogle... expliquerai de vive voix pourquoi... 
@@ -594,15 +596,15 @@ void buildGUI(int index,int x,int y,String tabName)
     .setInputFilter(Textfield.INTEGER)
     .setAutoClear(false)
     .moveTo(tabName);
-   tfID.getCaptionLabel().align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER);
+   tfID.getCaptionLabel().align(ControlP5.RIGHT_OUTSIDE,ControlP5.CENTER);
    //tfID.getCaptionLabel().setText("MOTOR "+imot+" ");
    tfID.setValue(""+motorId);
    tfID.addListener(this);
 
   toggleJoin = cp5.addToggle("JOIN"+index)
        .setId(globalID++)
-       .setPosition(x+35,y)
-       .setWidth(30)
+       .setPosition(x,y+20)
+       .setSize(40,22)
        .moveTo(tabName);
    toggleJoin.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
    toggleJoin.getCaptionLabel().setText("JOIN");
@@ -611,18 +613,19 @@ void buildGUI(int index,int x,int y,String tabName)
 
   toggleRelax = cp5.addToggle("RELAX"+index)
        .setId(globalID++)
-       .setPosition(x+72,y)
-       .setWidth(40)
+       .setPosition(x+250,y)
+       .setSize(50,50)
        .moveTo(tabName);
    toggleRelax.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
    toggleRelax.getCaptionLabel().setText("RELAX");
    toggleRelax.addListener(this);
 
 
-  y+=30;
+  //y+=30;
+  /*
   watch = cp5.addKnob("watch"+index)
                .setId(globalID++)
-               .setPosition(x,y)
+               .setPosition(x+100,y)
                .setRange(511,-512)
                .setRadius(44)
                .setTickMarkWeight(5)
@@ -635,11 +638,11 @@ void buildGUI(int index,int x,int y,String tabName)
     //knob.getCaptionLabel().align(ControlP5.CENTER,ControlP5.BOTTOM);
     //knob.getCaptionLabel().setText("position");
     watch.getCaptionLabel().hide();
-  
+  */
    knob = cp5.addKnob("Knob"+index)
                .setId(globalID++)
-               .setPosition(x+4,y+4)
-               .setRadius(40)
+               .setPosition(x+120,y)
+               .setRadius(30)
                .setRange(511,-512)
                .setValue(512)
                //.hideTickMarks()
@@ -656,9 +659,28 @@ void buildGUI(int index,int x,int y,String tabName)
                .moveTo(tabName);
                
     knob.getCaptionLabel().align(ControlP5.CENTER,ControlP5.BOTTOM);
-    knob.getCaptionLabel().setText("position");
- 
+    knob.getCaptionLabel().setText("position"); 
     knob.addListener(this);
+    
+    advSliderSpeed = cp5.addSlider("ADVSPEED"+servoIndex)
+     .setPosition(x,y+65)
+     .setSize(300,15)
+     .setRange(0,1024)
+     .setValue(0)
+     .moveTo(tabName)
+     ;//.addListener(this);
+    advSliderSpeed.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setText("SPEED");
+    
+    advSliderWheel = cp5.addSlider("ADVWHEEL"+servoIndex)
+     .setPosition(x,y+85)
+     .setSize(300,15)
+     .setRange(0,1024)
+     .setValue(0)
+     .moveTo(tabName)
+     ;//.addListener(this);
+    advSliderWheel.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setText("WHEEL");
+    
+
 }
 
 void update()
@@ -686,7 +708,7 @@ void setValue(int reg,int value)
     if(value==0)toggleRelax.setState(true);
     else toggleRelax.setState(false);
   }
-  
+/*  
   if( modeJoinWheel == 0) //JOINT
   {
     //if(reg==30)knob.setValue(value-512); //provoque event knob >> envoit
@@ -702,7 +724,7 @@ void setValue(int reg,int value)
         watch.setValue( -((value-1024)>>1) );
     }    
   }
-  
+*/  
 }
 
 void controlEvent(ControlEvent evt)
@@ -737,17 +759,29 @@ void controlEvent(ControlEvent evt)
        //ServoDxl servo = servoArray.getById(motorId);
        ServoDxl servo = servoArray.getByIndex(servoIndex);
        if(servo != null)
-         servo.setKnobValue( value );
-       midiCtrlChange(servoIndex+1,64-(value>>3));
-       
+       //  servo.setKnobValue( value );
+         servo.setGoal(value+512);
+       //midiCtrlChange(servoIndex+1,64-(value>>3));
      }
   }
+  else if(c==advSliderSpeed)
+  {
+    ServoDxl servo = servoArray.getByIndex(servoIndex);
+    if(servo != null)
+      servo.setSpeed((int)c.getValue());
+  }
+  else if(c==advSliderWheel)
+  {
+    ServoDxl servo = servoArray.getByIndex(servoIndex);
+    if(servo != null)
+      servo.setWheelSpeed((int)c.getValue());
+  }
+  
   else if(addr.startsWith("/JOIN")  )
   { 
      if( motorId>0 )
      {
-       //ServoDxl servo = servoArray.getById(motorId);
-      ServoDxl servo = servoArray.getByIndex(servoIndex);
+       ServoDxl servo = servoArray.getByIndex(servoIndex);
        if(servo != null)
          servo.setWheelMode( toggleJoin.getValue() > 0.5 );
      }
@@ -755,13 +789,13 @@ void controlEvent(ControlEvent evt)
      {
         c.getCaptionLabel().setText("WHEEL");
         modeJoinWheel = 1;
-        knob.setValue(0);
+        //knob.setValue(0);
      }
      else
      {
         c.getCaptionLabel().setText("JOIN");
         modeJoinWheel = 0;
-        knob.setValue(0);
+        //knob.setValue(0);
      }
   }  
   else if(addr.startsWith("/RELAX") )
@@ -809,7 +843,8 @@ void controlEvent(ControlEvent evt)
            {
              servo.setWheelMode(true);
            }
-           servo.setKnobValue( (int)c.getValue() );
+           //servo.setKnobValue( (int)c.getValue() );
+           servo.setGoal( (int)c.getValue() + 512 );
          }
        }
     }
@@ -825,7 +860,8 @@ void controlEvent(ControlEvent evt)
            {
              servo.setWheelMode(false);
            }
-           servo.setKnobValue( (int)c.getValue() );
+           //servo.setKnobValue( (int)c.getValue() );
+           servo.setGoal( (int)c.getValue()+512 );
          }
        }
     }

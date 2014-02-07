@@ -19,7 +19,7 @@ class DxlValue
     valueMax = max;
   }
  
-  Textfield addControl(int idx,int x,int y,int h,String tabName)
+  Textfield addControl(int idx,int x,int y,int h,Group group)
   {
     //cp5.addSlider(label).setPosition(x,y).setRange(0,1000);
     index = idx;
@@ -32,7 +32,8 @@ class DxlValue
          .setSize(30,h)
          .setColorBackground(color(128))
          .setColorForeground(color(128))
-         .moveTo(tabName);
+         .setGroup(group);
+         //.moveTo(tabName);
          
      tf.setInputFilter(Textfield.INTEGER);
      tf.setAutoClear(false);
@@ -138,30 +139,43 @@ class DxlControl implements ControlListener //CallbackListener
 
   void buildGUI(int x0,int y0, String tabName)
   {
-     startID = globalID;
-     Textfield tf =cp5.addTextfield(" DXL ID ")
+   
+    Group group = cp5.addGroup("DXL controls")
+                .setPosition(x0,y0-30)
+                .setWidth(180)
+                .setBackgroundHeight(600)
+                .setBackgroundColor(color(200,200))
+                .moveTo(tabName)
+                .bringToFront();
+                ;
+    
+    startID = globalID;
+    Textfield tf =cp5.addTextfield(" DXL ID ")
       .setId(globalID++)
-      .setPosition(x0,y0)
+      .setPosition(140,10)
       .setWidth(30)
       .setInputFilter(Textfield.INTEGER)
       .setAutoClear(false)
-      .moveTo(tabName);
+      .setGroup(group)
+      .addListener(this);
+      //.moveTo(tabName);
      tf.getCaptionLabel().align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER).setColor(0xFF000000);
        //lbl.toUpperCase(false);
        //lbl.setText(label);
   
-    int y = y0+25;
+    int y = 30; //y0; //25;
     int h = 18;
     int nbv = dxlValues.length;
     for(int i=0;i<nbv;i++)
     {
-      dxlValues[i].addControl(i,x0,y,h,tabName);
+      //dxlValues[i].addControl(i,x0,y,h,group);
+      dxlValues[i].addControl(i,140,y,h,group).addListener(this);
       y+=h+2;    
     }
     
     endID = globalID;
     
-    cp5.addListener(this);
+    //cp5.addListener(this);
     //my_cp5.addCallback(this);    
   }
 
@@ -171,6 +185,8 @@ class DxlControl implements ControlListener //CallbackListener
       return;
     if(!evt.isController())
     return;
+
+    println("got event");
 
     Controller c = evt.getController();
     int id = c.getId();

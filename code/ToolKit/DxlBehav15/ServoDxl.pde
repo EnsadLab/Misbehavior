@@ -8,7 +8,6 @@ class ServoKey
   int speed;  
 };
 
-
 class ServoArray
 {
   ServoDxl[] servos;
@@ -49,7 +48,7 @@ class ServoArray
     for(int i=0;i<servos.length;i++) 
     {
       if(servos[i].dxlId>0)
-        arduino.serialSend("MI "+i+" "+servos[i].dxlId+"\n");      
+        arduino.serialSend("EI "+i+" "+servos[i].dxlId+"\n");      
     }        
   }
   
@@ -109,9 +108,9 @@ class ServoDxl
   int mode      = 0; //0=JOIN 1=WHEEL
   int prevPos   = 0;
   int currPos   = 0;  //DXL36 current pos
-  int prevSpeed = 0;  
   int currSpeed = 0;  //DXL38 current speed
   int goal   = 0;       //DXL30 goal
+  int wantedSpeed = 0;
   int speed  = 0;      //DXL32: moving speed
   int torqueLimit = 1023; //DXL34: relax
   int minGoal = 0;     //DXL 6
@@ -156,12 +155,12 @@ class ServoDxl
     dxlId = id;
     if(dxlId>0)
     {
-      arduino.serialSend("MI "+index+" "+dxlId+"\n");
+      arduino.serialSend("EI "+index+" "+dxlId+"\n");
       delay(10);    
 //      arduino.serialSend("WA "+dxlId+" 36\n"); //add watch pos
       delay(10);
-      println("-> add watch speed");
-      arduino.serialSend("WA "+dxlId+" 38\n"); //add watch speed
+      //println("-> add watch speed");
+      //arduino.serialSend("WA "+dxlId+" 38\n"); //add watch speed
       delay(10);
       arduino.serialSend("MR "+dxlId+" 6\n"); //CW min
       delay(10);
@@ -305,7 +304,8 @@ class ServoDxl
       
       if(modus.equals("wheel"))
       {
-        println("vel: " + v);
+        //println("vel: " + v);
+        println("f: " + frame);
         setSpeed(v);
       }
       else
@@ -332,6 +332,7 @@ class ServoDxl
     currFrame = 0;
     oldModus = "none";
     setSpeed(0);
+    scriptArray.scriptAt(index).setReady(); //TODO safe ?
   }
 
   void update()
@@ -354,6 +355,14 @@ class ServoDxl
       playFrame(currFrame);
       currFrame++;
     }
+    
+    //becoz midi
+    if(speed!=wantedSpeed)
+    {
+      speed=wantedSpeed;
+      arduino.serialSend("EW "+index+" 32 "+speed+"\n");
+    }
+    
   }
 
   void sendToken(int tok,int value)
@@ -418,9 +427,9 @@ class ServoDxl
         {
           case '@': scriptArray.scriptAt(scriptIndex).start(line);break;
           case 'Q': case 'q': stop();break;
-          case 'j': setGoal(value);  break;
-          case 's': setSpeed(value); break;
-          case 'w': setWheelSpeed(value); break;
+          case 'j': setGoal(value);    break;
+          case 's': wantedSpeed=value; break;
+          case 'w': wantedSpeed=value; break;
         }
       }   
       catch(Exception e){}
@@ -475,6 +484,7 @@ class ServoDxl
     }
   }
   
+ /*
   int setKnobValue(int val)
   {
     if( mode == DXL_JOIN )
@@ -487,19 +497,22 @@ class ServoDxl
       if(val>0) setSpeed(    val<<1 );
       else setSpeed( 1024-(val<<1) );
       return speed;
-    }    
+    }
   }
-  
+  */
   
   void setGoal(int val)
   {
     goal = val;
-    arduino.serialSend("MW "+dxlId+" 30 "+val+"\n");
+    arduino.serialSend("EW "+index+" 30 "+val+"\n");
+    delay(1);
   }
   void setSpeed(int val)
   {
     speed = val;
-    arduino.serialSend("MW "+dxlId+" 32 "+val+"\n");
+    wantedSpeed = val;
+    arduino.serialSend("EW "+index+" 32 "+val+"\n");
+    delay(1);
   }
   
   void setWheelSpeed(int val)
@@ -512,16 +525,16 @@ class ServoDxl
   {
     if(doRelax)
     {
-      arduino.serialSend("MW "+dxlId+" 32 0\n" ); //speed
-      delay(50);      
-      arduino.serialSend("MW "+dxlId+" 34 0\n" ); //torque    
+      arduino.serialSend("EW "+index+" 32 0\n" ); //speed
+      delay(10);      
+      arduino.serialSend("EW "+index+" 34 0\n" ); //torque    
     }
     else
     {
       //TODO mettre goal à current position
-      arduino.serialSend("MW "+dxlId+" 32 0\n" ); //speed
-      delay(50);      
-      arduino.serialSend("MW "+dxlId+" 34 "+torqueLimit+"\n" );      
+      arduino.serialSend("EW "+index+" 32 0\n" ); //speed
+      delay(10);      
+      arduino.serialSend("EW "+index+" 34 "+torqueLimit+"\n" );      
     }
   }
   void setWheelMode(boolean wheel)
@@ -531,23 +544,23 @@ class ServoDxl
     {
       println("JOINT ");
       mode = DXL_JOIN;
-      arduino.serialSend("MW "+dxlId+" 6 "+minGoal+"\n" );
-      delay(100);
-      arduino.serialSend("MW "+dxlId+" 8 "+maxGoal+"\n" );
-      delay(100);
+      arduino.serialSend("EW "+index+" 6 "+minGoal+"\n" );
+      delay(10);
+      arduino.serialSend("EW "+index+" 8 "+maxGoal+"\n" );
+      delay(10);
       //TODO set goal to current pos
     }
     else
     {
       println("WHEEL ");
       mode = DXL_WHEEL;
-      arduino.serialSend("MW "+dxlId+" 32 0\n" ); //moving speed à 0;
+      arduino.serialSend("EW "+index+" 32 0\n" ); //moving speed à 0;
       speed = 0;
-      delay(100);
-      arduino.serialSend("MW "+dxlId+" 6 0\n" );
-      delay(100);
-      arduino.serialSend("MW "+dxlId+" 8 0\n" );
-      delay(100);
+      delay(10);
+      arduino.serialSend("EW "+index+" 6 0\n" );
+      delay(10);
+      arduino.serialSend("EW "+index+" 8 0\n" );
+      delay(10);
     }
   }
   

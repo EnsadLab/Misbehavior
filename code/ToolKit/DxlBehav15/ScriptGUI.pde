@@ -8,8 +8,9 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   int scriptIndex = 0;
   int idFile   = 1;
   long clickTime = 0; //pour double click
-  Textfield textFile   = null;
-  Textfield textEngine = null;
+  Textfield textFile    = null;
+  Textfield textServoA  = null;
+  Textfield textServoB  = null;
   Button    buttonPlay = null;
   Button    buttonStop = null;
   Button    buttonStep = null;
@@ -36,9 +37,36 @@ class ScriptGUI implements ControlListener //implements CallbackListener
     build(x,y,h,tabName);
   }
   */
+  
   void build(int x,int y,int h,String tabName)
   {
     idFile = globalID++;
+    
+    CheckBox chkBox =
+            cp5.addCheckBox("SCHECK"+scriptIndex)
+            .moveTo(tabName)
+            .setPosition(x,y)
+            .setColorForeground(color(120))
+            .setColorActive(color(255))
+            .setColorLabel(color(255))
+            .setSize(15, 10)
+            .setItemsPerRow(6)
+            .setSpacingColumn(40)
+            .setSpacingRow(10)
+            .addItem("C0"+scriptIndex, 0)
+            .addItem("C1"+scriptIndex, 1)
+            .addItem("C2"+scriptIndex, 2)
+            .addItem("C3"+scriptIndex, 3)
+            .addItem("C4"+scriptIndex, 4)
+            .addItem("C5"+scriptIndex, 5)
+            ;
+    for(int i=0;i<6;i++)
+    {
+      chkBox.getItem(i).getCaptionLabel().setText(" "+i).setColor(0xFF000000);
+    }
+
+    y+=30;
+    
     textFile = cp5.addTextfield("Script "+scriptIndex)
                   .setId(idFile)
                   .setPosition(x,y)
@@ -52,20 +80,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
      .align(ControlP5.TOP_OUTSIDE,ControlP5.TOP_OUTSIDE);
      //.align(ControlP5.RIGHT_OUTSIDE,ControlP5.CENTER);
 
-    y+=20;
-
-   textEngine = cp5.addTextfield("Servo "+scriptIndex)
-                  .setId(idFile)
-                  .setPosition(x+280,y)
-                  .setSize(20,18)
-                  .setAutoClear(false)
-                  .setValue(" "+scriptIndex)
-                  .moveTo(tabName)
-                  .addListener(this);
-   textEngine.getCaptionLabel().setText(" SERVO INDEX ")
-             .setColor(0xFF000000)
-             .align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER);
-
+   y+=20;
     
    buttonPlay = cp5.addButton("SPLAY"+scriptIndex)
        .setId(globalID++)
@@ -93,6 +108,33 @@ class ScriptGUI implements ControlListener //implements CallbackListener
    buttonStep.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
    buttonStep.getCaptionLabel().setText("STEP");
    buttonStep.addListener(this);
+
+   textServoA = cp5.addTextfield("Servo1"+scriptIndex)
+                  .setId(idFile)
+                  .setPosition(x+280,y)
+                  .setSize(20,18)
+                  .setAutoClear(false)
+                  .setValue(" "+scriptIndex)
+                  .setInputFilter(Textfield.INTEGER)
+                  .moveTo(tabName)
+                  .addListener(this);
+   textServoA.getCaptionLabel().setText(" SERVO A ")
+             .setColor(0xFF000000)
+             .align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER);
+
+   textServoB = cp5.addTextfield("Servo2"+scriptIndex)
+                  .setId(idFile)
+                  .setPosition(x+280,y+20)
+                  .setSize(20,18)
+                  .setAutoClear(false)
+                  .setValue("-1")
+                  .setInputFilter(Textfield.INTEGER)
+                  .moveTo(tabName)
+                  .addListener(this);
+   textServoB.getCaptionLabel().setText(" SERVO B ")
+             .setColor(0xFF000000)
+             .align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER);
+
     
     y+=55;
 
@@ -231,7 +273,6 @@ class ScriptGUI implements ControlListener //implements CallbackListener
     catch(Exception e){}
   }
 
-  
   void controlEvent(ControlEvent evt)
   {
     if (evt.isGroup())
@@ -251,10 +292,11 @@ class ScriptGUI implements ControlListener //implements CallbackListener
           script.run();
       }
     }
-    else if(evt.isController())
+    else if( evt.isController() )
     {
       Controller c = evt.getController();
       if( c== textFile ){ load(c.getStringValue()); }
+      else if( c== textServoB ){ script.servoIndexB = Integer.parseInt(c.getStringValue().trim()); }
       else if(c==buttonPlay){ script.run();  }
       else if(c==buttonStop){ script.stop(); }
       else if(c==buttonStep){ scriptStep();  }

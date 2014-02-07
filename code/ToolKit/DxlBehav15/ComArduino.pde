@@ -452,7 +452,8 @@ class CommArduino implements ControlListener //CallbackListener
    {
      if(openned && (rcvCount>0) && (serial!=null) ) //Serial is good if received at least once
      {
-       textArea.append( ">>>"+toSend );
+       if(toSend.charAt(0)!='E')
+         textArea.append( ">>>"+toSend );
        serial.write(toSend); //no exception ????
      }
    }
@@ -470,7 +471,7 @@ class OpenSerial extends Thread
     running = true;
     openned = false;
     Serial tmp = null;
-    textArea.append("RUNNING\n");
+    textArea.append("WAIT\n");
     try
     { 
       tmp = new Serial(mainApp,port,baudrate); //GRRR Windows : no exception, no null even if cannot open 

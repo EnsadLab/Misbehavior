@@ -7,7 +7,9 @@
 #include "Anim.h"
 #include "DxlEngine.h"
 
-extern void serialSend(char* str,int i0,int i1,char* buffer);
+extern void serialSend(char* cmd,int i0,char*buffer);
+extern void serialSend(char* cmd,int i0,int i1,char*buffer);
+extern void serialSend(char* cmd,int i0,int i1,int i2,char*buffer);
 
 #define TASK_JOINT 1
 #define TASK_WHEEL 2
@@ -81,11 +83,12 @@ void Anim::sendReady()
   duration  = 0;
   localTime = 0;
   //SERIAL.print("ok ");SERIAL.print(pEngine->index);SERIAL.println(" 0"); //READY
- serialSend("ok",pEngine->index,0,strBuffer);
+ serialSend("ok",pEngine->index,0,myBuffer);
 }
 
 void Anim::execCmd(const char* strcmd,int value)
 {
+  serialSend("__execCmd0",value,myBuffer);
   int  cmd = 0;
   int  c = (int)strcmd[1];
   switch(c)
@@ -110,6 +113,7 @@ void Anim::execCmd(const char* strcmd,int value)
 void Anim::execTokenDbg(int tok,int value)
 {
   //SERIAL.print("DBG[");SERIAL.print(pEngine->dxlId);SERIAL.print("]");SERIAL.print(tok);SERIAL.print(" ");SERIAL.println(value); //READY  
+  serialSend("__execToken",tok,value,myBuffer);
   int cmd = tok & 0x3F; //0x80=EOL 0x40=RND
   switch(cmd)
   {
@@ -129,8 +133,9 @@ void Anim::execTokenDbg(int tok,int value)
       break;
     case TOKEN_WHEEL:
       currentTask = 0;
-      pEngine->setWheelSpeed(value);
+      //pEngine->setWheelSpeed(value);
       speedValue = float(value);
+      pEngine->cmdSpeed = value;
       break;
     case TOKEN_WHEEL_D:
       currentTask = 0;
