@@ -79,7 +79,7 @@ void setup()
 
   //loadConfig("config.xml");
   //loadConfig("config_dib.xml");
-  loadConfig("config_cbu.xml");
+  loadConfig("config_dib.xml");
   loadMidiConfig("config_MIDI.xml"); //will change : sensors  
   
   arduino = new CommArduino(arduinoPort,arduinoBaudRate);
