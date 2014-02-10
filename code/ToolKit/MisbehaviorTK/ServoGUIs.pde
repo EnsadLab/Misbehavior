@@ -1,7 +1,7 @@
 
 int motorColumnWidth;
 
-class ServoGUIarray
+class ServoGUIarray implements ControlListener
 {
   ServoGUI[] servoGUIs;
 
@@ -81,6 +81,32 @@ class ServoGUIarray
     for(int i=0;i<servoGUIs.length;i++)
     { 
       servoGUIs[i].update();
+    }
+  }
+  
+  void controlEvent(ControlEvent evt)
+  {
+    if(!evt.isController())
+      return;
+      
+   
+    Controller c = evt.getController();
+    //int id = c.getId();
+    String addr = c.getAddress();
+    if(addr.startsWith("/SPEED"))
+    {
+      println("speed selected");
+    }
+    else if(addr.startsWith("/DXLID"))
+    {
+      int num = c.getId();
+      int dxlid   = Integer.parseInt(c.getStringValue());
+      println("dbg DXLID"+c.getId()+" : "+dxlid);
+      {
+        ServoDxl servo = servoArray.getByIndex(num);
+        if(servo!=null)
+          servo.setDxlId(dxlid);
+      }
     }
   }
   
