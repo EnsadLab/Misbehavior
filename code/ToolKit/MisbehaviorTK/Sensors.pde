@@ -33,6 +33,7 @@ class SensorGUIarray
     
   void buildGUI(int x,int y,String tabName)
   {
+/* ============================    
     for(int i=0;i<6;i++)
     {
      textfields[i] = cp5.addTextfield("SENSOR"+i) 
@@ -48,8 +49,31 @@ class SensorGUIarray
     textfields[i].getCaptionLabel().setText("Sensor_"+i+"  ")
              .setColor(0xFF000000)
              .align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER);
-    x+=150;
+             
+             
+      //Range slider = cp5.addRange("EVT"+i) //NOT VERTICAL
+      Slider slider = cp5.addSlider("EVT"+i) //NOT VERTICAL
+       .setBroadcast(false)
+       .setPosition(x,y+40)
+       .setSize(200,20)
+       //.setHandleSize(20) //range
+       //.setRangeValues(50,100)
+       .setRange(0,1024)  
+       .setValue(512)
+       .setColorForeground(0xFF00FF00)
+       .setColorBackground(0xFFFFFF00)  
+
+       .moveTo(tabName)
+       //.setBroadcast(true)
+       ;
+         
+             
+    y+=50;
     }
+    
+    
+    
+===================== */     
   }
   
   void showValue(int isensor,float value)

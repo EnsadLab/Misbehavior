@@ -59,10 +59,12 @@ class ScriptArray
   }
   void buildGUI(int x,int y,int h,String tabname)
   {
+    
+    
     for(int i=0;i<scriptList.length;i++)
     {
       scriptList[i].buildGUI(x,y,h,tabname);
-      x+=350;
+      x+=380;
     }
   }
   

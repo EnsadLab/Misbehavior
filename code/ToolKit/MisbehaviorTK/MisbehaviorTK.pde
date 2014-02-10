@@ -7,6 +7,7 @@ int keyModifier = 0; //1 shift 2ctrl 4alt
 
 PFont courrierFont; // = createFont("Arial",20,true); // use true/false for smooth/no-smooth
 PFont verdanaFont; //
+PFont testFont;
 
 CommArduino     arduino;
 DxlControl      dxlGui;
@@ -17,12 +18,15 @@ SensorArray     sensorArray;
 SensorGUIarray  sensorGUI;
 AnimGUI        animGUI;
 
+EventGUI eventGUI;
+
+
 ControlP5 cp5;
 int globalID = 0;
 
 String tabNameBasic = "default"; // the identifier name is different from the label for the default tab.
-String tabNameAdvanced = "SCRIPTING";
-String tabNameDebug = "DEBUG";
+String tabNameAdvanced = "ADVANCED";
+String tabNameEvent    = "EVENTS";
 int currentTabId = 1; // 1:default tab / 2:ADVANCED tab
 
 int nbMotors = 4; // default value. Might be overriden with value set in the config.xml file
@@ -56,15 +60,16 @@ void setup()
   globalID = 200;
   
   courrierFont = createFont("Courier New",12,false); // use true/false for smooth/no-smooth
-  verdanaFont  = createFont("Verdana",13,false); // use true/false for smooth/no-smooth
+  verdanaFont  = createFont("Verdana",12,true);
+  testFont = createFont("Consolas Bold",18,true);
+  
+  //cp5.setControlFont(testFont);
 
-  cp5.addTab(tabNameAdvanced)
+  cp5.addTab(tabNameEvent)
      .activateEvent(true)
-     .setId(2);
-     //.setColorBackground(color(255, 160, 100))
-     //.setColorLabel(color(0,0,0))
-     //.setColorActive(color(255,128,255));
-  cp5.addTab(tabNameDebug)
+     .setId(3);
+  
+  cp5.addTab(tabNameAdvanced)
      .activateEvent(true)
      .setId(2);
      //.setColorBackground(color(255, 160, 100))
@@ -94,8 +99,10 @@ void setup()
   servoArray = new ServoArray(motorIds,jointwheelmodes);
        
   dxlGui = new DxlControl();
-  dxlGui.buildGUI(1050,90,tabNameAdvanced);
-  //dxlGui.buildGUI(20,70,tabNameAdvanced);
+  dxlGui.buildGUI(1050,70,tabNameAdvanced);
+  
+  eventGUI = new EventGUI();
+  eventGUI.buildGUI(30,30,tabNameEvent);
   
   servoGUIarray = new ServoGUIarray(motorIds,jointwheelmodes);
 
@@ -106,21 +113,21 @@ void setup()
   animGUI.buildGUI(marginLeft, 220, tabNameBasic,wFirstColumn+space);
     
   scriptArray = new ScriptArray(motorIds.length );
-  scriptArray.buildGUI(260,180,550,tabNameAdvanced);  //TODO ... more than 2 scripts
+  scriptArray.buildGUI(260,70,480,tabNameAdvanced);  //TODO ... more than 2 scripts
   scriptArray.scriptAt(0).load("scripts/Script00.txt"); //<<< TODO config.xml
  // scriptArray.scriptAt(1).load("scripts/Script00.txt"); //<<< TODO config.xml
   
   sensorArray = new SensorArray();
   sensorArray.loadConfig("config_MIDI.xml");
   sensorGUI = new SensorGUIarray();
-  sensorGUI.buildGUI(280,5,tabNameAdvanced);
+  //sensorGUI.buildGUI(280,5,tabNameEvent);
 
   listMidiDevices();
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config
     openMidi(midiInDevice,midiOutDevice);
 
-  //String[] fonts = PFont.list();
-  //println(fonts);
+  String[] fonts = PFont.list();
+  println(fonts);
   
   //threadTest = new ThreadTest(); //,"le thread");
   //threadTest.start();
@@ -135,7 +142,9 @@ void draw()
   }
   else // tab ADVANCED
   {
-    background(200);
+    background(240);
+    //eventGUI.draw();
+    eventGUI.update();
   } 
   
   scriptArray.update();
@@ -217,48 +226,6 @@ void controlEvent(ControlEvent evt)
   }
 }
 
-void garbage(ControlEvent evt)
-{
-  if(evt.isGroup())
-  {
-    println("MAIN GROUP");
-    /*
-     String gName = evt.getGroup().getName();
-     int iselect = (int)evt.getGroup().getValue();
-     if(gName.equals("SerialPort"))
-     {
-       
-       println("SERIALPORT :"+iselect+" " );
-     }
-     else if(gName.equals("BAUDRATE"))
-       arduino.baudFromGUI();
-     //println("event from group : "+evt.getGroup().getValue()+" from "+evt.getGroup());
-     println("event from group : "+evt.getGroup().getValue()+" from "+gName);
-    */
-  }
-  else if(evt.isController())  
-  {
-    int evId = evt.getController().getId();
-    String evAdrr = evt.getController().getAddress();
-    String evName = evt.getController().getName();
-    //println("controlEvent "+evName);
-    /*
-    if( evName.equals("ARDUINO") )
-    {
-      //arduino.toggleOnOff(); //bloquant ... 
-      action = 1;
-    }
-    else if( evName.equals("SCAN") )
-      arduino.list();
-    else if( evName.equals("SEND") )
-      arduino.serialSend();
-    else if( evName.equals("CLEAR") )
-      arduino.clearTerminal();
-      */
-  }
-  else
-    println("UNKNOWN EVENT");
-}
 
 void serialEvent(Serial serial)
 {

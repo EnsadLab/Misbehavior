@@ -143,7 +143,7 @@ class DxlControl implements ControlListener //CallbackListener
     Group group = cp5.addGroup("DXL controls")
                 .setPosition(x0,y0-30)
                 .setWidth(180)
-                .setBackgroundHeight(600)
+                .setBackgroundHeight(700)
                 .setBackgroundColor(color(200,200))
                 .moveTo(tabName)
                 .bringToFront();
