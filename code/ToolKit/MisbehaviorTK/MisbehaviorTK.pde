@@ -85,8 +85,8 @@ void setup()
      //.setColorActive(color(255,128,0));
 
   //loadConfig("config.xml");
-  //loadConfig("config_dib.xml");
-  loadConfig("config_cbu.xml");
+  loadConfig("config_dib.xml");
+  //loadConfig("config_cbu.xml");
   loadMidiConfig("config_MIDI.xml"); //will change : sensors  
   
   int wFirstColumn = 160;
@@ -126,8 +126,8 @@ void setup()
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config
     openMidi(midiInDevice,midiOutDevice);
 
-  String[] fonts = PFont.list();
-  println(fonts);
+  //String[] fonts = PFont.list();
+  //println(fonts);
   
   //threadTest = new ThreadTest(); //,"le thread");
   //threadTest.start();

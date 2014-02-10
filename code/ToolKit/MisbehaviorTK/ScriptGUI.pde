@@ -209,12 +209,13 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   
   void changeScript(int other)
   {
+    /*
     stop();
     clearList();
     clearConsole();
     script = scr;
     scriptIndex = numScriptGUI++;
-    
+    */
     
   }
 
