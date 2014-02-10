@@ -33,7 +33,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
     script = scr;
     scriptIndex = numScriptGUI++;
   }
-    
+      
   void build(int x,int y,int h,String tabName)
   {
     idFile = globalID++;
@@ -206,6 +206,18 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   
 //   cp5.addCallback(this);    
   }
+  
+  void changeScript(int other)
+  {
+    stop();
+    clearList();
+    clearConsole();
+    script = scr;
+    scriptIndex = numScriptGUI++;
+    
+    
+  }
+
   
   void clearList()
   {

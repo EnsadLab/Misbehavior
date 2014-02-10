@@ -178,7 +178,7 @@ class ScriptStack
 
 class Script
 {
-  ScriptGUI gui = null;
+  //ScriptGUI gui = null;
   
   int index = 0;
   static final int STACK_MAX = 128;
