@@ -3,14 +3,62 @@ import java.io.*;
 
 public class WavEncoder{
   
-  WavEncoder(){   System.out.println("-> Create Wav Encoder"); }
+  WavEncoder()
+  { 
+  
+  }
+ 
+  double[][] readWav(String path)
+  {
+     try
+      {
+        WavFile wavFile = WavFile.openWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/"+path));
+       
+        // Display information about the wav file
+        wavFile.display();
+        
+        int numChannels = wavFile.getNumChannels();
+        int nbFrames = (int)wavFile.getNumFrames();
+        double[][] values = new double[numChannels][nbFrames];
+        double[][] buffer = new double[numChannels][100];
+        int currFrame = 0;
+        int framesRead;
+        do
+        {
+            // Read frames into buffer
+            framesRead = wavFile.readFrames(buffer, 100);
+
+            // Loop through frames and look for minimum and maximum value
+            for (int s=0 ; s<framesRead; s++)
+            {
+               for(int c=0; c<numChannels; c++)
+               {
+                 values[c][currFrame] = buffer[c][s];
+               }
+               currFrame++;
+            }
+         }
+         while (framesRead != 0);
+
+         // Close the wavFile
+         wavFile.close();
+         
+         return values;
+      }
+      catch (Exception e)
+      {
+         System.err.println(e);
+         double[][] values = new double[0][0];
+         return values;
+      }
+  }
   
   public void readWav()
   {
     try
       {
          // Open the wav file specified as the first argument
-         WavFile wavFile = WavFile.openWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/DxlBehav15/test.wav"));//new File(args[0]));
+         WavFile wavFile = WavFile.openWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/test.wav"));//new File(args[0]));
 
          // Display information about the wav file
          wavFile.display();
@@ -53,6 +101,55 @@ public class WavEncoder{
    
   }
   
+  
+  public void writeWav(String path, int numFrames,float[][] values)
+  {
+
+    try
+    {
+      int sampleRate = 50;
+      double duration = numFrames/sampleRate;
+      int nbChannels = values.length;
+      WavFile wavFile = WavFile.newWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/"+path), nbChannels, numFrames, 16, sampleRate);
+       // Create a buffer of 100 frames
+      double[][] buffer = new double[nbChannels][100];
+
+      // Initialise a local frame counter
+      long frameCounter = 0;
+
+      // Loop until all frames written
+      while (frameCounter < (long)numFrames)
+      {
+        // Determine how many frames to write, up to a maximum of the buffer size
+        long remaining = wavFile.getFramesRemaining();
+        int toWrite = (remaining > 100) ? 100 : (int) remaining;
+
+        // on pourrait faire ça un peu plus malin... avancer le pointeur... plutot que de copier inutilement ... une fois que tout marche oui...
+        // Fill the buffer, one tone per channel
+        for (int s=0 ; s<toWrite ; s++, frameCounter++)
+        {
+          for(int c=0; c<nbChannels; c++)
+          {
+            //double val = (double)(values[c][(int)frameCounter]);
+            //val = val/1024.0;
+            buffer[c][s] = (double)(values[c][(int)frameCounter]);//val;
+          }
+        }
+
+        // Write the buffer
+        wavFile.writeFrames(buffer, toWrite);
+      }
+
+      // Close the wavFile
+      wavFile.close();
+    }
+    catch (Exception e)
+    {
+      System.err.println(e);
+    }
+ 
+  }
+    
   public void writeWav()
   {
     System.out.printf("WRITE WAV");
@@ -73,10 +170,7 @@ public class WavEncoder{
       boolean down = false;
       for(int i=0; i<numFrames; i++)
       {
-        velocities[i] = (v+1024.0)*2.0/2028.0 - 1.0;
-        double temp = (v+1024.0)*2.0/2028.0 ;
-       // println("v: " + v + " " + temp + " " + velocities[i]);
-        System.out.printf("v: %d  %f %f\n",v, temp, velocities[i]);
+        velocities[i] = v/1024.0;
         if(down)
         {
           v -= 30;

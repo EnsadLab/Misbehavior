@@ -14,17 +14,22 @@ class ServoArray
   long frameTime;
   long recRate;
 
-  ServoArray(int[] motorIds)
+  ServoArray(int[] motorIds, int[] jointwheelmode)
   {
     servos = new ServoDxl[motorIds.length];
     for(int i=0;i<motorIds.length;i++)
     {
-      servos[i] = new ServoDxl(i,motorIds[i]);
+      servos[i] = new ServoDxl(i,motorIds[i], jointwheelmode[i]);
       servos[i].index = i;
     }
     recRate = 20;
     frameTime = millis();    
   }
+    
+ ServoDxl[] getServos()
+ {
+   return servos;
+ }
 
   ServoDxl getByIndex(int i)
   {
@@ -84,6 +89,7 @@ class ServoArray
   
   void update()
   {
+    
     long t = millis();    
     if( (t-frameTime)>=recRate )
     {
@@ -91,7 +97,6 @@ class ServoArray
       for(int i=0;i<servos.length;i++)
       { 
         servos[i].recKey(t);
-        //servos[i].update(); // mouais... pas très logique d'appeler un update pas à chaque update... je changerai prob par la suite
       }
     }
     
@@ -145,21 +150,25 @@ class ServoDxl
   boolean readyForRecording = false;
   boolean enableRecording = false;
   boolean playing = false;
+  boolean loop = false;
   int currFrame = 0;
   
   String oldModus = "none";
   
-  JSONArray velocities;
+  //JSONArray velocities;
+  float[] recordValues;
+  int[] animValues;
   int currRec = 0;
   ServoKey[] recValue;
   long recframeTime;
   long playframeTime;
   long recRate = 20;
   long playRate = 20;
+  Anim anim = null;
 
   int scriptIndex = 0;  //future work: several scripts ???
 
-  ServoDxl(int index,int id)
+  ServoDxl(int index,int id, int jointwheelmode)
   {
     this.index  = index;
     scriptIndex = index; //default
@@ -168,6 +177,17 @@ class ServoDxl
       recValue[i]=new ServoKey();
       
     setDxlId(id);   
+    
+    // TODO: tell the servo to be on mode
+    // TODO: INUTILE, car quand CM9 connexion est fait, tous les moteurs sont mis à wheel par défaut.... a changer
+    if(jointwheelmode == 0)
+    {
+      setWheelMode(false);
+    }
+    else
+    {
+      setWheelMode(true);
+    }
  }
 
   void setDxlId(int id)
@@ -208,197 +228,147 @@ class ServoDxl
     enableRecording = false;
   }
 
-  void startRecording(boolean isGlobal)
-  {
-    
-    println("start record enable: " + enableRecording + " " + index);
-    if((isGlobal && enableRecording) || !isGlobal)
-    {
-      setWheelMode(true);
-      relax(false);
-  
-      readyForRecording = true;
-      recording = true;
-      //recording = false;
-      currFrame = 0;
-      velocities = new JSONArray();
-    }
-    
-    /* to generate animations....
-    int v = 250;
-    boolean down = false;
-    for(int i=0; i<5000; i++)
-    {
-      JSONObject vel = new JSONObject();
-      vel.setInt("frame", i);
-      vel.setInt("vel", v);
-      velocities.setJSONObject(i,vel);
-      if(down)
-      {
-        v -= 5;
-        if(v < 250)
-        {
-          v = 250;
-          down = false;
-        }
-      }
-      else
-      {
-        v += 5;
-        if(v > 350)
-        {
-          down = true;
-        }
-      }
-     
-    }
-    saveJSONArray(velocities, "anims/anim.json");
-    */
-   
-  }
 
-  void recordFrame(int frame)
+  void startRecording()
   {
-     JSONObject vel = new JSONObject();
-     vel.setInt("frame", frame);
-     if(isWheelMode())
-     {
-       vel.setString("modus","wheel");
-       vel.setInt("vel", speed);
-     }
-     else
-     {
-       vel.setString("modus","joint");
-       vel.setInt("vel", goal);
-     }
-     
-     
-     //vel.setInt("vel", recValue[currRec].speed);
-     velocities.setJSONObject(frame,vel);
+    recordValues = new float[0];
+    readyForRecording = true;
+    recording = true;
+    //recording = false; // an intermediate state in case we wanna ignore first frames... to be done...
+    currFrame = 0;
   }
   
   
-  JSONArray stopGlobalRecording()
+  void recordFrame()
   {
-     readyForRecording = false;
-     recording = false;
-     currFrame = 0;
-     return velocities;
+    if(isWheelMode())
+    {
+      recordValues = append(recordValues,(float)speed/1024.0);
+      //println("record speed: " + speed);
+    }
+    else
+    {
+      recordValues = append(recordValues,(float)goal/512.0);
+      //println("record goal: " + goal);
+    }
   }
   
-  String stopRecording()
+  
+  float[] stopRecording()
   {
     readyForRecording = false;
     recording = false;
     currFrame = 0;
-    int d = day();    // Values from 1 - 31
-    int m = month();
-    int s = second();  // Values from 0 - 59
-    int min = minute();  // Values from 0 - 59
-    int h = hour();    // Values from 0 - 23
-    String path = "anims/anim_" + d + "-"+ m + "_" + h + "-" + min + ".json";
-    println("Saving animation into " + path);
-    saveJSONArray(velocities, path);
-    return path;
-  }
-
-// taking in account just velocity animation for now...
-  void startPlaying(String jsonFilenmame)
-  {
-    playing = true;
-    currFrame = 0;
-    long t1 = millis();
-    velocities = loadJSONArray(jsonFilenmame);
-    long t2 = millis()-t1;
-    println("finished loading in " + t2 + " milliseconds");
-    //if(!isWheelMode())
-    //{
-    //  setWheelMode(true);
-    //}
-    relax(false);
+    /*int s = 0;
+    for(int i=0; i<200; i++)
+    {
+      recordValues = append(recordValues,s);
+      s += 2;
+    }*/
+    return recordValues;
   }
   
-  void startPlaying(JSONArray vel, float speed)
+  void startPlaying(double[] val, boolean l, float speed, Anim a)
   {
+    if(anim != null)
+    {
+      anim.servoStoppedPlaying(index);
+    }
+    anim = a;
+    loop = l;
     playRate = (int)((float)recRate*speed);
     println("-> animation playrate = " + playRate);
     playing = true;
     currFrame = 0;
-    velocities = vel;
-    //if(!isWheelMode())
-    //{
-      // setWheelMode(true); // is done now in play frame
-    //}
-    relax(false);
+    animValues = new int[val.length];
+    for(int i=0; i< val.length; i++)
+    {
+      double v = val[i]; 
+      //println("v = " + v);
+      if(isWheelMode()) // convert to velocity
+      {
+        v = v*1024.0;
+      }
+      else // convert to goal
+      {
+        v = v*512.0;
+      }
+      animValues[i] = (int)v;
+    }
+    //relax(false); // TODO: didier, on en a besoin?
   }
   
   void playFrame(int frame)
   {
-    if(frame <  velocities.size())
+    
+    if(frame <  animValues.length)
     {
-      JSONObject vel = velocities.getJSONObject(frame); 
-      String modus = vel.getString("modus","wheel");
-      //println("modus: " + modus + " " + oldModus);
-      if(modus.equals("wheel") && !oldModus.equals(modus))
+      int v = animValues[frame];
+      if(isWheelMode())
       {
-        setWheelMode(true);
-      }
-      else if(modus.equals("joint") && !oldModus.equals("joint"))
-      {
-        setWheelMode(false);
-      }
-      int v = vel.getInt("vel");
-      
-      if(modus.equals("wheel"))
-      {
-        //println("vel: " + v);
-        //println("f: " + frame);
+        //println("speed: " + v);
         setSpeed(v);
       }
       else
       {
-        //println("goal: " + v + " " + goal);
-        if(v != goal)
+        //println("goal: " + v);
+        setGoal(v);
+      }
+    }
+    else if(frame == animValues.length)
+    {
+      if(loop)
+      {
+        currFrame = 0;
+        if(anim != null)
         {
-          //println("goal: " + v);
-          setGoal(v);
+          anim.loopIsFinished();
         }
       }
-      oldModus = modus;
-    }
-    else if(frame == velocities.size())
-    {
-      stopPlaying();
+      else
+      {
+        if(anim != null)
+        {
+          anim.playingIsFinished();
+        }
+        stopPlaying();
+      }
     }
     
   }
-
+  
   void stopPlaying()
   {
     playing = false;
     currFrame = 0;
-    oldModus = "none";
-    setWheelMode(true);
-    setSpeed(0);
-    scriptArray.scriptAt(index).setReady(); //TODO safe ?
+    anim = null;
+    if(isWheelMode())
+    {
+      setSpeed(0);
+    }
+    
+    scriptArray.scriptAt(index).setReady(); //TODO safe ? a discuter ensemble !
   }
 
+
+  void setLoop(boolean b)
+  {
+    loop = b;
+  }
+  
+  
   void update()
   {
+    
     if(readyForRecording)
     {
-      //if(speed != 0) recording = true;
-      //println("GOAL : " + float(recValue[currRec].goal));//recValue[currRec].goal);
-      //println("POS : " + float(recValue[currRec].pos));
-      //println("SPEED : " + currSpeed); 
-      //println("SPEED : " + float(recValue[currRec].speed));
       if(recording)
       {
         long t = millis();    
         if( (t-recframeTime)>=recRate ) // ou controller depuis ServoDxl Array.... arf...
         {
           recframeTime = t;
-          recordFrame(currFrame);
+          recordFrame();
           currFrame++;
         }
       }
@@ -432,7 +402,7 @@ class ServoDxl
   void onSensor(SensorEvt cmd)
   {
     int v = (int)(cmd.coef * (cmd.value-cmd.center) );
-    println("TYPE "+cmd.type);
+    //println("TYPE "+cmd.type);
     switch( cmd.type )
     {
       case 0: // inside range
@@ -569,7 +539,7 @@ class ServoDxl
   {
     speed = val;
     wantedSpeed = val;
-    println("setSpeed: " + val);
+    //println("setSpeed: " + val);
     arduino.serialSend("EW "+index+" 32 "+val+"\n");
     delay(1);
   }

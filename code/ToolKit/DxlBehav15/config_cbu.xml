@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
  <config>
-   <arduino port="/dev/tty.usbmodemfa141" bauds="9600" />
+   <!--<arduino port="/dev/tty.usbmodemfa141" bauds="115200" />-->
+   <arduino port="/dev/tty.usbserial-A9SF3D91" bauds = "115200" />
    <motor id="7"/>
    <motor id="17"/>
    <!--<motor id="27"/>

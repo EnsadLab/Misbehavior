@@ -38,12 +38,12 @@ class CommArduino implements ControlListener //CallbackListener
   }
      
   // basic GUI: port and bauds must be set in the config.xml file
-  void buildBasicGUI(int x,int y, String tabName)
+  void buildBasicGUI(int x,int y, String tabName, int w, int h)
   {
     
      Textlabel label = cp5.addTextlabel("arduinoInfos")
-                  .setText("Current port: "+port + "\nCurrent baudrate: "+baudrate)
-                  .setPosition(x-4,y+50)
+                  .setText("Current port:\n"+port + "\n\n\nCurrent baudrate:\n"+baudrate)
+                  .setPosition(x-4,y+h+25)
                   .setColorValue(0xFF000000)
                   .setFont(createFont("Verdana",10))
                   .moveTo(tabName);
@@ -51,9 +51,9 @@ class CommArduino implements ControlListener //CallbackListener
       titleButtonBasic = cp5.addToggle("ARDUINObasic")
         .setPosition(x,y)
         .setColorActive(0xFFCC0000)
-        .setSize(180,40)
+        .setSize(w,h)
         .moveTo(tabName)
-        .setCaptionLabel("CONNECT TO ARDUINO");
+        .setCaptionLabel("CONNECT TO CM9");
      titleButtonBasic.getCaptionLabel().setFont(createFont("Verdana",13)).align(ControlP5.CENTER,ControlP5.CENTER);
      
      togleDogBasic = cp5.addToggle("DOGbasic")
@@ -155,8 +155,8 @@ class CommArduino implements ControlListener //CallbackListener
       case 3: //serial openned
          openSerial = null; //cannot restart;(& I prefer not keeping it running)
          servoArray.sendDxlId();
-         titleButton.getCaptionLabel().setText("ARDUINO on");
-         titleButtonBasic.getCaptionLabel().setText("ARDUINO on");
+         titleButton.getCaptionLabel().setText("CM9 on");
+         titleButtonBasic.getCaptionLabel().setText("CM9 on");
          textArea.append("Openned "+port+" "+baudrate+"\n");
          action = 0;
          break;
@@ -165,8 +165,8 @@ class CommArduino implements ControlListener //CallbackListener
            openSerial.interrupt();
         openned = false; 
         openSerial = null;        
-        titleButtonBasic.getCaptionLabel().setText("ARDUINO off");
-        titleButton.getCaptionLabel().setText("ARDUINO off");
+        titleButtonBasic.getCaptionLabel().setText("CM9 off");
+        titleButton.getCaptionLabel().setText("CM9 off");
         togleDog.setState(false);
         togleDogBasic.setState(false);
         action = 0;

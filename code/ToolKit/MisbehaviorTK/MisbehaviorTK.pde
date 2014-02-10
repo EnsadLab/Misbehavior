@@ -15,22 +15,22 @@ ServoGUIarray   servoGUIarray;
 ScriptArray     scriptArray;
 SensorArray     sensorArray;
 SensorGUIarray  sensorGUI;
+AnimGUI        animGUI;
 
 ControlP5 cp5;
 int globalID = 0;
 
 String tabNameBasic = "default"; // the identifier name is different from the label for the default tab.
-String tabNameAdvanced = "ADVANCED";
+String tabNameAdvanced = "SCRIPTING";
+String tabNameDebug = "DEBUG";
 int currentTabId = 1; // 1:default tab / 2:ADVANCED tab
 
 int nbMotors = 4; // default value. Might be overriden with value set in the config.xml file
 int[] motorIds;
+int[] jointwheelmodes;
 String[] animPaths;
 int nbAnims = 0;
-int nbAnimsMax = 18; 
-String[] globalAnimPaths;
-int nbGlobalAnims = 0;
-int nbGlobalAnimsMax = 11;
+int nbAnimsMax = 30;
 
 String arduinoPort = "COM13";
 int arduinoBaudRate = 57600;
@@ -38,17 +38,15 @@ int arduinoBaudRate = 57600;
 String midiInDevice = null; 
 String midiOutDevice = null;
 
-int guiHeight;
+int marginLeft = 50;
+int marginTop = 50;
 
 
 void setup()
 {
   
-  WavEncoder wavEncoder = new WavEncoder();
-  wavEncoder.writeWav  ();
-  
   mainApp = this;
-  size(1250,825); //P3D OPENGL
+  size(1280,720); //P3D OPENGL
   
   frame.setTitle("Misbehaviors toolkit");
   
@@ -66,8 +64,14 @@ void setup()
      //.setColorBackground(color(255, 160, 100))
      //.setColorLabel(color(0,0,0))
      //.setColorActive(color(255,128,255));
+  cp5.addTab(tabNameDebug)
+     .activateEvent(true)
+     .setId(2);
+     //.setColorBackground(color(255, 160, 100))
+     //.setColorLabel(color(0,0,0))
+     //.setColorActive(color(255,128,255));
   cp5.getTab("default")
-     .setLabel("BASIC")
+     .setLabel("ANIMATION")
      .activateEvent(true)
      .setMoveable(true)
      .setId(1);
@@ -76,30 +80,35 @@ void setup()
      //.setColorActive(color(255,128,0));
 
   //loadConfig("config.xml");
-  loadConfig("config_dib.xml");
-  //loadConfig("config_cbu.xml");
+  //loadConfig("config_dib.xml");
+  loadConfig("config_cbu.xml");
   loadMidiConfig("config_MIDI.xml"); //will change : sensors  
   
+  int wFirstColumn = 160;
+  int space = 20;
+  
   arduino = new CommArduino(arduinoPort,arduinoBaudRate);
-  arduino.buildBasicGUI(20,50,tabNameBasic);
-  arduino.buildGUI(20,50,tabNameAdvanced);
+  arduino.buildBasicGUI(marginLeft,marginTop,tabNameBasic,wFirstColumn,50);
+  arduino.buildGUI(marginLeft,marginTop,tabNameAdvanced);
 
-  servoArray = new ServoArray(motorIds);
+  servoArray = new ServoArray(motorIds,jointwheelmodes);
        
   dxlGui = new DxlControl();
   dxlGui.buildGUI(1050,90,tabNameAdvanced);
   //dxlGui.buildGUI(20,70,tabNameAdvanced);
   
-  servoGUIarray = new ServoGUIarray(motorIds);
+  servoGUIarray = new ServoGUIarray(motorIds,jointwheelmodes);
 
   servoGUIarray.buildGUI(260,40,tabNameAdvanced);
-  guiHeight = servoGUIarray.buildBasicGui(350,50,tabNameBasic);
-  servoGUIarray.buildGlobalGui(20,160,tabNameBasic);
+  servoGUIarray.buildMotorGui(marginLeft+wFirstColumn+space,marginTop,tabNameBasic);
+ 
+  animGUI = new AnimGUI();
+  animGUI.buildGUI(marginLeft, 220, tabNameBasic,wFirstColumn+space);
     
   scriptArray = new ScriptArray(motorIds.length );
   scriptArray.buildGUI(260,180,550,tabNameAdvanced);  //TODO ... more than 2 scripts
   scriptArray.scriptAt(0).load("scripts/Script00.txt"); //<<< TODO config.xml
-  scriptArray.scriptAt(1).load("scripts/Script00.txt"); //<<< TODO config.xml
+ // scriptArray.scriptAt(1).load("scripts/Script00.txt"); //<<< TODO config.xml
   
   sensorArray = new SensorArray();
   sensorArray.loadConfig("config_MIDI.xml");
@@ -135,6 +144,7 @@ void draw()
   servoGUIarray.update();
   arduino.update();  
   dxlGui.update();
+  animGUI.update();
   
   //servoArray.draw(500,20);
   //curve.test(500,100,1300,500);
@@ -165,26 +175,26 @@ void loadConfig(String xmlFilePath)
 
   nbMotors = children.length;
   motorIds = new int[nbMotors];
+  jointwheelmodes = new int[nbMotors];
   for (int i = 0; i < children.length; i++) {
     int id = children[i].getInt("id");
     motorIds[i] = id;
-    println("-> adding motor with id " + id);
-  }
-  
-  children = xml.getChildren("globalanim");
-  nbGlobalAnims = children.length;
-  globalAnimPaths = new String[nbGlobalAnimsMax]; // TODO: use append instead....
-  for(int i=0; i<children.length; i++)
-  {
-    String globalAnimPath = children[i].getString("path");
-    globalAnimPaths[i] = globalAnimPath;
-    println("-> adding global anim with path " + globalAnimPath);
+    String jointwheelmode = children[i].getString("mode");
+    if(jointwheelmode.equals("joint"))
+    {
+      jointwheelmodes[i] = 0;
+    }
+    else
+    {
+      jointwheelmodes[i] = 1;
+    }
+    println("-> adding motor with id " + id + " in mode " + jointwheelmode);
   }
   
   children = xml.getChildren("anim");
   nbAnims = children.length;
-  //animPaths = new String[nbAnims];
-  animPaths = new String[nbAnimsMax];
+  animPaths = new String[nbAnims];
+  //animPaths = new String[nbAnimsMax];
   for(int i=0; i<children.length; i++)
   {
     String animPath = children[i].getString("path");
@@ -202,7 +212,7 @@ void controlEvent(ControlEvent evt)
 {
   if(evt.isTab())
   {
-    println("TAB "+evt.getTab().getName()+" IS SELECTED with id "+evt.getTab().getId());
+    //println("TAB "+evt.getTab().getName()+" IS SELECTED with id "+evt.getTab().getId());
     currentTabId = evt.getTab().getId();
   }
 }
@@ -339,18 +349,5 @@ void keyPressed()
   
 }
 
-PVector pos = new PVector(0.0,0.0);
 
-// enable scrolling in the basic tab
-void mouseWheel(MouseEvent event) {
-  float e = event.getAmount();
-  pos.y = pos.y -e;
-  float newY = pos.y -e;//*10.0;
-  if(pos.y < -guiHeight+getHeight()) pos.y = -guiHeight+getHeight();
-  else if(pos.y > 0) pos.y = 0;
-  //servoGUIarray.setPos(0,(int)pos.y);
-  //cp5.getTab("default").setPosition(pos.x,newY);
-  //cp5.getTab(tabNameBasic).setPosition(pos.x,newY);
-  //println(e);
-}
 

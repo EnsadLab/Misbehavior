@@ -423,7 +423,8 @@ void startAnim(int iAnim)
   //TODO  nbLoops , ... READY ???
   try
   { 
-    servoArray.getByIndex(servoIndex).startPlaying(anims.get(iAnim).name);
+    //servoArray.getByIndex(servoIndex).startPlaying(anims.get(iAnim).name);
+    animGUI.startPlaying(anims.get(iAnim).name);
     waitReady = true;
   }
   catch(Exception e)
