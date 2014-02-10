@@ -6,7 +6,7 @@ extern Dynamixel Dxl;
 
 #include "HardwareSerial.h"
 
-//#define USE_SERIALUSB
+#define USE_SERIALUSB
 
 
 #ifdef USE_SERIALUSB

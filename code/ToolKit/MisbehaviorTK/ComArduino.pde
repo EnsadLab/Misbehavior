@@ -119,17 +119,17 @@ class CommArduino implements ControlListener //CallbackListener
    y+=30;
    textArea = cp5.addTextarea("TextArea")
      .setPosition(x,y)
-     .setSize(180,600)
+     .setSize(180,500)
      .setLineHeight(14)
-     .setColor(color(255))
-     .setColorBackground(color(128))
-     .setColorForeground(color(255))
+     .setColor(color(0))
+     .setColorBackground(color(200))
+     .setColorForeground(color(0))
      .moveTo(tabName);
      
      listBauds.bringToFront();
      listBox.bringToFront();
 
-     y+=602;
+     y+=502;
      sendField = cp5.addTextfield("SEND")
            .setPosition(x,y)
            .setWidth(148)
@@ -440,6 +440,10 @@ class CommArduino implements ControlListener //CallbackListener
         scriptArray.rcvMsg(imot,icmd);
         }catch(Exception e){}
     }
+    else if(toks[0].equals("start") )
+    {
+      println("START");
+    }
     else
     {
       textArea.append("---"+rcv,200);
@@ -449,7 +453,6 @@ class CommArduino implements ControlListener //CallbackListener
 
  boolean serialSend(String toSend)
  {
-   //print("send("+rcvCount+")"+toSend);
    try
    {
      if(openned && (rcvCount>0) && (serial!=null) ) //Serial is good if received at least once
@@ -457,6 +460,7 @@ class CommArduino implements ControlListener //CallbackListener
        if(toSend.charAt(0)!='E')
          textArea.append( ">>>"+toSend );
        serial.write(toSend); //no exception ????
+   print("send>"+toSend);
      }
    }
    catch(Exception e){}

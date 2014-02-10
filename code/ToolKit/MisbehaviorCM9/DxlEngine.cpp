@@ -11,7 +11,6 @@ extern void serialSend(char* cmd,int i0,char*buffer);
 extern void serialSend(char* cmd,int i0,int i1,char*buffer);
 extern void serialSend(char* cmd,int i0,int i1,int i2,char*buffer);
 
-
 #define RELAXED 1
 #define JOINT_MODE 2
 
@@ -26,15 +25,13 @@ DxlEngine::DxlEngine()
 
 void DxlEngine::setId(int id)
 {
-  dxlId = id;    
+  dxlId = id;  
   if(dxlId>0)
     CM9_EEPROM.write(index,(uint16)dxlId);
 
   init();
   
   anim.init(this);
-  if(id>0)
-    relax(true);    
 }
 
 int DxlEngine::getIdFromFlash()
@@ -46,7 +43,7 @@ void DxlEngine::init()
 {
   status = RELAXED;
   jointMode = true;
-  cmdSpeed = 0;
+  cmdSpeed  = 0;
   lastSpeed = 0;
   minPos = 0;
   maxPos = 1023;
@@ -70,10 +67,10 @@ void DxlEngine::init()
      return;
   }
 */
-
   relax(true);
-  jointMode = (Dxl.readWord(dxlId,P_CCW_ANGLE_LIMIT_L)>0 );
-  anim.init(this);    
+  setWheelMode();
+  anim.init(this);
+  relax(false);  
 }
 
 void DxlEngine::stop()
@@ -115,8 +112,8 @@ void  DxlEngine::onCmd(const char* cmd,int* pParam,int nbp )
   if( cmd[1]=='I')
   {
     if(nbp==1)
-      setId(pParam[2]);
-    serialSend(" %dgb ID ",index,dxlId,myBuffer);
+      setId(pParam[0]);
+    serialSend(" %dxlID:",index,dxlId,myBuffer);
     return;
   }
    
@@ -187,7 +184,7 @@ void DxlEngine::setSpeed(int s)
     if(s<-1023)s=-1023;
     Dxl.writeWord(dxlId,32,1024-s);
   }
-  serialSend("& idxl speed ",dxlId,s,myBuffer);
+  //serialSend(" %idxl speed ",dxlId,s,myBuffer);
   lastSpeed = s;
 }
 
@@ -233,6 +230,8 @@ void DxlEngine::setWheelSpeed(int s)
 
 void DxlEngine::setGoal(int g)
 {
+    if(!jointMode)
+      setJointMode();  
     Dxl.writeWord(dxlId,P_GOAL_POSITION_L,g);
 }
 
@@ -275,7 +274,7 @@ int DxlEngine::getCurrSpeed()
 }
 void DxlEngine::relax(bool dorelax)
 {
-   serialSend("&*relax*",maxLoad,myBuffer);
+   serialSend(" %relax%",maxLoad,myBuffer);
 
   
   maxLoad = 0;
@@ -308,7 +307,7 @@ void DxlEngine::setTorque(int tl)
 
 void DxlEngine::setWheelMode()
 {
-   serialSend("&*wheel*",maxLoad,myBuffer);
+   serialSend(" %wheel%",maxLoad,myBuffer);
   maxLoad = 0;
     //devrai mettre speed à 0 ... 1 ???
     Dxl.writeWord(dxlId,P_CW_ANGLE_LIMIT_L,0);
@@ -317,7 +316,7 @@ void DxlEngine::setWheelMode()
 }
 void DxlEngine::setJointMode()
 {
-  serialSend("&*joint*",maxLoad,myBuffer);
+  serialSend(" %joint%",maxLoad,myBuffer);
   maxLoad = 0;
     int p = Dxl.readWord(dxlId,P_PRESENT_POSITION_L);  //currPos
     Dxl.writeWord(dxlId,P_GOAL_POSITION_L,p);          //goal = currPos

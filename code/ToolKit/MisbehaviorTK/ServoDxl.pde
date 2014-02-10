@@ -432,7 +432,7 @@ class ServoDxl
   void onSensor(SensorEvt cmd)
   {
     int v = (int)(cmd.coef * (cmd.value-cmd.center) );
-    println("TYPE "+cmd.type);
+    //println("TYPE "+cmd.type);
     switch( cmd.type )
     {
       case 0: // inside range
@@ -567,6 +567,7 @@ class ServoDxl
   }
   void setSpeed(int val)
   {
+    //println("setSpeed "+val);
     speed = val;
     wantedSpeed = val;
     arduino.serialSend("EW "+index+" 32 "+val+"\n");

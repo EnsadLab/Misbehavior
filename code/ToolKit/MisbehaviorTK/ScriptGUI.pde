@@ -4,11 +4,15 @@ int numScriptGUI = 0;
 class ScriptGUI implements ControlListener //implements CallbackListener
 {
   Script script = null;
-  
   int scriptIndex = 0;
   int idFile   = 1;
   long clickTime = 0; //pour double click
   Textfield textFile    = null;
+
+  Slider advSliderGoal;
+  Slider advSliderSpeed;
+  Slider advSliderWheel;
+
   Textfield textServoA  = null;
   Textfield textServoB  = null;
   Button    buttonPlay = null;
@@ -29,27 +33,21 @@ class ScriptGUI implements ControlListener //implements CallbackListener
     script = scr;
     scriptIndex = numScriptGUI++;
   }
-  
-  /*
-  ScriptGUI(int x,int y,int h,String tabName)
-  {
-    scriptIndex = numScriptGUI++;
-    build(x,y,h,tabName);
-  }
-  */
-  
+    
   void build(int x,int y,int h,String tabName)
   {
     idFile = globalID++;
     
+     /*   
     CheckBox chkBox =
             cp5.addCheckBox("SCHECK"+scriptIndex)
             .moveTo(tabName)
             .setPosition(x,y)
-            .setColorForeground(color(120))
-            .setColorActive(color(255))
-            .setColorLabel(color(255))
-            .setSize(15, 10)
+            .setColorBackground(0xFF00FF00)
+            .setColorForeground(0xFFFFFF00)
+            .setColorActive(0xFFFF0000)
+            .setColorLabel(0xFF00FF00)
+            .setSize(20, 10)
             .setItemsPerRow(6)
             .setSpacingColumn(40)
             .setSpacingRow(10)
@@ -62,15 +60,17 @@ class ScriptGUI implements ControlListener //implements CallbackListener
             ;
     for(int i=0;i<6;i++)
     {
-      chkBox.getItem(i).getCaptionLabel().setText(" "+i).setColor(0xFF000000);
+      chkBox.getItem(i).getCaptionLabel()
+         .setText("X").setColor(0xFF000000)
+        .align(ControlP5.CENTER,ControlP5.CENTER);
     }
-
-    y+=30;
+    */
+    //y+=30;
     
     textFile = cp5.addTextfield("Script "+scriptIndex)
                   .setId(idFile)
                   .setPosition(x,y)
-                  .setSize(300,18)
+                  .setSize(300,20)
                   .setAutoClear(false)
                   .moveTo(tabName)
                   .addListener(this);
@@ -80,11 +80,51 @@ class ScriptGUI implements ControlListener //implements CallbackListener
      .align(ControlP5.TOP_OUTSIDE,ControlP5.TOP_OUTSIDE);
      //.align(ControlP5.RIGHT_OUTSIDE,ControlP5.CENTER);
 
-   y+=20;
-    
+   y+=30;
+   
+  advSliderGoal = cp5.addSlider("ADVGOAL"+scriptIndex)
+   .setPosition(x,y)
+   .setSize(300,20)
+   .setRange(0,1024)
+   .setValue(512)
+   .moveTo(tabName)
+   .addListener(this);
+  advSliderGoal.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setText("GOAL");
+  
+  y+=25;
+  advSliderSpeed = cp5.addSlider("ADVSPEED"+scriptIndex)
+   .setPosition(x,y)
+   .setSize(300,20)
+   .setRange(0,1024)
+   .setValue(0)
+   .moveTo(tabName)
+   .addListener(this);
+  advSliderSpeed.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setText("SPEED");
+  
+  y+=25;
+  advSliderWheel = cp5.addSlider("ADVWHEEL"+scriptIndex)
+   .setPosition(x,y)
+   .setSize(300,20)
+   .setRange(-1024,1024)
+   .setValue(0)
+   .moveTo(tabName)
+   .addListener(this);
+  advSliderWheel.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setText("WHEEL");
+
+  y+=30; 
+
+   buttonStep = cp5.addButton("SSTEP"+scriptIndex)
+       .setId(globalID++)
+       .setPosition(x,y)
+       .setSize(60,30)
+       .moveTo(tabName)
+       .addListener(this);
+   buttonStep.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER)
+        .setText("STEP");
+
    buttonPlay = cp5.addButton("SPLAY"+scriptIndex)
        .setId(globalID++)
-       .setPosition(x+10,y)
+       .setPosition(x+80,y)
        .setSize(60,30)
        .moveTo(tabName)
        .addListener(this);
@@ -93,21 +133,12 @@ class ScriptGUI implements ControlListener //implements CallbackListener
 
   buttonStop = cp5.addButton("SSTOP"+scriptIndex)
        .setId(globalID++)
-       .setPosition(x+80,y)
+       .setPosition(x+150,y)
        .setSize(60,30)
        .moveTo(tabName)
        .addListener(this);
    buttonStop.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER)
        .setText("STOP");
-
-   buttonStep = cp5.addButton("SSTEP"+scriptIndex)
-       .setId(globalID++)
-       .setPosition(x+150,y)
-       .setSize(60,30)
-       .moveTo(tabName);
-   buttonStep.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER);
-   buttonStep.getCaptionLabel().setText("STEP");
-   buttonStep.addListener(this);
 
    textServoA = cp5.addTextfield("Servo1"+scriptIndex)
                   .setId(idFile)
@@ -136,7 +167,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
              .align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER);
 
     
-    y+=55;
+    y+=60;
 
    console = cp5.addTextarea("console "+scriptIndex)
      .setPosition(x+150,y-15)
@@ -153,22 +184,24 @@ class ScriptGUI implements ControlListener //implements CallbackListener
          .setPosition(x,y)
          .setSize(145,h-15) //80 ????
          .toUpperCase(false)
-         .setItemHeight(18)
+         .setItemHeight(20)
          .setBarHeight(18)
-         .setColorBackground(color(255, 128))
+         .setColorBackground(color(255))
          .setColorActive(color(0))
-         .setColorForeground(color(128,128,128))
+         .setColorForeground(color(255,255,255)) //bar
          .actAsPulldownMenu(false)
          .setScrollbarWidth(10)
          .disableCollapse()
+         //.setfont(testFont) // dont exist for listBox !!!!
          .moveTo(tabName);
 
   listbox.captionLabel().toUpperCase(false);
-  listbox.captionLabel().set("A Listbox");
+  listbox.captionLabel().set("Script");
   listbox.captionLabel().setColor(0xff000000);
   listbox.captionLabel().style().marginTop = 3;
   listbox.valueLabel().style().marginTop = 3;
-  
+  listbox.valueLabel().setFont(testFont); //......rien
+
   listbox.addListener(this);
   
 //   cp5.addCallback(this);    
@@ -241,11 +274,12 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   {
     ListBoxItem lbi = listbox.addItem(line,nbLines++);
     lbi.setId(globalID++);
+    lbi.setColorLabel(color(0));
     lbi.toUpperCase(false);
-    lbi.setColorBackground(0xff808080);
+    lbi.setColorBackground(0xffC0C0C0);
     lbi.setColorForeground(0xFF707070);
     lbi.setColorActive(0xFF00FF00);
-    //lbi.getCaptionLabel().setFont(courrierFont);
+    //lbi.setFont(courrierFont);
   }
   
   void setCurrLine(int current,int next)
@@ -300,6 +334,27 @@ class ScriptGUI implements ControlListener //implements CallbackListener
       else if(c==buttonPlay){ script.run();  }
       else if(c==buttonStop){ script.stop(); }
       else if(c==buttonStep){ scriptStep();  }
+      else if(c==advSliderGoal)
+      {
+          ServoDxl servo = servoArray.getByIndex(script.servoIndex);
+          if(servo != null)
+            servo.setGoal((int)c.getValue());
+      }
+      else if(c==advSliderSpeed)
+      {
+          ServoDxl servo = servoArray.getByIndex(script.servoIndex);
+          if(servo != null)
+            servo.setSpeed((int)c.getValue());
+      }
+      else if(c==advSliderWheel)
+      {
+          ServoDxl servo = servoArray.getByIndex(script.servoIndex);
+          if(servo != null)
+            servo.setWheelSpeed((int)c.getValue());
+      }
+
+
+      //else if(
     }
   }
   
