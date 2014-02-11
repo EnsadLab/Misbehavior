@@ -119,6 +119,14 @@ class AnimGUI implements ControlListener
            anims[i].setAnim(animPaths[i]);
          }
      }
+     
+     if(animPaths.length >= 11)
+     {
+        fakeToggleSecond.show();
+        fakeToggleMotorSecond.show();
+        labelAnimSecond.show();
+        labelMotorSecond.show();
+     }
     
      /*
      // in case little trick in update is not working.
