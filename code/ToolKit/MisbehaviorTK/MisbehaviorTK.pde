@@ -133,11 +133,7 @@ void setup()
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config
     openMidi(midiInDevice,midiOutDevice);
 
-<<<<<<< HEAD
-  String[] fonts = PFont.list();
-=======
   //String[] fonts = PFont.list();
->>>>>>> bce61615cc040c566ed19bd8a9acb4007b8ed30f
   //println(fonts);
   
   //threadTest = new ThreadTest(); //,"le thread");
