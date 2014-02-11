@@ -37,7 +37,7 @@ void controllerChange(int channel, int num, int value)
         fval = (float)(value-64)/63.0;
 
       println("dbg midi "+num+","+fval);
-      //... appeler la fonction correspondate ... wheelGoal
+      servoGUIarray.midiValue(num,fval);
     }
     //TODO
     // stop
