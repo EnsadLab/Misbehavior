@@ -113,9 +113,9 @@ void setup()
   animGUI.buildGUI(marginLeft, 220, tabNameBasic,wFirstColumn+space);
     
   scriptArray = new ScriptArray(motorIds.length );
-  scriptArray.buildGUI(260,70,480,tabNameAdvanced);  //TODO ... more than 2 scripts
+  scriptArray.buildGUI(260,70,456,tabNameAdvanced);  //TODO ... more than 2 scripts
   scriptArray.scriptAt(0).load("scripts/Script00.txt"); //<<< TODO config.xml
-  //scriptArray.scriptAt(1).load("scripts/Script00.txt"); //<<< TODO config.xml
+  scriptArray.scriptAt(1).load("scripts/Script00.txt"); //<<< TODO config.xml
   
   sensorArray = new SensorArray();
   sensorArray.loadConfig("config_MIDI.xml");

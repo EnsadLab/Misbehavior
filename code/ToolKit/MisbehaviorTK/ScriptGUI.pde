@@ -4,7 +4,7 @@ int numScriptGUI = 0;
 class ScriptGUI implements ControlListener //implements CallbackListener
 {
   Script script = null;
-  int scriptIndex = 0;
+  int index = 0;
   int idFile   = 1;
   long clickTime = 0; //pour double click
     
@@ -32,13 +32,13 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   ScriptGUI(Script scr)
   {
     script = scr;
-    scriptIndex = numScriptGUI++;
+    index = numScriptGUI++;
   }
       
   void build(int x,int y,int h,String tabName)
   {
     idFile = globalID++;
-    radioScript = cp5.addRadioButton("SCRIPTSEL"+scriptIndex)
+    radioScript = cp5.addRadioButton("SCRIPTSEL"+index)
            .setPosition(x,y)
            .setSize(20,15)
            .setColorBackground(0xFFC0C0C0)
@@ -47,12 +47,12 @@ class ScriptGUI implements ControlListener //implements CallbackListener
            .setColorLabel(color(0))
            .setItemsPerRow(6)
            .setSpacingColumn(36)
-           .addItem("SRADIO0"+scriptIndex,0)
-           .addItem("SRADIO1"+scriptIndex,1)
-           .addItem("SRADIO2"+scriptIndex,2)
-           .addItem("SRADIO3"+scriptIndex,3)
-           .addItem("SRADIO4"+scriptIndex,4)
-           .addItem("SRADIO5"+scriptIndex,5)
+           .addItem("SRADIO0"+index,0)
+           .addItem("SRADIO1"+index,1)
+           .addItem("SRADIO2"+index,2)
+           .addItem("SRADIO3"+index,3)
+           .addItem("SRADIO4"+index,4)
+           .addItem("SRADIO5"+index,5)
            .addListener(this) //GRRRRR no event ???
            .moveTo(tabName)
            ;
@@ -74,7 +74,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
     
      /*   
     CheckBox chkBox =
-            cp5.addCheckBox("SCHECK"+scriptIndex)
+            cp5.addCheckBox("SCHECK"+index)
             .moveTo(tabName)
             .setPosition(x,y)
             .setColorBackground(0xFF00FF00)
@@ -85,12 +85,12 @@ class ScriptGUI implements ControlListener //implements CallbackListener
             .setItemsPerRow(6)
             .setSpacingColumn(40)
             .setSpacingRow(10)
-            .addItem("C0"+scriptIndex, 0)
-            .addItem("C1"+scriptIndex, 1)
-            .addItem("C2"+scriptIndex, 2)
-            .addItem("C3"+scriptIndex, 3)
-            .addItem("C4"+scriptIndex, 4)
-            .addItem("C5"+scriptIndex, 5)
+            .addItem("C0"+index, 0)
+            .addItem("C1"+index, 1)
+            .addItem("C2"+index, 2)
+            .addItem("C3"+index, 3)
+            .addItem("C4"+index, 4)
+            .addItem("C5"+index, 5)
             ;
     for(int i=0;i<6;i++)
     {
@@ -101,7 +101,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
     */
     
     y+=30;
-    textFile = cp5.addTextfield("Script "+scriptIndex)
+    textFile = cp5.addTextfield("Script "+index)
                   .setId(idFile)
                   .setPosition(x,y)
                   .setSize(300,20)
@@ -116,7 +116,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
 
    y+=30;
    
-  advSliderGoal = cp5.addSlider("ADVGOAL"+scriptIndex)
+  advSliderGoal = cp5.addSlider("ADVGOAL"+index)
    .setPosition(x,y)
    .setSize(300,20)
    .setRange(0,1024)
@@ -126,7 +126,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   advSliderGoal.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setText("GOAL");
   
   y+=25;
-  advSliderSpeed = cp5.addSlider("ADVSPEED"+scriptIndex)
+  advSliderSpeed = cp5.addSlider("ADVSPEED"+index)
    .setPosition(x,y)
    .setSize(300,20)
    .setRange(0,1024)
@@ -136,7 +136,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   advSliderSpeed.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setText("SPEED");
   
   y+=25;
-  advSliderWheel = cp5.addSlider("ADVWHEEL"+scriptIndex)
+  advSliderWheel = cp5.addSlider("ADVWHEEL"+index)
    .setPosition(x,y)
    .setSize(300,20)
    .setRange(-1024,1024)
@@ -147,7 +147,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
 
   y+=30; 
 
-   buttonStep = cp5.addButton("SSTEP"+scriptIndex)
+   buttonStep = cp5.addButton("SSTEP"+index)
        .setId(globalID++)
        .setPosition(x,y)
        .setSize(60,30)
@@ -156,7 +156,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
    buttonStep.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER)
         .setText("STEP");
 
-   buttonPlay = cp5.addButton("SPLAY"+scriptIndex)
+   buttonPlay = cp5.addButton("SPLAY"+index)
        .setId(globalID++)
        .setPosition(x+80,y)
        .setSize(60,30)
@@ -165,7 +165,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
    buttonPlay.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER)
        .setText("PLAY");
 
-  buttonStop = cp5.addButton("SSTOP"+scriptIndex)
+  buttonStop = cp5.addButton("SSTOP"+index)
        .setId(globalID++)
        .setPosition(x+150,y)
        .setSize(60,30)
@@ -174,12 +174,12 @@ class ScriptGUI implements ControlListener //implements CallbackListener
    buttonStop.getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER)
        .setText("STOP");
 
-   textServoA = cp5.addTextfield("Servo1"+scriptIndex)
+   textServoA = cp5.addTextfield("Servo1"+index)
                   .setId(idFile)
                   .setPosition(x+280,y)
                   .setSize(20,18)
                   .setAutoClear(false)
-                  .setValue(" "+scriptIndex)
+                  .setValue(" "+index)
                   .setInputFilter(Textfield.INTEGER)
                   .moveTo(tabName)
                   .addListener(this);
@@ -187,7 +187,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
              .setColor(0xFF000000)
              .align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER);
 
-   textServoB = cp5.addTextfield("Servo2"+scriptIndex)
+   textServoB = cp5.addTextfield("Servo2"+index)
                   .setId(idFile)
                   .setPosition(x+280,y+20)
                   .setSize(20,18)
@@ -203,7 +203,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
     
     y+=60;
 
-   console = cp5.addTextarea("console "+scriptIndex)
+   console = cp5.addTextarea("console "+index)
      .setPosition(x+150,y-15)
      .setSize(150,h)
      .setLineHeight(20)
@@ -213,7 +213,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
      .setFont(courrierFont)
      .moveTo(tabName);
      
-    listbox = cp5.addListBox("ScrList"+scriptIndex)
+    listbox = cp5.addListBox("ScrList"+index)
          .setId(globalID++)
          .setPosition(x,y)
          .setSize(145,h-15) //80 ????
@@ -243,13 +243,15 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   
   void changeScript(int other)
   {
-    stop(); //... ??? TODO dont stop ???
+    //script.stop(); //... ??? TODO dont stop ???
     clearList();
     clearConsole();
     Script scr = scriptArray.scriptAt(other);
     script = scr;
+    println("dbg SETGUI");
     if( scr != null )
       scr.setGUI(this);
+    println("done");
   }
 
   
@@ -281,6 +283,9 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   
   void update()
   {
+    if(script==null)
+      return;
+    
     if(currLine != script.currLine )
     {
       int pl = currLine;
@@ -290,6 +295,9 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   
   void scriptStep()
   {
+    if(script==null)
+      return;
+
     int next = script.nextStep();
     //println("curr "+currLine+"next = "+next);
     setCurrLine(currLine,next);
@@ -313,7 +321,10 @@ class ScriptGUI implements ControlListener //implements CallbackListener
    
   void setName(String name)
   {
-    textFile.setValue(name);
+    if(name==null)
+      textFile.setValue("");
+    else
+      textFile.setValue(name);
   }
     
   void addLine(String line)

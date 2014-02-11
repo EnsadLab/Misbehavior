@@ -460,7 +460,7 @@ class CommArduino implements ControlListener //CallbackListener
        if(toSend.charAt(0)!='E')
          textArea.append( ">>>"+toSend );
        serial.write(toSend); //no exception ????
-   print("send>"+toSend);
+   //print("send>"+toSend);
      }
    }
    catch(Exception e){}

@@ -178,6 +178,7 @@ class AnimGUI implements ControlListener
   
   void stopRecording(String recordLabel)
   {
+    println("dbg STOP RECORDING 1");
     if(recordLabel.equals(""))
     {
       int d = day();    // Values from 1 - 31
@@ -203,7 +204,7 @@ class AnimGUI implements ControlListener
         }
       }
     }
-    
+     
     if(nbActivatedMotors == 0) return;
     
     float[][] recordValues = new float[nbActivatedMotors][0];

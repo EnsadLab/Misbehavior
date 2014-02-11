@@ -77,7 +77,7 @@ class ScriptArray
   
   Script scriptAt(int i)
   {
-    if(i<scriptList.length) return scriptList[i];
+    if((i>=0)&&(i<scriptList.length)) return scriptList[i];
     return null;
   }
   /*
@@ -636,7 +636,7 @@ void load(String name)
   {
     currentGUI.clearList();
     currentGUI.clearConsole();
-    currentGUI.setName(name);
+    currentGUI.setName("\n");
   }
   
   if(name==null)
@@ -646,13 +646,15 @@ void load(String name)
   catch(Exception e){ println("FILE ERROR");return;} //TODO ... clear tokens ???
   if(scriptLines==null)
   {
-    println("FILE ERROR2");return;
+    dbg("FILE ERROR");
+    return;
   }
     
   parse();
   
   if(currentGUI!=null)
   {
+      currentGUI.setName(name);
       for(int i=0;i<scriptLines.length;i++)
         currentGUI.addLine(scriptLines[i]);
   }
