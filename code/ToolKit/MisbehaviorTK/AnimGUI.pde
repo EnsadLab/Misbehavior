@@ -4,7 +4,7 @@ int animLabelColumnWidth;
 int space = 30;
 int toggleSize = 20;
 int spaceBetweenToggle = 10;
-int spaceBetweenColumns = 230;
+int secondColumnX = 650;
 int spaceBetweenLines = 15;
 PImage playImage;
 
@@ -17,7 +17,16 @@ class AnimGUI implements ControlListener
   Toggle recButtonPlayPause;
   Toggle[] motorToggles;
   Textfield recordLabelTextField;
+  Button scanAnimFolder;
+  DropdownList availableAnims;
+  Toggle fakeDDBackground;
+  boolean oldDDopenStatus = false;
   WavEncoder wavEncoder = new WavEncoder(); 
+  int nbAvailableAnims = 0;
+  Toggle fakeToggleSecond;
+  Toggle fakeToggleMotorSecond;
+  Textlabel labelAnimSecond;
+  Textlabel labelMotorSecond;
 
   AnimGUI()
   {
@@ -34,14 +43,14 @@ class AnimGUI implements ControlListener
      //motorColumnWidth = 300;
      animLabelColumnWidth = animLabelColumnW;
     
-     cp5.addToggle("FAKETOGGLE")
+     Toggle fakeToggle = cp5.addToggle("FAKETOGGLE")
         .setPosition(x,y)
         .setColorBackground(0xFF008A62)
         .setSize(animLabelColumnWidth-toggleSize,30)
         .lock()
         .moveTo(tabName);
         
-     Textlabel label = cp5.addTextlabel("ANIMATIONS_gui")// we keep index as identifier. This way we are completely sure no label has the same identifier. In case user adds twice same motorid in xml.
+     Textlabel label = cp5.addTextlabel("ANIMATIONS_gui")
               .setText("Animations")
               .setPosition(x+30,y+5)
               .setColorValueLabel(0xFFFFFFFF)
@@ -54,39 +63,55 @@ class AnimGUI implements ControlListener
         .setSize(motorColumnWidth,30)
         .lock()
         .moveTo(tabName);
+        
+        
               
-     label = cp5.addTextlabel("MOTORS_gui")// we keep index as identifier. This way we are completely sure no label has the same identifier. In case user adds twice same motorid in xml.
+     label = cp5.addTextlabel("MOTORS_gui")
               .setText("Motors")
               .setPosition(x+animLabelColumnWidth+motorColumnWidth/2-30,y+5)
               .setColorValue(0xFFFFFFFF)
               .setFont(createFont("Verdana",14))
               .moveTo(tabName);
               ;
-       
+     fakeToggleSecond = cp5.addToggle("FAKETOGGLE2").setPosition(secondColumnX,marginTop).setColorBackground(0xFF008A62).setSize(animLabelColumnWidth-toggleSize,30).lock().moveTo(tabName).hide();
+     labelAnimSecond = cp5.addTextlabel("ANIMATIONS_gui2").setText("Animations").setPosition(secondColumnX+30,marginTop+5).setColorValueLabel(0xFFFFFFFF).setFont(createFont("Verdana",14)).moveTo(tabName).hide();
+     fakeToggleMotorSecond = cp5.addToggle("FAKETOGGLEMOTORS2").setPosition(secondColumnX+animLabelColumnWidth,marginTop).setColorBackground(0xFF792e3f).setSize(motorColumnWidth,30).lock().moveTo(tabName).hide();
+     labelMotorSecond = cp5.addTextlabel("MOTORS_gui2").setText("Motors").setPosition(secondColumnX+animLabelColumnWidth+motorColumnWidth/2-30,marginTop+5).setColorValue(0xFFFFFFFF).setFont(createFont("Verdana",14)).moveTo(tabName).hide();
+   
+     int xLabels = x + animLabelColumnWidth + motorColumnWidth + 16;
+     int yLabels = y + 110;
+     // create labels play,loop et etc...
+     label = cp5.addTextlabel("labelPlay").setPosition(xLabels,yLabels).setText("Play").setColor(color(0,138,98)).moveTo(tabName).setFont(createFont("Verdana",10)); xLabels += toggleSize + spaceBetweenToggle;
+     label = cp5.addTextlabel("labelLoop").setPosition(xLabels,yLabels).setText("Loop").setColor(color(0,138,98)).moveTo(tabName).setFont(createFont("Verdana",10)); xLabels += 2*toggleSize + spaceBetweenToggle;
+     label = cp5.addTextlabel("labelProgress").setPosition(xLabels,yLabels).setText("Progress").setColor(color(0,138,98)).moveTo(tabName).setFont(createFont("Verdana",10)); xLabels += 3*toggleSize + spaceBetweenToggle;
+     label = cp5.addTextlabel("labelSpeed").setPosition(xLabels,yLabels).setText("Speed").setColor(color(0,138,98)).moveTo(tabName).setFont(createFont("Verdana",10));
+     
+     
      y += 50;
      
      buildRecordGui(x,y,tabName);
      
-     y += 50;
+     y += 40;
+     
+     int yScanAnimTemp = y;
+     int xScanAnimTemp = x;
+    
+     
+     y += 40;
      
      int yTemp = y;
      anims = new Anim[nbAnimsMax];   
 
      for(int i=0; i<anims.length; i++)
      {
-       if(i == 11)
+       if(i == 10)
        {
-         y = marginTop-10;
-         x += animLabelColumnWidth + motorColumnWidth + spaceBetweenColumns;
+         y = marginTop+57;
+         x = secondColumnX;
        }
        anims[i] = new Anim();
        anims[i].buildGui(x,y,tabName,i);
        y += toggleSize  + spaceBetweenLines;
-     }
-     
-     for(int i=anims.length-1; i >= 0; i--)
-     {
-       anims[i].buildDropDownSpeed(tabName,i);
      }
      
      for(int i=0; i<animPaths.length; i++)
@@ -97,6 +122,51 @@ class AnimGUI implements ControlListener
            anims[i].setAnim(animPaths[i]);
          }
      }
+    
+     /*
+     // in case little trick in update is not working.
+     scanAnimFolder = cp5.addButton("SCANANIMFOLDER")
+                    .setPosition(xScanAnimTemp,yScanAnimTemp)
+                    .setSize(toggleSize,toggleSize)
+                    .moveTo(tabName)
+                    .setColorForeground(color(128,197,176))
+                    .setColorBackground(color(204,232,224))
+                    .setColorActive(color(0,138,98))
+                    .setImages(loadImage("resetOff.jpg"),loadImage("resetOff.jpg"),loadImage("resetOn.jpg"))
+                    .addListener(this)
+                    ;
+     scanAnimFolder.getCaptionLabel().setFont(createFont("Verdana",18)).setText("+").setColor(0xFF000000).align(ControlP5.CENTER,ControlP5.BOTTOM);
+     */
+     
+     fakeDDBackground = cp5.addToggle("FAKEBACKGROUND")
+                   //.setPosition(xScanAnimTemp + toggleSize+10, yScanAnimTemp+2)
+                   //.setSize(animLabelColumnWidth-2*toggleSize-10,170)
+                   .setPosition(xScanAnimTemp, yScanAnimTemp)
+                   .setSize(animLabelColumnWidth-toggleSize,170)
+                   .setLock(true)
+                   .moveTo(tabName)
+                   .hide()
+                   .setColorBackground(0xFFFFFFFF)
+                   .setCaptionLabel("")
+                   ;
+     
+     availableAnims = cp5.addDropdownList("AVAILABLEANIMS")
+          .setPosition(xScanAnimTemp, yScanAnimTemp+toggleSize)
+          .setSize(animLabelColumnWidth-toggleSize,250)
+          .moveTo(tabName)
+          .setItemHeight(toggleSize)
+          .addListener(this)
+          .setBarHeight(toggleSize)
+          .setColorForeground(color(128,197,176))
+          .setColorBackground(color(204,232,224))
+          .setColorActive(color(0,138,98))
+          .setColorLabel(0xFF000000)
+          .toUpperCase(false)
+          ;
+     availableAnims.captionLabel().set("Load animation").setFont(createFont("Verdana",11)).align(ControlP5.LEFT,ControlP5.CENTER);
+     availableAnims.valueLabel().setFont(createFont("Verdana",13)).setColor(0xFFFF0000).align(ControlP5.CENTER,ControlP5.CENTER); // ne marche pas.........
+     updateDropDownAnimList();
+     
   }
   
   void buildRecordGui(int x, int y, String tabName)
@@ -106,7 +176,7 @@ class AnimGUI implements ControlListener
                   .setPosition(x,y)
                   .setSize(animLabelColumnWidth-toggleSize,toggleSize)
                   .setColorForeground(color(255,0,0))
-                  .setColor(color(2255,0,0))
+                  .setColor(color(255,0,0))
                   .setColorBackground(0xFFFFFFFF)
                   .setColorActive(color(255,0,0))
                   .setAutoClear(false)
@@ -151,6 +221,69 @@ class AnimGUI implements ControlListener
      
   }
   
+  void updateDropDownAnimList()
+  {
+     availableAnims.clear();
+     nbAvailableAnims = 0;
+    
+     File dossier = new File(sketchPath + "/anims");
+     String[] fichiers = dossier.list();
+     //println(fichiers);
+     int index = 0;
+     for(int i=0; i<fichiers.length; i++)
+     {
+       String f = fichiers[i];
+       String ext = f.substring(f.length()-4,f.length());
+       if(ext.equals(".wav") && !isAlreadyImported("anims/"+f))
+       {
+         ListBoxItem item = availableAnims.addItem(""+fichiers[i], index);
+         index++;
+         nbAvailableAnims++;
+       }
+       
+     }
+     availableAnims.captionLabel().set("Load animation");
+     //availableAnims.setIndex(0);
+    
+  }
+  
+  boolean isAlreadyImported(String wavPath)
+  {
+    int index = 0;
+    boolean found = false;
+    while(index < anims.length)
+    {
+      //println("wav p " + wavPath + " anims: " + anims[index].wavPath);
+      if(anims[index].wavPath.equals(wavPath))
+      {
+        found = true;
+        break;
+      }
+      index++;
+    }
+    return found;
+  }
+  
+  void importNewAnimation(int line)
+  {
+    String newWavPath = availableAnims.getItem(line).getName();
+    println("Import new animation: " + newWavPath);
+    int index = 0;
+    while(index < anims.length)
+    {
+      if(anims[index].isFree())
+      {
+        anims[index].setAnim("anims/"+newWavPath);
+        break;
+      }
+      index++;
+    }
+    //availableAnims.removeItem(newWavPath); // cela n'update pas la liste correctement... j oublie pour maintenant
+    //availableAnims.updateListBoxItems();
+    availableAnims.captionLabel().set("Load animation");
+    updateAnimXml();
+  }
+  
   void startPlaying(String label)
   //void startPlaying(String label, boolean loop, float speed)
   {
@@ -166,6 +299,12 @@ class AnimGUI implements ControlListener
   
   void startRecording()
   {
+    
+    // this is necessary... 
+    for(int i=0; i<motorToggles.length ; i++)
+    {
+      motorToggles[i].setLock(true);
+    }
     //selectInput("Select a file to process:", "fileSelected");
     ServoDxl[] servos = servoArray.getServos();
     for(int i=0;i<servos.length;i++)
@@ -206,6 +345,11 @@ class AnimGUI implements ControlListener
       }
     }
     
+    for(int i=0; i<motorToggles.length ; i++)
+    {
+      motorToggles[i].setLock(false);
+    }
+    
     if(nbActivatedMotors == 0) return;
     
     float[][] recordValues = new float[nbActivatedMotors][0];
@@ -224,6 +368,7 @@ class AnimGUI implements ControlListener
     
     // save wav
     recordWavPath += ".wav";
+    if(wavEncoder == null) return;
     wavEncoder.writeWav(recordWavPath,recordValues[0].length,recordValues); // we know we have at least one chanel since nbActivatedMotors > 0
     
     // activate anim
@@ -237,6 +382,10 @@ class AnimGUI implements ControlListener
       }
       index++;
     }
+    
+    // update anim config xml file
+    updateAnimXml();
+   
   }
   
   
@@ -250,12 +399,64 @@ class AnimGUI implements ControlListener
     }
   }
   
+  void updateAnimXml()
+  {
+    XML xml = loadXML(animConfigPath); // we reload it in case file had been manually changed in between
+    if(xml==null)
+    {
+      println("[ERROR]: config ANIM file " + animConfigPath + " could not be loaded");
+      return;    
+    }
+    // addChild will append the new child at the end, but we want to have same ordering as in the gui so delete and recreate
+    XML[] children = xml.getChildren("anim");
+    for(int i=0; i<children.length; i++)
+    {
+      xml.removeChild(children[i]);
+    }
+    
+    int count = 0;
+    for(int i=0; i<anims.length; i++)
+    {
+      if(!(anims[i].wavPath.equals("")))
+      {
+        XML animChild = xml.addChild("anim");
+        animChild.setString("path",anims[i].wavPath);
+        count++;
+      }
+    }
+    saveXML(xml,animConfigPath);
+    
+    if(count >= 11)
+    {
+        fakeToggleSecond.show();
+        fakeToggleMotorSecond.show();
+        labelAnimSecond.show();
+        labelMotorSecond.show();
+    }
+    
+  }
+  
   void update()
   {
     for(int i=0; i<anims.length; i++)
     {
       anims[i].update();
     }
+    if(oldDDopenStatus != availableAnims.isOpen())
+    {
+      if(availableAnims.isOpen())
+      {
+        updateDropDownAnimList(); // did not find a callback in cp5...
+        fakeDDBackground.setHeight(nbAvailableAnims*toggleSize + toggleSize);
+        fakeDDBackground.show(); // stupid, but there is no other way...
+      }
+      else
+      {
+        fakeDDBackground.hide();
+      }
+      //println("aaa");
+    }
+    oldDDopenStatus = availableAnims.isOpen();
   }
   
   void fileSelected(File selection) 
@@ -272,6 +473,16 @@ class AnimGUI implements ControlListener
   
   void controlEvent(ControlEvent evt)
   {
+    if(evt.isGroup()) //dropdown list
+    {
+      ControlGroup g = evt.group();
+      if( g == availableAnims )
+      {
+        int line = (int)g.value();
+        importNewAnimation(line);
+      }
+    }
+    
     if(!evt.isController())
     return;
   
@@ -290,6 +501,10 @@ class AnimGUI implements ControlListener
         recButtonPlayPause.setCaptionLabel("REC");
         stopRecording(recordLabelTextField.getText());
       }
+    }
+    else if(c == scanAnimFolder)
+    {
+      updateDropDownAnimList();
     }
     
     //int id = c.getId();
@@ -319,17 +534,21 @@ class Anim implements ControlListener
   Button animPlayButton;
   Toggle loopButton;
   Slider progressbar;
-  DropdownList animSpeed;
-  float[] speeds = { 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0 }; // ou a generer...
+  Button speedIncrease;
+  Button speedDecrease;
+  Toggle fakeToggle;
+  Textlabel speedLabel;
+  //DropdownList animSpeed;
+  //float[] speeds = { 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0 }; // ou a generer...
   float animSpeedSelected = 1.0;
-  String label;
-  String wavPath;
+  String label = "";
+  String wavPath = "";
   PVector posDDSpeed;
   boolean free = true;
   boolean loop = false;
   long playframeTime;
-  long recRate = 20; // ATTENTION: cette valeur est aussi inscrite dans ServoDxl...
-  long playRate = 20;
+  long recRate = 25; // ATTENTION: cette valeur est aussi inscrite dans ServoDxl...
+  long playRate = 25;
   int nbFrames = 0;
   int currFrame = 0;
   WavEncoder wavEncoder = new WavEncoder(); 
@@ -415,7 +634,7 @@ void buildGui(int x, int y, String tabName, int index)
    .setPosition(x,y)
    .setSwitch(true)
    .setSize(toggleSize,toggleSize)
-   .setImages(loadImage("playButton.jpg"),loadImage("playButton.jpg"),loadImage("stopButton.jpg"))//playImage2)//,playImage2,playImage2)
+   .setImages(loadImage("playButton.jpg"),loadImage("playButton.jpg"),loadImage("stopButton.jpg"))
    //.updateSize()
    .setColorForeground(color(128,197,176))
    .setColorBackground(color(204,232,224))
@@ -465,8 +684,56 @@ void buildGui(int x, int y, String tabName, int index)
    x += 3*toggleSize + spaceBetweenToggle;
    posDDSpeed = new PVector(x,y);
    
+   fakeToggle = cp5.addToggle("FAKESPEEDTOGGLE"+index)
+                   .setPosition(x,y)
+                   .setSize(2*toggleSize,toggleSize)
+                   .setColorBackground(color(204,232,224))
+                   .setLock(true)
+                   .hide()
+                   .moveTo(tabName)
+                   ;
+   
+   speedLabel = cp5.addTextlabel("SPEEDLABEL"+index)// we keep index as identifier. This way we are completely sure no label has the same identifier. In case user adds twice same motorid in xml.
+              .setText("1.0")
+              .setPosition(x+5,y)
+              .setColorValueLabel(0xFF000000)
+              .setFont(createFont("Verdana",12))
+              .hide()
+              .moveTo(tabName);
+   
+   x += 2*toggleSize ;
+   
+   speedIncrease = cp5.addButton("SPEEDINCREASE_"+index)
+                .setCaptionLabel("+")
+                .setPosition(x,y)
+                .setSize(toggleSize,toggleSize/2)
+                .setColorForeground(color(128,197,176))
+                .setColorBackground(color(204,232,224))
+                .setColorActive(color(0,138,98))
+                .moveTo(tabName)
+                .hide()
+                .setLock(true)
+                .addListener(this)
+                ;  
+   speedIncrease.getCaptionLabel().setFont(createFont("Verdana",10)).setColor(0xFF000000).align(ControlP5.CENTER,ControlP5.CENTER);
+   
+   speedDecrease = cp5.addButton("SPEEDDECREASE_"+index)
+                .setCaptionLabel("-")
+                .setPosition(x,y+toggleSize/2)
+                .setSize(toggleSize,toggleSize/2)
+                .setColorForeground(color(128,197,176))
+                .setColorBackground(color(204,232,224))
+                .setColorActive(color(0,138,98))
+                .moveTo(tabName)
+                .hide()
+                .setLock(true)
+                .addListener(this)
+                ;  
+   speedDecrease.getCaptionLabel().setFont(createFont("Verdana",14)).setColor(0xFF000000).setPadding(7,15);//align(ControlP5.CENTER,ControlP5.BOTTOM);
+  
+   
 }
-
+/*
 void buildDropDownSpeed(String tabName, int index)
 {
  
@@ -494,6 +761,7 @@ void buildDropDownSpeed(String tabName, int index)
    animSpeed.setIndex(8);
    
 }
+*/
 
 void setAnim(String path)
 {
@@ -545,7 +813,14 @@ void setAnim(String path)
   loopButton.setLock(false);
   loopButton.show();
   progressbar.show();
-  animSpeed.show();
+  //animSpeed.show();
+  speedIncrease.setLock(false);
+  speedIncrease.show();
+  speedDecrease.setLock(false);
+  speedDecrease.show();
+  speedLabel.show();
+  fakeToggle.show();
+  
 }
 
 void startPlaying()
@@ -590,7 +865,7 @@ void startPlaying()
     {
       animPlayButton.setOff();
     }
-    playRate = (int)((float)recRate*animSpeedSelected);
+    playRate = (int)((float)recRate/animSpeedSelected);
     
   }
 }
@@ -610,7 +885,11 @@ void stopPlaying()
         {
           if(motorToggles[i].getState()) // this motor was NOT desactivated to play the anim
           {
-            servos[i].stopPlaying(); 
+            if(i < playMotorToggles.length && playMotorToggles[i].isVisible()) // and this motor is playing THIS animation
+            {
+              println("servo " + i + " will stop");
+              servos[i].stopPlaying(true);
+            } 
           }
           nbActivatedMotors++;
         }    
@@ -628,6 +907,7 @@ void stopPlaying()
 
 void servoStoppedPlaying(int index)
 {
+  println("servoStoppedPlaying " + index);
   if(index >= 0 && index < playMotorToggles.length)
   {
     playMotorToggles[index].hide();
@@ -649,13 +929,13 @@ void servoStoppedPlaying(int index)
 
 void playingIsFinished()
 {
-  animPlayButton.setOff();
-  for(int i=0; i<playMotorToggles.length; i++)
+  animPlayButton.setOff(); // this will then automatically call stopPlaying()
+  /*for(int i=0; i<playMotorToggles.length; i++)
   {
     playMotorToggles[i].hide();
   }
   progressbar.setValue(0.0);
-  currFrame = 0;
+  currFrame = 0;*/
 }
 
 void loopIsFinished()
@@ -667,35 +947,93 @@ void loopIsFinished()
 void setLoop(boolean b)
 {
   loop = b;
+  if(!animPlayButton.isOn()) return; // do not need to update value when anim has not started
   ServoDxl[] servos = servoArray.getServos();
   for(int i=0;i<servos.length;i++)
   {
     if(servos[i] != null)
     {
-      if(servos[i].playing)
+      if(!motorToggles[i].isLock()) // this motor was assigned to play the anim
       {
-        servos[i].setLoop(b);
+        if(motorToggles[i].getState()) // this motor was NOT desactivated to play the anim
+        {
+          if(i < playMotorToggles.length && playMotorToggles[i].isVisible()) // and this motor is playing THIS animation
+          {
+            servos[i].setLoop(b);
+          } 
+        }
       }
     }
   }
 }
 
-/*
+
+void setSpeedToServos(float speed)
+{
+  playRate = (int)((float)recRate/animSpeedSelected);
+  if(!animPlayButton.isOn()) return; // do not need to update value when anim has not started
+  ServoDxl[] servos = servoArray.getServos();
+  for(int i=0;i<servos.length;i++)
+  {
+    if(servos[i] != null)
+    {
+      if(!motorToggles[i].isLock()) // this motor was assigned to play the anim
+      {
+        if(motorToggles[i].getState()) // this motor was NOT desactivated to play the anim
+        {
+          if(i < playMotorToggles.length && playMotorToggles[i].isVisible()) // and this motor is playing THIS animation
+          {
+            servos[i].playRate = playRate;
+          } 
+        }
+      }
+    }
+  }
+}
+
+
+// only used when animation is already playing
 void selectForPlaying(boolean select, int index)
 {
+  if(!animPlayButton.isOn()) return;
+  if(select)
+  {
+    // for now we ignore this
+    // if the animation is already running and the toggle is activated, nothing happens.
+    return;
+  }
+  
+  // toggle has been desactivated. Stop the animation for this servo
   ServoDxl servo = servoArray.getByIndex(index);
   if(servo != null)
   {
-      servo.enablePlaying = select;
+    if(index < playMotorToggles.length && playMotorToggles[index].isVisible())
+    {
+      playMotorToggles[index].hide();
+      servo.stopPlaying(true);
+    }
       //println("SELECT for playing " + index + " " + select);
   }
+  // check if there is still another servo playing this anim, otherwise we need to change playanim state
+  boolean servoPlayingFound = false;
+  for(int i=0; i< playMotorToggles.length; i++)
+  {
+    if(playMotorToggles[i].isVisible())
+    {
+      servoPlayingFound = true;
+    }
+  }
+  if(!servoPlayingFound)
+  {
+    animPlayButton.setOff();
+  }
 }
-*/
+
 
 
 void deleteAnim()
 {
-  wavPath = "";
+  
   label = "";
   animLabel.setText(label);
   for(int i=0; i<motorToggles.length ; i++)
@@ -714,7 +1052,8 @@ void deleteAnim()
   progressbar.setValue(0.0);
   animPlayButton.setOff();
   loopButton.setState(false);
-  animSpeed.setIndex(8);
+  //animSpeed.setIndex(8);
+  speedLabel.setText("1.0");
   
   // lock and hide buttons
   deleteButton.setLock(true);
@@ -724,10 +1063,38 @@ void deleteAnim()
   loopButton.setLock(true);
   loopButton.hide();
   progressbar.hide();
-  animSpeed.hide();
+  //animSpeed.hide();
+  speedIncrease.setLock(true);
+  speedIncrease.hide();
+  speedDecrease.setLock(true);
+  speedDecrease.hide();
+  speedLabel.hide();
+  fakeToggle.hide();
   
   free = true;
-
+  
+   // update anim config xml file
+   XML xml = loadXML(animConfigPath); // we reload it in case file had been manually changed in between
+   if(xml==null)
+   {
+      println("[ERROR]: config ANIM file " + animConfigPath + " could not be loaded");
+      wavPath = "";
+      return;    
+   }
+   
+   XML[] children = xml.getChildren("anim");
+   for(int i=0; i<children.length; i++)
+   {
+      String animPath = children[i].getString("path");
+      if(animPath.equals(wavPath))
+      {
+        xml.removeChild(children[i]);
+        println("-> removing anim with path " + animPath);
+      }
+   }
+   
+   saveXML(xml,animConfigPath);
+   wavPath = "";
   
 }
 
@@ -742,6 +1109,7 @@ void update()
    if(animPlayButton.isOn())
    {
       long t = millis();    
+      
       if( (t-playframeTime)>=playRate )
       {
           playframeTime = t;
@@ -754,20 +1122,6 @@ void update()
 
 void controlEvent(ControlEvent evt)
 {
- 
-    if(evt.isGroup()) //dropdown list
-    {
-      ControlGroup g = evt.group();
-      if( g == animSpeed )
-      {
-        int line = (int)g.value();
-        if(line >= 0 && line < speeds.length)
-        {
-          animSpeedSelected = speeds[line];
-          println("-> selected new animation speed: " + animSpeed);
-        }
-      }
-    }
     if(!evt.isController())
       return;
       
@@ -804,16 +1158,37 @@ void controlEvent(ControlEvent evt)
         setLoop(false);
       }
     }
+    else if(c == speedIncrease)
+    {
+      animSpeedSelected += 0.1;
+      if(animSpeedSelected > 1.5)
+      {
+        animSpeedSelected = 1.5;
+      }
+      String text = String.format("%.1f", animSpeedSelected);
+      speedLabel.setText(text);
+      setSpeedToServos(animSpeedSelected);
+    }
+    else if(c == speedDecrease)
+    {
+      animSpeedSelected -= 0.1;
+      if(animSpeedSelected < 0.2)
+      {
+        animSpeedSelected = 0.2;
+      }
+      String text = String.format("%.1f", animSpeedSelected);
+      speedLabel.setText(text);
+    }
     else if(addr.startsWith("/MOTORTOGGLE_"))
     {
       // we don't need to do anything
-      /*for(int i=0; i<motorToggles.length; i++)
+      for(int i=0; i<motorToggles.length; i++)
       {
         if(c == motorToggles[i])
         {
           selectForPlaying(motorToggles[i].getState(),i);
         }
-      }*/
+      }
     }
 
 }

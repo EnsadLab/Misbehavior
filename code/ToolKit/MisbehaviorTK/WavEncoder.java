@@ -107,7 +107,7 @@ public class WavEncoder{
 
     try
     {
-      int sampleRate = 50;
+      int sampleRate = 40; // 1000/25
       double duration = numFrames/sampleRate;
       int nbChannels = values.length;
       WavFile wavFile = WavFile.newWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/"+path), nbChannels, numFrames, 16, sampleRate);

@@ -4,12 +4,9 @@
    <!--<arduino port="/dev/tty.usbserial-A9SF3D91" bauds = "115200" />-->
    <motor id="7" mode="joint"/>
    <motor id="17" mode= "wheel"/>
-   <motor id="15" mode= "wheel"/>
-   <motor id="77" mode="wheel"/>
-   <motor id="30" mode="wheel"/>
-   <motor id="36" mode= "wheel"/>
-   <anim path="anims/anim1_m0_m1.wav"/>
-   <anim path="anims/anim2_m0_m1_m2_m3.wav"/>
-   <anim path="anims/anim3_m0_m2.wav"/>
+   <motor id="15" mode= "joint"/>
+   <motor id="9" mode="wheel"/>
+   <!--<motor id="30" mode="wheel"/>
+   <motor id="36" mode= "wheel"/>-->
    <midi in="SLIDER/KNOB" out="CTRL"/>
  </config>

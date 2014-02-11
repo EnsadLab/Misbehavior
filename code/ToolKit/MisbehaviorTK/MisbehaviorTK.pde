@@ -34,7 +34,7 @@ int[] motorIds;
 int[] jointwheelmodes;
 String[] animPaths;
 int nbAnims = 0;
-int nbAnimsMax = 30;
+int nbAnimsMax = 27;
 
 String arduinoPort = "COM13";
 int arduinoBaudRate = 57600;
@@ -42,8 +42,10 @@ int arduinoBaudRate = 57600;
 String midiInDevice = null; 
 String midiOutDevice = null;
 
-int marginLeft = 50;
+int marginLeft = 40;
 int marginTop = 50;
+
+String animConfigPath = "config_ANIM.xml";
 
 
 void setup()
@@ -67,11 +69,15 @@ void setup()
 
   cp5.addTab(tabNameEvent)
      .activateEvent(true)
+     //.setColorLabel(color(255))
+     //.setColorActive(color(200,200,200))
      .setId(3);
   
   cp5.addTab(tabNameAdvanced)
      .activateEvent(true)
-     .setId(2);
+     .setId(2)
+     .hide()
+     ;
      //.setColorBackground(color(255, 160, 100))
      //.setColorLabel(color(0,0,0))
      //.setColorActive(color(255,128,255));
@@ -79,14 +85,15 @@ void setup()
      .setLabel("ANIMATION")
      .activateEvent(true)
      .setMoveable(true)
-     .setId(1);
+     .setId(1)
      //.setColorBackground(color(0, 160, 100))
      //.setColorLabel(color(255))
-     //.setColorActive(color(255,128,0));
-
+     //.setColorActive(color(0,138,98));
+     ;
   //loadConfig("config.xml");
   //loadConfig("config_dib.xml");
   loadConfig("config_cbu.xml");
+  loadAnim(animConfigPath);
   loadMidiConfig("config_MIDI.xml"); //will change : sensors  
   
   int wFirstColumn = 160;
@@ -127,7 +134,7 @@ void setup()
     openMidi(midiInDevice,midiOutDevice);
 
   String[] fonts = PFont.list();
-  println(fonts);
+  //println(fonts);
   
   //threadTest = new ThreadTest(); //,"le thread");
   //threadTest.start();
@@ -200,7 +207,22 @@ void loadConfig(String xmlFilePath)
     println("-> adding motor with id " + id + " in mode " + jointwheelmode);
   }
   
-  children = xml.getChildren("anim");
+  try{midiInDevice  = xml.getChild("midi").getString("in");}catch(Exception e){}
+  try{midiOutDevice = xml.getChild("midi").getString("out");}catch(Exception e){}
+  println("MIDIin  "+midiInDevice);
+  println("MIDIout "+midiOutDevice);  
+}
+
+void loadAnim(String xmlFilePath)
+{
+  println("Loading ANIM Config file...");
+  XML xml = loadXML(xmlFilePath);
+  if(xml==null)
+  {
+    println("[ERROR]: config ANIM file " + xmlFilePath + " could not be loaded");
+    return;    
+  }
+  XML[] children = xml.getChildren("anim");
   nbAnims = children.length;
   animPaths = new String[nbAnims];
   //animPaths = new String[nbAnimsMax];
@@ -211,10 +233,6 @@ void loadConfig(String xmlFilePath)
     println("-> adding anim with path " + animPath);
   }
   
-  try{midiInDevice  = xml.getChild("midi").getString("in");}catch(Exception e){}
-  try{midiOutDevice = xml.getChild("midi").getString("out");}catch(Exception e){}
-  println("MIDIin  "+midiInDevice);
-  println("MIDIout "+midiOutDevice);  
 }
 
 void controlEvent(ControlEvent evt)
@@ -264,6 +282,8 @@ void keyReleased()
 
 void keyPressed()
 { 
+  
+  
   //print("KEY "+(int)key+" "+(int)keyCode);
   //if(key>32)print(" "+key);
   //if( (keyCode>32)&&(keyCode<256) )print(" "+(char)keyCode);
@@ -277,6 +297,19 @@ void keyPressed()
       case CONTROL: keyModifier |= 2; break;
       case ALT: keyModifier     |= 4; break;
     }
+
+    if(keyCode == SHIFT) // TODO: @Didier: on peut changer is jamais... j'y voyais pas très clair ds cette methode
+    {
+      if(cp5.getTab(tabNameAdvanced).isVisible())
+      {
+        cp5.getTab(tabNameAdvanced).hide();
+      }
+      else
+      {
+        cp5.getTab(tabNameAdvanced).show();
+      }
+    }
+    
   }
   else if(keyModifier!=0) //GRRRR SHIFT CTRL ALT
   {
