@@ -227,11 +227,11 @@ void midiValue(float value)
   //scriptConsole.append("midi "+value);
   if(modeJoinWheel == 0)
   {
-    sliderWheelGoal.setValue(value*1024.9);
+    sliderWheelGoal.setValue(value*512.0);
   }
   else
   {
-    sliderWheelGoal.setValue(value*512.0);
+    sliderWheelGoal.setValue(value*1024.0);
   }
 }
 
