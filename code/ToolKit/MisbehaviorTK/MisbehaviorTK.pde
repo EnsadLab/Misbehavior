@@ -91,8 +91,8 @@ void setup()
      //.setColorActive(color(0,138,98));
      ;
   //loadConfig("config.xml");
-  loadConfig("config_dib.xml");
-  //loadConfig("config_cbu.xml");
+  //loadConfig("config_dib.xml");
+  loadConfig("config_cbu.xml");
   loadAnim(animConfigPath);
   loadMidiConfig("config_MIDI.xml"); //will change : sensors  
   

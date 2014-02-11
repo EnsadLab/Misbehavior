@@ -70,10 +70,13 @@ class ServoGUIarray implements ControlListener
         servoGUIs[i].setValue(reg,val);
     }        
   }
-
-  void midiValue(int imot,int value)
+  
+  void midiValue( int imotor, float val )
   {
-    try{servoGUIs[imot].midiValue( value ); }
+    try
+    {
+      servoGUIs[imotor].midiValue( val ); 
+    }
     catch(Exception e){}
   }
   
@@ -216,10 +219,17 @@ void update()
 {
 }
 
-void midiValue(int value)
+void midiValue(float value)
 {
   //scriptConsole.append("midi "+value);
-  knob.setValue( -(value-64)<<3);
+  if(modeJoinWheel == 0)
+  {
+    sliderWheelGoal.setValue(value*1024.9);
+  }
+  else
+  {
+    sliderWheelGoal.setValue(value*512.0);
+  }
 }
 
 //AREVOIR
