@@ -40,9 +40,12 @@ void controllerChange(int channel, int num, int value)
       //... appeler la fonction correspondate ... wheelGoal
     }
     //TODO
+    //potars?
+    //Bouton:
     // stop
-    // mode
+    // mode Wheel/joint
     // reverse
+    //
 }
 
 /*
