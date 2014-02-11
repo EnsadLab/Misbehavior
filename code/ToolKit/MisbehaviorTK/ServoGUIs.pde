@@ -8,6 +8,7 @@ class ServoGUIarray implements ControlListener
   ServoGUIarray(int[] motorIds, int[] jointwheelmode)
   {
     servoGUIs = new ServoGUI[motorIds.length];
+    
     for(int i=0;i<motorIds.length;i++)
     {
       servoGUIs[i] = new ServoGUI(i,motorIds[i], jointwheelmode[i]);
@@ -20,18 +21,21 @@ class ServoGUIarray implements ControlListener
     motorColumnWidth = 0;
     for(int i=0;i<servoGUIs.length;i++)
     {
-      servoGUIs[i].buildMotorGUI(x,y-5,tabName);
+      servoGUIs[i].buildMotorGUI(x,y,tabName);
       x+=30;
       motorColumnWidth += 30;
     }
+    motorColumnWidth -= 10;
     
   }
 
   // constructs the advanced tab gui
   void buildGUI(int x,int y, String tabName)
   {
+    int nbServos = servoArray.getNbServos();
+    
     int ix=300;
-    for(int i=0;i<6;i++)
+    for(int i=0;i<nbServos;i++)
     {
       Textfield tfID =cp5.addTextfield("DXLID"+i)
       .setId(i)
@@ -39,7 +43,7 @@ class ServoGUIarray implements ControlListener
       .setWidth(30)
       .setInputFilter(Textfield.INTEGER)
       .setAutoClear(false)
-         .setValue("?")
+      .setValue( ""+servoArray.getByIndex(i).dxlId )
       .moveTo(tabName);
      tfID.getCaptionLabel().align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER)
          .setText(" MOTOR  "+i+"  ").setColor(0xFF000000)
@@ -126,6 +130,8 @@ class ServoGUI implements ControlListener
   Slider advSliderGoal;
   Slider advSliderSpeed;
   Slider advSliderWheel;
+  Button stopVelocityButton;
+  Slider sliderWheelGoal;
   //Knob watch;
  
 
@@ -144,10 +150,19 @@ ServoDxl getServo()
 
 void buildMotorGUI(int x, int y, String tabName)
 {
-    Slider slider = cp5.addSlider("SLIDERMOTORVAL"+servoIndex)
+  
+    
+   stopVelocityButton = cp5.addButton("STOPBUTTON"+servoIndex)
+                .setPosition(x,y-30)
+                .setSize(20,20)
+                .moveTo(tabName)
+                .setImages(loadImage("stopVelButtonOff.jpg"),loadImage("stopVelButtonOver.jpg"),loadImage("stopVelButtonOn.jpg"))
+                .addListener(this)
+                ;
+  
+    sliderWheelGoal = cp5.addSlider("SLIDERMOTORVAL"+servoIndex)
      .setPosition(x,y)
      .setSize(20,150)
-     .setRange(-1023,1023)
      .setValue(0)
      .moveTo(tabName)
      .setColorForeground(0xFF792e3f)
@@ -156,17 +171,25 @@ void buildMotorGUI(int x, int y, String tabName)
      //.showTickMarks(true);
      //.setNumberOfTickMarks(1024)
      ;
-    slider.addListener(this);
+    if(modeJoinWheel == 0) // JOINT
+    {
+      sliderWheelGoal.setRange(-512,512);
+    }
+    else // WHEEL
+    {
+      sliderWheelGoal.setRange(-1023,1023);
+    }
+    sliderWheelGoal.addListener(this);
     
-    slider.getValueLabel().setColor(0xFFFF0000).setFont(createFont("Verdana",8)).align(ControlP5.CENTER, ControlP5.TOP_OUTSIDE);//.setPaddingX(2);
+    sliderWheelGoal.getValueLabel().setColor(0xFFFF0000).setFont(createFont("Verdana",8)).align(ControlP5.CENTER, ControlP5.TOP_OUTSIDE);//.setPaddingX(2);
     //slider.getValueLabel().setColor(0xFF000000);//.align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
     if(modeJoinWheel == 0)
     {
-      slider.getCaptionLabel().setColor(0xFFFFFFFF).setFont(createFont("Verdana",14)).setText("J").align(ControlP5.CENTER, ControlP5.BOTTOM);//.setOffsetY(-20);
+      sliderWheelGoal.getCaptionLabel().setColor(0xFFFFFFFF).setFont(createFont("Verdana",14)).setText("J").align(ControlP5.CENTER, ControlP5.BOTTOM);//.setOffsetY(-20);
     }
     else
     {
-      slider.getCaptionLabel().setColor(0xFFFFFFFF).setFont(createFont("Verdana",14)).setText("W").align(ControlP5.CENTER, ControlP5.BOTTOM);//.setOffsetY(-20);
+      sliderWheelGoal.getCaptionLabel().setColor(0xFFFFFFFF).setFont(createFont("Verdana",14)).setText("W").align(ControlP5.CENTER, ControlP5.BOTTOM);//.setOffsetY(-20);
     }  
 }
 
@@ -319,6 +342,13 @@ void controlEvent(ControlEvent evt)
          servo.relax( c.getValue() > 0.5 );
      }
   }
+  else if(addr.startsWith("/STOPBUTTON"))
+  {
+    if(sliderWheelGoal != null)
+    {
+      sliderWheelGoal.setValue(0); 
+    }
+  }
   else if(addr.startsWith("/SLIDERMOTORVAL"))
   {
      ServoDxl servo = servoArray.getByIndex(servoIndex);
@@ -326,10 +356,20 @@ void controlEvent(ControlEvent evt)
      {
        if(servo.isWheelMode())
        {
+         if(servo.playing) // stop the animation if there is one running TODO: do it also when controlling from MIDI         
+         {
+           servo.tellToAnimServoIsFinished();
+           servo.stopPlaying(false);
+         }
          servo.setSpeed( (int)c.getValue());
        }
        else
        {
+         if(servo.playing) // stop the animation if there is one running TODO: do it also when controlling from MIDI    
+         {
+           servo.tellToAnimServoIsFinished();
+           servo.stopPlaying(false);
+         }
          servo.setGoal( (int)c.getValue());
        }
      }

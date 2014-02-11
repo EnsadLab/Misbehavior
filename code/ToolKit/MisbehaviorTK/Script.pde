@@ -322,7 +322,7 @@ class Script
   void stop()
   {
     execMode = 0;
-    servoArray.getByIndex(index).stopPlaying();
+    servoArray.getByIndex(index).stopPlaying(true); // argument boolean tells whether the velocity should become zero in mode wheel
     arduino.serialSend("Q "+servoIndex+"\n");    
   }
 

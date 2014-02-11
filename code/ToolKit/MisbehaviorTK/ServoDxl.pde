@@ -11,14 +11,17 @@ class ServoKey
 class ServoArray
 {
   ServoDxl[] servos;
+  int[] dxlIds;   //tmp : a copy from initialization
   long frameTime;
   long recRate;
 
   ServoArray(int[] motorIds, int[] jointwheelmode)
   {
     servos = new ServoDxl[motorIds.length];
+    dxlIds = new int[motorIds.length];
     for(int i=0;i<motorIds.length;i++)
     {
+      dxlIds[i] = motorIds[i];
       servos[i] = new ServoDxl(i,motorIds[i], jointwheelmode[i]);
       servos[i].index = i;
     }
@@ -29,6 +32,11 @@ class ServoArray
  ServoDxl[] getServos()
  {
    return servos;
+ }
+ 
+ int getNbServos()
+ {
+   return servos.length;
  }
 
   ServoDxl getByIndex(int i)
@@ -53,7 +61,10 @@ class ServoArray
     for(int i=0;i<servos.length;i++) 
     {
       if(servos[i].dxlId>0)
-        arduino.serialSend("EI "+i+" "+servos[i].dxlId+"\n");      
+      {
+        arduino.serialSend("EI "+i+" "+servos[i].dxlId+"\n");
+        delay(40); //take your time
+      }      
     }        
   }
 
@@ -65,7 +76,14 @@ class ServoArray
     {
       if(servos[i].dxlId>0)
       {
-        servos[i].setWheelMode(true);
+        if(servos[i].mode == 0)
+        {
+          servos[i].setWheelMode(false);
+        }
+        else
+        {
+          servos[i].setWheelMode(true);
+        }
         servos[i].relax(false);
       }
     }        
@@ -150,6 +168,7 @@ class ServoDxl
   boolean readyForRecording = false;
   boolean enableRecording = false;
   boolean playing = false;
+  int oldGoal = 0;
   boolean loop = false;
   int currFrame = 0;
   
@@ -162,8 +181,8 @@ class ServoDxl
   ServoKey[] recValue;
   long recframeTime;
   long playframeTime;
-  long recRate = 20;
-  long playRate = 20;
+  long recRate = 25;
+  long playRate = 25;
   Anim anim = null;
 
   int scriptIndex = 0;  //future work: several scripts ???
@@ -177,17 +196,9 @@ class ServoDxl
       recValue[i]=new ServoKey();
       
     setDxlId(id);   
-    
-    // TODO: tell the servo to be on mode
-    // TODO: INUTILE, car quand CM9 connexion est fait, tous les moteurs sont mis à wheel par défaut.... a changer
-    if(jointwheelmode == 0)
-    {
-      setWheelMode(false);
-    }
-    else
-    {
-      setWheelMode(true);
-    }
+    if(jointwheelmode == 0) setWheelMode(false);
+    else setWheelMode(true);
+
  }
 
   void setDxlId(int id)
@@ -248,7 +259,7 @@ class ServoDxl
     }
     else
     {
-      recordValues = append(recordValues,(float)goal/512.0);
+      recordValues = append(recordValues,(float)goal*2.0/1024.0-1.0);
       //println("record goal: " + goal);
     }
   }
@@ -276,10 +287,11 @@ class ServoDxl
     }
     anim = a;
     loop = l;
-    playRate = (int)((float)recRate*speed);
+    playRate = (int)((float)recRate/speed);
     println("-> animation playrate = " + playRate);
     playing = true;
     currFrame = 0;
+    oldGoal = goal;
     animValues = new int[val.length];
     for(int i=0; i< val.length; i++)
     {
@@ -301,6 +313,7 @@ class ServoDxl
   void playFrame(int frame)
   {
     
+    //println("Servo " + index + " f: " + frame + " " + animValues.length);
     if(frame <  animValues.length)
     {
       int v = animValues[frame];
@@ -312,13 +325,17 @@ class ServoDxl
       else
       {
         //println("goal: " + v);
-        setGoal(v);
+        if((v+512) != goal)
+        {
+          setGoal(v);
+        }
       }
     }
     else if(frame == animValues.length)
     {
       if(loop)
       {
+        println("LOOP: anim is finished on servo " + index);
         currFrame = 0;
         if(anim != null)
         {
@@ -327,22 +344,31 @@ class ServoDxl
       }
       else
       {
+        println("anim is finished on servo " + index);
         if(anim != null)
         {
-          anim.playingIsFinished();
+           anim.playingIsFinished();
         }
-        stopPlaying();
+        stopPlaying(true);
       }
     }
     
   }
   
-  void stopPlaying()
+  void tellToAnimServoIsFinished()
+  {
+    if(anim != null)
+    {
+      anim.servoStoppedPlaying(index);
+    }
+  }
+  
+  void stopPlaying(boolean resetVelocity)
   {
     playing = false;
     currFrame = 0;
     anim = null;
-    if(isWheelMode())
+    if(isWheelMode() && resetVelocity)
     {
       setSpeed(0);
     }
@@ -531,13 +557,15 @@ class ServoDxl
   
   void setGoal(int val)
   {
+    //relax(false);
+    val += 512;
     goal = val;
+    //println("setgoal " + val);
     arduino.serialSend("EW "+index+" 30 "+val+"\n");
     delay(1);
   }
   void setSpeed(int val)
   {
-    //println("setSpeed "+val);
     speed = val;
     wantedSpeed = val;
     //println("setSpeed: " + val);
