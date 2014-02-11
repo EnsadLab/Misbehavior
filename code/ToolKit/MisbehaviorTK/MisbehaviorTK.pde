@@ -91,8 +91,8 @@ void setup()
      //.setColorActive(color(0,138,98));
      ;
   //loadConfig("config.xml");
-  //loadConfig("config_dib.xml");
-  loadConfig("config_cbu.xml");
+  loadConfig("config_dib.xml");
+  //loadConfig("config_cbu.xml");
   loadAnim(animConfigPath);
   loadMidiConfig("config_MIDI.xml"); //will change : sensors  
   
@@ -122,7 +122,7 @@ void setup()
   scriptArray = new ScriptArray(motorIds.length );
   scriptArray.buildGUI(260,70,480,tabNameAdvanced);  //TODO ... more than 2 scripts
   scriptArray.scriptAt(0).load("scripts/Script00.txt"); //<<< TODO config.xml
- // scriptArray.scriptAt(1).load("scripts/Script00.txt"); //<<< TODO config.xml
+  //scriptArray.scriptAt(1).load("scripts/Script00.txt"); //<<< TODO config.xml
   
   sensorArray = new SensorArray();
   sensorArray.loadConfig("config_MIDI.xml");
@@ -133,7 +133,11 @@ void setup()
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config
     openMidi(midiInDevice,midiOutDevice);
 
+<<<<<<< HEAD
   String[] fonts = PFont.list();
+=======
+  //String[] fonts = PFont.list();
+>>>>>>> bce61615cc040c566ed19bd8a9acb4007b8ed30f
   //println(fonts);
   
   //threadTest = new ThreadTest(); //,"le thread");

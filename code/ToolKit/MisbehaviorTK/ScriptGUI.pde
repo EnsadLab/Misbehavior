@@ -7,8 +7,9 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   int scriptIndex = 0;
   int idFile   = 1;
   long clickTime = 0; //pour double click
-  Textfield textFile    = null;
-
+    
+  RadioButton radioScript;
+  Textfield textFile;
   Slider advSliderGoal;
   Slider advSliderSpeed;
   Slider advSliderWheel;
@@ -33,10 +34,43 @@ class ScriptGUI implements ControlListener //implements CallbackListener
     script = scr;
     scriptIndex = numScriptGUI++;
   }
-    
+      
   void build(int x,int y,int h,String tabName)
   {
     idFile = globalID++;
+    radioScript = cp5.addRadioButton("SCRIPTSEL"+scriptIndex)
+           .setPosition(x,y)
+           .setSize(20,15)
+           .setColorBackground(0xFFC0C0C0)
+           .setColorForeground(0xFF505080)
+           .setColorActive(0xFF404080)
+           .setColorLabel(color(0))
+           .setItemsPerRow(6)
+           .setSpacingColumn(36)
+           .addItem("SRADIO0"+scriptIndex,0)
+           .addItem("SRADIO1"+scriptIndex,1)
+           .addItem("SRADIO2"+scriptIndex,2)
+           .addItem("SRADIO3"+scriptIndex,3)
+           .addItem("SRADIO4"+scriptIndex,4)
+           .addItem("SRADIO5"+scriptIndex,5)
+           .addListener(this) //GRRRRR no event ???
+           .moveTo(tabName)
+           ;
+     
+     for(int i=0;i<6;i++)
+     {
+       Toggle t = radioScript.getItem(i);
+       t.addListener(this);       
+       Label lb = t.captionLabel();
+       lb.setText("M "+i);
+       //lb.setColorBackground(0xFFC0C0C0);
+       lb.style().moveMargin(-7,0,0,-3);
+       lb.style().movePadding(7,0,0,3);
+       //lb.style().backgroundWidth = 45;
+       //lb.style().backgroundHeight = 13;       
+     }
+    
+    
     
      /*   
     CheckBox chkBox =
@@ -65,8 +99,8 @@ class ScriptGUI implements ControlListener //implements CallbackListener
         .align(ControlP5.CENTER,ControlP5.CENTER);
     }
     */
-    //y+=30;
     
+    y+=30;
     textFile = cp5.addTextfield("Script "+scriptIndex)
                   .setId(idFile)
                   .setPosition(x,y)
@@ -207,6 +241,18 @@ class ScriptGUI implements ControlListener //implements CallbackListener
 //   cp5.addCallback(this);    
   }
   
+  void changeScript(int other)
+  {
+    stop(); //... ??? TODO dont stop ???
+    clearList();
+    clearConsole();
+    Script scr = scriptArray.scriptAt(other);
+    script = scr;
+    if( scr != null )
+      scr.setGUI(this);
+  }
+
+  
   void clearList()
   {
     nbLines  = 0;
@@ -309,8 +355,14 @@ class ScriptGUI implements ControlListener //implements CallbackListener
 
   void controlEvent(ControlEvent evt)
   {
+    println("evt:"+evt.getName());
+      if( evt.isFrom(radioScript) )
+         println("RADIO");
+
     if (evt.isGroup())
-    {      
+    { 
+       println("is group");
+      
       ControlGroup g = evt.group();
       if( g == listbox )
       {
@@ -352,9 +404,12 @@ class ScriptGUI implements ControlListener //implements CallbackListener
           if(servo != null)
             servo.setWheelSpeed((int)c.getValue());
       }
-
-
-      //else if(
+      else if( c.getAddress().startsWith("/SRADIO") )
+      {
+        println("dbg radio "+radioScript.getValue() ); //ok
+        changeScript( (int)radioScript.getValue() );
+        
+      }
     }
   }
   

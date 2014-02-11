@@ -2,7 +2,7 @@ import java.io.*;
 
 
 public class WavEncoder{
-  
+    
   WavEncoder()
   { 
   
@@ -12,7 +12,8 @@ public class WavEncoder{
   {
      try
       {
-        WavFile wavFile = WavFile.openWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/"+path));
+        //DIB WavFile wavFile = WavFile.openWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/"+path));
+        WavFile wavFile = WavFile.openWavFile(new File(path.trim()));
        
         // Display information about the wav file
         wavFile.display();
@@ -58,7 +59,8 @@ public class WavEncoder{
     try
       {
          // Open the wav file specified as the first argument
-         WavFile wavFile = WavFile.openWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/test.wav"));//new File(args[0]));
+         //WavFile wavFile = WavFile.openWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/test.wav"));//new File(args[0]));
+         WavFile wavFile = WavFile.openWavFile(new File("/anims/test.wav"));//new File(args[0]));
 
          // Display information about the wav file
          wavFile.display();
@@ -110,7 +112,8 @@ public class WavEncoder{
       int sampleRate = 40; // 1000/25
       double duration = numFrames/sampleRate;
       int nbChannels = values.length;
-      WavFile wavFile = WavFile.newWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/"+path), nbChannels, numFrames, 16, sampleRate);
+      //WavFile wavFile = WavFile.newWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/"+path), nbChannels, numFrames, 16, sampleRate);
+      WavFile wavFile = WavFile.newWavFile(new File("/"+path), nbChannels, numFrames, 16, sampleRate);
        // Create a buffer of 100 frames
       double[][] buffer = new double[nbChannels][100];
 
@@ -196,7 +199,8 @@ public class WavEncoder{
       
 
       // Create a wav file with the name specified as the first argument
-      WavFile wavFile = WavFile.newWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/testWrite.wav"), 2, numFrames, 16, sampleRate);
+      //WavFile wavFile = WavFile.newWavFile(new File("/Users/cecbucher/Projects/Diip/Misbehavior/code/ToolKit/MisbehaviorTK/testWrite.wav"), 2, numFrames, 16, sampleRate);
+      WavFile wavFile = WavFile.newWavFile(new File("/anims/testWrite.wav"), 2, numFrames, 16, sampleRate);
 
       // Create a buffer of 100 frames
       double[][] buffer = new double[2][100];

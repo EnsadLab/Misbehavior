@@ -50,22 +50,29 @@ class Token
 
 class ScriptArray
 {
-  Script    scriptList[];  
+  Script    scriptList[];
+  ScriptGUI scriptGUIs[];
+
+  
   ScriptArray(int nb)
   {
     scriptList = new Script[nb];
+    scriptGUIs = new ScriptGUI[2];
+    
     for(int i=0;i<nb;i++)
       scriptList[i]= new Script(i);
   }
   void buildGUI(int x,int y,int h,String tabname)
   {
+    scriptGUIs[0] = new ScriptGUI(scriptList[0]);
+    scriptGUIs[0].build(x,y,h,tabname);
+    if( scriptList[0] != null)
+      scriptList[0].currentGUI = scriptGUIs[0];
     
-    
-    for(int i=0;i<scriptList.length;i++)
-    {
-      scriptList[i].buildGUI(x,y,h,tabname);
-      x+=380;
-    }
+    scriptGUIs[1] = new ScriptGUI(scriptList[1]);
+    scriptGUIs[1].build(x+380,y,h,tabname);
+    if( scriptList[1] != null)
+      scriptList[1].currentGUI = scriptGUIs[1];
   }
   
   Script scriptAt(int i)
@@ -73,11 +80,13 @@ class ScriptArray
     if(i<scriptList.length) return scriptList[i];
     return null;
   }
+  /*
   ScriptGUI guiAt(int i)
   {
     if(i<scriptList.length) return scriptList[i].gui;
     return null;
-  }  
+  } 
+ */ 
   void update()
   {
     for(int i=0;i<scriptList.length;i++)
@@ -178,9 +187,10 @@ class ScriptStack
 
 class Script
 {
-  ScriptGUI gui = null;
+  ScriptGUI currentGUI = null;
   
   int index = 0;
+  String fileName = null;
   static final int STACK_MAX = 128;
   int frameTime = 0;
   int pauseDuration = 1;
@@ -213,18 +223,19 @@ class Script
       stack[i]=new ScriptStack();
   }
   
-  void buildGUI(int x,int y,int h,String tabName)
+  void setGUI( ScriptGUI otherGUI )
   {
-    gui = new ScriptGUI(this);
-    gui.build(x,y,h,tabName);
+    currentGUI = otherGUI;
+    if(fileName != null )
+      reload(); //mmmm  -> stop !!!
   }
-  
+
   void dbg(String txt)
   {
     //scriptConsole.append(txt);
     //scriptGuiArray[index].print(txt);
-    if(gui!=null)
-      gui.print(txt);
+    if(currentGUI!=null)
+      currentGUI.print(txt);
   }
   
   void send( int tok,int value )
@@ -374,8 +385,8 @@ void update()
     stepToken(4);
     dbg("...");
   }
-  if( gui!=null )
-    gui.update();
+  if( currentGUI!=null )
+    currentGUI.update();
 }
 
 void setReady()
@@ -610,17 +621,26 @@ boolean execTorque()
 
 
 //===========================PARSE
+void reload()
+{
+  load(fileName);  
+}
+
 void load(String name)
 {
   println("scr loading "+name);
+  fileName = name;
   stop();
   iToken = -1;
-  if(gui!=null)
+  if(currentGUI!=null)
   {
-    gui.clearList();
-    gui.clearConsole();
-    gui.setName(name);
+    currentGUI.clearList();
+    currentGUI.clearConsole();
+    currentGUI.setName(name);
   }
+  
+  if(name==null)
+    return;
   
   try{ scriptLines = loadStrings(name); }
   catch(Exception e){ println("FILE ERROR");return;} //TODO ... clear tokens ???
@@ -631,10 +651,10 @@ void load(String name)
     
   parse();
   
-  if(gui!=null)
+  if(currentGUI!=null)
   {
       for(int i=0;i<scriptLines.length;i++)
-        gui.addLine(scriptLines[i]);
+        currentGUI.addLine(scriptLines[i]);
   }
 }
 
@@ -655,7 +675,7 @@ String getLine(int iline)
 void parse()
 {
   //scriptConsole.clear();
-  try{ gui.clearConsole(); }
+  try{ currentGUI.clearConsole(); }
   catch(Exception e){}
    
   iChar = 0;

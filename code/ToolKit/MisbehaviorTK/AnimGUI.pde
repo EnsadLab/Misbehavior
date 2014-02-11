@@ -12,7 +12,6 @@ PImage playImage;
 
 class AnimGUI implements ControlListener
 {
- 
   Anim[] anims;// = new Anim[nbAnimsMax];
   Toggle recButtonPlayPause;
   Toggle[] motorToggles;
@@ -32,9 +31,7 @@ class AnimGUI implements ControlListener
   {
   
   }
-  
-  
-  
+    
   void buildGUI(int x, int y, String tabName, int animLabelColumnW)
   {
     
@@ -297,6 +294,7 @@ class AnimGUI implements ControlListener
     }
   }
   
+  
   void startRecording()
   {
     
@@ -369,7 +367,7 @@ class AnimGUI implements ControlListener
     // save wav
     recordWavPath += ".wav";
     if(wavEncoder == null) return;
-    wavEncoder.writeWav(recordWavPath,recordValues[0].length,recordValues); // we know we have at least one chanel since nbActivatedMotors > 0
+    wavEncoder.writeWav(sketchPath+"/"+recordWavPath,recordValues[0].length,recordValues); // we know we have at least one chanel since nbActivatedMotors > 0
     
     // activate anim
     index = 0;
@@ -827,7 +825,7 @@ void startPlaying()
 {
   if(!wavPath.equals(""))
   {
-    double[][] values = wavEncoder.readWav(wavPath); 
+    double[][] values = wavEncoder.readWav(sketchPath+"/"+wavPath); 
 
     int nbChannels = values.length;
     if(nbChannels > 0)

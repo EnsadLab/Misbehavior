@@ -2,14 +2,15 @@
  <config>
    <arduino port="COM10" bauds="115200" />
    <!-- arduino port="COM10" bauds="57600" / -->
-   <motor id="1"/>
-   <motor id="2"/>
-   <anim path="anims/animTemp.json"/>
-   <anim path="anims/anim.json"/>
-   <anim path="anims/anim2.json"/>
-   <anim path="anims/anim3.json"/>
-   <anim path="anims/anim3.json"/>
-   <anim path="anims/anim_13-1_23-11.json"/>
+   <motor id="1" mode="wheel"/>
+   <motor id="2" mode="wheel"/>
+   <motor id="4" mode="wheel"/>
+   <motor id="16" mode="wheel"/>
+   <motor id="13" mode="wheel"/>
+   <motor id="7" mode="wheel"/>
+   <anim path="anims/anim1_m0_m1.wav"/>
+   <anim path="anims/anim2_m0_m1_m2_m3.wav"/>
+   <anim path="anims/anim3_m0_m2.wav"/>
    <!--midi in="BCR2000" out="BCR2000"/ -->   
    <midi in="nanoKONTROL2" out="nanoKONTROL2"/>   
  </config>
