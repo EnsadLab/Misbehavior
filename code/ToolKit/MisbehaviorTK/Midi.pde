@@ -28,6 +28,21 @@ void noteOff(int channel, int pitch, int vel)
 void controllerChange(int channel, int num, int value)
 {
     println("CC "+num+":"+value);
+    if( num<8) //ça tombe bien : num = Servo index
+    {
+      float fval = 0;
+      if( value < 64 )
+        fval = (float)(value-64)/64.0;
+      else if(value > 64 )
+        fval = (float)(value-64)/63.0;
+
+      println("dbg midi "+num+","+fval);
+      //... appeler la fonction correspondate ... wheelGoal
+    }
+    //TODO
+    // stop
+    // mode
+    // reverse
 }
 
 /*
