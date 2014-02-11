@@ -8,6 +8,7 @@ class ServoGUIarray implements ControlListener
   ServoGUIarray(int[] motorIds, int[] jointwheelmode)
   {
     servoGUIs = new ServoGUI[motorIds.length];
+    
     for(int i=0;i<motorIds.length;i++)
     {
       servoGUIs[i] = new ServoGUI(i,motorIds[i], jointwheelmode[i]);
@@ -31,8 +32,10 @@ class ServoGUIarray implements ControlListener
   // constructs the advanced tab gui
   void buildGUI(int x,int y, String tabName)
   {
+    int nbServos = servoArray.getNbServos();
+    
     int ix=300;
-    for(int i=0;i<6;i++)
+    for(int i=0;i<nbServos;i++)
     {
       Textfield tfID =cp5.addTextfield("DXLID"+i)
       .setId(i)
@@ -40,7 +43,7 @@ class ServoGUIarray implements ControlListener
       .setWidth(30)
       .setInputFilter(Textfield.INTEGER)
       .setAutoClear(false)
-         .setValue("?")
+      .setValue( ""+servoArray.getByIndex(i).dxlId )
       .moveTo(tabName);
      tfID.getCaptionLabel().align(ControlP5.LEFT_OUTSIDE,ControlP5.CENTER)
          .setText(" MOTOR  "+i+"  ").setColor(0xFF000000)

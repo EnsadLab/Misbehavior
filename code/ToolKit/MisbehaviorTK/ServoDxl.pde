@@ -11,14 +11,17 @@ class ServoKey
 class ServoArray
 {
   ServoDxl[] servos;
+  int[] dxlIds;   //tmp : a copy from initialization
   long frameTime;
   long recRate;
 
   ServoArray(int[] motorIds, int[] jointwheelmode)
   {
     servos = new ServoDxl[motorIds.length];
+    dxlIds = new int[motorIds.length];
     for(int i=0;i<motorIds.length;i++)
     {
+      dxlIds[i] = motorIds[i];
       servos[i] = new ServoDxl(i,motorIds[i], jointwheelmode[i]);
       servos[i].index = i;
     }
@@ -29,6 +32,11 @@ class ServoArray
  ServoDxl[] getServos()
  {
    return servos;
+ }
+ 
+ int getNbServos()
+ {
+   return servos.length;
  }
 
   ServoDxl getByIndex(int i)
@@ -53,7 +61,10 @@ class ServoArray
     for(int i=0;i<servos.length;i++) 
     {
       if(servos[i].dxlId>0)
-        arduino.serialSend("EI "+i+" "+servos[i].dxlId+"\n");      
+      {
+        arduino.serialSend("EI "+i+" "+servos[i].dxlId+"\n");
+        delay(40); //take your time
+      }      
     }        
   }
 

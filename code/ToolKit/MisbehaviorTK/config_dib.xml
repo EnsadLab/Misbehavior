@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
  <config>
-   <arduino port="COM10" bauds="115200" />
-   <!-- arduino port="COM10" bauds="57600" / -->
+   <arduino port="COM13" bauds="115200" />
+   <!-- arduino port="COM13" bauds="57600" / -->
    <motor id="1" mode="wheel"/>
    <motor id="2" mode="wheel"/>
    <motor id="4" mode="wheel"/>

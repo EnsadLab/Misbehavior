@@ -1,6 +1,4 @@
-//String ???
-
-#include "Anim.h"
+//no String ???
 
 boolean echo = false;
 

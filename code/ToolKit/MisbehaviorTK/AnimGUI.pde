@@ -325,6 +325,7 @@ class AnimGUI implements ControlListener
   
   void stopRecording(String recordLabel)
   {
+    println("dbg STOP RECORDING 1");
     if(recordLabel.equals(""))
     {
       int d = day();    // Values from 1 - 31
