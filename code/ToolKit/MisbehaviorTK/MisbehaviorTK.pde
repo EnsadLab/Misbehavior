@@ -91,8 +91,8 @@ void setup()
      //.setColorActive(color(0,138,98));
      ;
   //loadConfig("config.xml");
-  //loadConfig("config_dib.xml");
-  loadConfig("config_cbu.xml");
+  loadConfig("config_dib.xml");
+  //loadConfig("config_cbu.xml");
   loadAnim(animConfigPath);
   
   int wFirstColumn = 160;
@@ -238,8 +238,14 @@ void controlEvent(ControlEvent evt)
 {
   if(evt.isTab())
   {
-    //println("TAB "+evt.getTab().getName()+" IS SELECTED with id "+evt.getTab().getId());
+    println("TAB "+evt.getTab().getName()+" IS SELECTED with id "+evt.getTab().getId());
     currentTabId = evt.getTab().getId();
+    if(currentTabId == 3) //TODO 3 ???
+      eventGUI.onOpen();
+    else
+      eventGUI.onClose();
+    
+      
   }
 }
 

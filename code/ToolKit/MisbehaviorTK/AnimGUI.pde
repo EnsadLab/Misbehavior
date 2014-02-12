@@ -29,8 +29,45 @@ class AnimGUI implements ControlListener
 
   AnimGUI()
   {
-  
+    
   }
+
+
+  //DIB
+  String getAnimLabel(int i)
+  {
+    if( (i>=0)&&(i<anims.length) )
+      return anims[i].label;
+    return null;
+  }
+  /*
+  //DIB
+  Anim getByLabel(String label)
+  {
+    for(int i=0;i>= anims.length;i++ )
+    {
+      if( label.equals(anims[i]) )
+        return anims[i];
+    }
+    return null;
+  }
+  */
+  boolean isAnimPlaying(int iAnim)
+  {
+    if( (iAnim>=0)&&(iAnim<anims.length) )
+      return anims[iAnim].animPlayButton.isOn(); //mmm what if hidden
+
+    return false;
+  }
+  //DIB
+  float getProgress(int iAnim)
+  {
+    if( (iAnim>=0)&&(iAnim<anims.length) )
+      return anims[iAnim].progress;
+    return 0;
+  }
+
+
     
   void buildGUI(int x, int y, String tabName, int animLabelColumnW)
   {
@@ -287,6 +324,14 @@ class AnimGUI implements ControlListener
     //availableAnims.updateListBoxItems();
     availableAnims.captionLabel().set("Load animation");
     updateAnimXml();
+  }
+  
+  //DIB
+  void startPlaying(int iAnim)
+  {
+    if( (iAnim>=0)&&(iAnim<anims.length) )
+      //anims[iAnim].startPlaying(); //DIB: marche pas (update teste l'état du bouton)
+      anims[iAnim].animPlayButton.setOn();
   }
   
   void startPlaying(String label)
@@ -558,6 +603,7 @@ class Anim implements ControlListener
   long playRate = 25;
   int nbFrames = 0;
   int currFrame = 0;
+  float progress = 0.0;  //DIB
   WavEncoder wavEncoder = new WavEncoder(); 
   
 Anim()
@@ -947,6 +993,7 @@ void playingIsFinished()
 
 void loopIsFinished()
 {
+  progress = 0;//DIB
   progressbar.setValue(0.0);
   currFrame = 0;
 }
@@ -1056,6 +1103,7 @@ void deleteAnim()
   animSpeedSelected = 1.0;
   currFrame = 0;
   nbFrames = 0;
+  progress = 0; //DIB
   progressbar.setValue(0.0);
   animPlayButton.setOff();
   loopButton.setState(false);
@@ -1120,7 +1168,8 @@ void update()
       if( (t-playframeTime)>=playRate )
       {
           playframeTime = t;
-          progressbar.setValue(((float)currFrame)/((float) nbFrames));
+          progress = (float)currFrame/(float) nbFrames; //DIB
+          progressbar.setValue(progress);
           currFrame++;
       }
    }
