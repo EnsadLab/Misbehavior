@@ -56,6 +56,7 @@ class SensorRow
     
   void stop()
   {
+     animGUI.stopPlaying(animIndex);
      toggleRight.setColorActive(0xFF008a62);  
      toggleLeft.setColorActive(0xFF008a62);  
      toggleLeftState.setColorActive(0xFF008a62);  
@@ -431,10 +432,8 @@ class SensorColon implements ControlListener
          //.setColorActive(0xFF008a62)  
          .setColorActive(0xFFFF0000)  
          .moveTo(tabname)
+         .setLabelVisible(false)
          .addListener(this);
-       toggleActive.getCaptionLabel()
-           .align(ControlP5.RIGHT_OUTSIDE,ControlP5.CENTER)
-           .setColor(0).setFont(verdanaFont).setText("  SENSOR "+index+"   ");
 
 /*
     test = cp5.addToggle("EVANIM"+index)
@@ -489,14 +488,14 @@ class SensorColon implements ControlListener
       y0+=20;
          
       dropList = cp5.addDropdownList("DROP"+index)
-          .setPosition(positionX+100,positionY+20)
-          .setSize(EVT_WIDTH-100,250)
+          .setPosition(positionX+20,positionY+20)
+          .setSize(100,250)
           .moveTo(tabname)
           .setItemHeight(20)
           .addListener(this)
           .setBarHeight(20)
           .setColorForeground(color(128,197,176))
-          .setColorBackground(color(240))
+          .setColorBackground(color(230))
           .setColorActive(color(0,138,98))
           .setColorLabel(0xFF000000)
           .toUpperCase(false)
@@ -530,6 +529,13 @@ class SensorColon implements ControlListener
     sliderVal.setValue(val);
   }
   
+  void onMidi(float val)
+  {
+    if(inputType != 2) //0 = MIDI
+      return;
+
+    sliderVal.setValue( val*(float)(max-min)+(float)min );
+  }
   
   int appendAnim(String label,int iAnim)
   {
@@ -768,6 +774,12 @@ class EventGUI implements ControlListener
   {
     if( (id>=0)&&(id<SENSOR_NB_COLS) )
       sensorColons[id].onSensor(val);
+  }
+  
+  void onMidiValue(int id,float val)
+  {
+    if( (id>=0)&&(id<SENSOR_NB_COLS) )
+      sensorColons[id].onMidi(val);    
   }
       
   void controlEvent(ControlEvent evt)

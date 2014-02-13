@@ -333,6 +333,17 @@ class AnimGUI implements ControlListener
       //anims[iAnim].startPlaying(); //DIB: marche pas (update teste l'état du bouton)
       anims[iAnim].animPlayButton.setOn();
   }
+
+  //DIB
+  void stopPlaying(int iAnim)
+  {
+    if( (iAnim>=0)&&(iAnim<anims.length) )
+    {
+      anims[iAnim].animPlayButton.setOff();
+      anims[iAnim].stopPlaying();
+    }
+  }
+
   
   void startPlaying(String label)
   //void startPlaying(String label, boolean loop, float speed)

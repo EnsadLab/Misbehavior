@@ -38,8 +38,14 @@ void controllerChange(int channel, int num, int value)
       else if(value > 64 )
         fval = (float)(value-64)/63.0;
 
-      println("dbg midi "+num+","+fval);
+      //println("dbg midi "+num+","+fval);
       servoGUIarray.midiValue(num,fval*midiValueCoef[num]);
+    }
+    
+    else if( (num>=16)&&(num<24) ) //knobs
+    {
+      float fval = (float)value/127.0;
+      eventGUI.onMidiValue(num-16,fval);
     }
     
     else if( (num>=32)&&(num<40) ) //Bouton [S]
