@@ -1,3 +1,4 @@
+static final int SENSOR_NB_COLS   = 5;
 static final int SENSOR_NB_ROWS   = 30;
 static final int EVT_WIDTH = 220; 
 static final int EVT_TAB_X0 = 50;
@@ -12,10 +13,12 @@ class SensorRow
 {
   int index;
   int state;
+
   int cmdLeft=0;
 
   boolean activated;
   int animIndex;
+  int checkFlags;
   boolean playing;
   Toggle toggleLeft;
   Toggle toggleRight;
@@ -28,25 +31,19 @@ class SensorRow
   SensorRow(int idx)
   {
     index = idx;
+    checkFlags = 0;
     animIndex = -1;
     activated = false;
     playing = false;
   }
   
-  //FAKE
   int update()
   {
     if( (!activated)||(!playing)||(animIndex<0) )
       return 0;
-    /*  
-    fakePos+=fakeSpeed;
-    if(fakePos>1024)
-    {
-      stop();
-      return 2; //stopped
-    }
-    */  
+
     //progress.setValue((float)fakePos);
+
     if(!animGUI.isAnimPlaying(animIndex))
     {
       stop();
@@ -69,7 +66,7 @@ class SensorRow
   
   void start(int side,int type)
   {
-     println("dbgStart "+index+" side "+side+" ia "+animIndex);
+     //println("dbgStart "+index+" side "+side+" ia "+animIndex);
      stop();
      if(side==0)
      {
@@ -107,7 +104,7 @@ class SensorRow
   }
     
   void buildGui(int x,int y,String tabname,int col,ControlListener cl)
-  {
+  {    
       toggleLeftState=cp5.addToggle("STATELOW"+col+"-"+index)
          .setId(index)
          .setPosition(x,y)
@@ -155,9 +152,8 @@ class SensorRow
            .setColor(255).setFont(verdanaFont)
            ;//.setText;
        
-       //textAnim = cp5.addTextfield("ANIM"+col+"-"+index)
-       textAnim = cp5.addTextlabel("ANIM"+col+"-"+index)
-           .setPosition(x+20,y)
+       textAnim = cp5.addTextlabel("ANIM"+col+"-"+index) //TODO progess label
+           .setPosition(x+20,y-10)
            .setSize(w-20,EVT_BT_SIZE)
            //.setAutoClear(false)
            .setColorBackground(0x20BBBBBB)  
@@ -215,7 +211,7 @@ class SensorRow
     x+=EVT_BT_SIZE+EVT_BT_SPC;
     int w = EVT_WIDTH - ((EVT_BT_SIZE+EVT_BT_SPC)*4);
     progress.setPosition(x,y);
-    textAnim.setPosition(x+20,y);
+    textAnim.setPosition(x+20,y-1);
     textAnim.setLabelVisible(false);
     x+=w+EVT_BT_SPC;
     toggleRight.setPosition(x,y);
@@ -236,8 +232,27 @@ class SensorRow
     toggleLeftState.setVisible(onOff);
     toggleRightState.setVisible(onOff);
     progress.setVisible(onOff);
-    textAnim.setVisible(onOff);
+    textAnim.setVisible(onOff);    
   }
+  
+  int getToggles()
+  {
+    checkFlags = 0;
+    if(toggleRightState.getValue()>0.5)checkFlags |= 1;    
+    if(toggleRight.getValue()>0.5)checkFlags      |= 2;
+    if(toggleLeft.getValue()>0.5)checkFlags       |= 4;
+    if(toggleLeftState.getValue()>0.5)checkFlags  |= 8;
+    return checkFlags;
+  }
+  void setToggles(int flags)
+  {
+    if((flags & 1)==0)toggleRightState.setValue(0);else toggleRightState.setValue(1);
+    if((flags & 1)==0)toggleRight.setValue(0);else toggleRight.setValue(1);
+    if((flags & 1)==0)toggleLeft.setValue(0);else toggleLeft.setValue(1);
+    if((flags & 1)==0)toggleLeftState.setValue(0);else toggleLeftState.setValue(1);
+    checkFlags = flags;
+  }
+  
 
 };
 
@@ -245,19 +260,24 @@ class SensorRow
 class SensorColon implements ControlListener
 {
   int index;
+  boolean activated;
   int positionX;
   int positionY;
+  int inputType = 1; //manual
+  int inputNum  = 0;
+  int    min = 0;
+  int    max = 1000;  
+  int    threshold0 = 100;
+  int    threshold1 = 110;
 
-  boolean activated;
   int state = 1;
   Toggle toggleActive;
   Toggle test;
   Slider sliderVal;
   Range  rangeThres;
   DropdownList dropList;
-  
-  int    threshold0 = 412;
-  int    threshold1 = 512;
+  Textlabel textSensor=null;
+
   IntList selectedLow    = new IntList();
   IntList animsLow       = new IntList();
   IntList selectedHigh   = new IntList();
@@ -268,6 +288,72 @@ class SensorColon implements ControlListener
   {
     index = SensorColonIndex++;
     activated = false;
+  }
+
+  void toXML(XML xml)
+  {
+    XML xmlMe = xml.addChild("event");
+    xmlMe.setInt("index",index);
+    xmlMe.setInt("input",inputType);
+    xmlMe.setInt("inputNum",inputNum);
+    xmlMe.setInt("min",min);
+    xmlMe.setInt("max",max);
+    xmlMe.setInt("thresLow",threshold0);
+    xmlMe.setInt("thresHigh",threshold1);
+    for(int i=0;i<SENSOR_NB_ROWS;i++)
+    {
+      if( (row[i].activated) && (row[i].animIndex>=0) )
+      {
+        XML xmlAnim = xmlMe.addChild("anim");
+        xmlAnim.setString("label",row[i].getLabel());
+        xmlAnim.setInt("whenLow" ,(int)row[i].toggleLeftState.getValue() );
+        xmlAnim.setInt("onLow"   ,(int)row[i].toggleLeft.getValue() );
+        xmlAnim.setInt("onHigh"  ,(int)row[i].toggleRight.getValue() );
+        xmlAnim.setInt("whenHigh",(int)row[i].toggleRightState.getValue() );
+      }      
+    }
+  }
+
+  void fromXML(XML child)
+  {
+    println("dbg FROM XML");
+    activated = false;
+    inputType = child.getInt("input");
+    inputNum = child.getInt("inputNum");
+    min = child.getInt("min");
+    max = child.getInt("max");
+    threshold0 = child.getInt("thresLow");
+    threshold1 = child.getInt("thresHigh");
+    setMinMax(min,max);
+    //rangeThres.setRangeValues(threshold0,threshold1);
+    //println("dbg1 threshold0 "+threshold0);
+    //println("dbg1 threshold1 "+threshold1);    
+
+    dropList.setIndex(inputType);
+
+    for(int i=0;i<SENSOR_NB_ROWS;i++)
+    {
+      row[i].setVisible(false);
+      row[i].animIndex = -1;
+    }
+    
+    XML xmlRow[] = child.getChildren("anim");
+    int nb = xmlRow.length;
+    if(nb>SENSOR_NB_ROWS)
+      nb = SENSOR_NB_ROWS;    
+    for(int i=0;i<nb;i++)
+    {
+      int irow = appendAnim( xmlRow[i].getString("label"),i);
+      if(irow>=0)
+      {
+        row[irow].toggleLeftState.setValue((float)xmlRow[i].getInt("whenLow") );
+        row[irow].toggleLeft.setValue((float)xmlRow[i].getInt("onLow") );
+        row[irow].toggleRight.setValue((float)xmlRow[i].getInt("onHigh") );
+        row[irow].toggleRightState.setValue((float)xmlRow[i].getInt("whenHigh") );
+      }
+    }
+
+    
   }
   
   void update()
@@ -287,7 +373,9 @@ class SensorColon implements ControlListener
 
   void randomPlay(int side)
   {
-    //println("dbg random play side "+side);
+    println("dbg Random SIDE "+side);
+    println("dbg Random LOW  "+animsLow.size());
+    println("dbg Random HIGH "+animsHigh.size());
     IntList list = animsLow;
     if(side==1)
       list = animsHigh;
@@ -296,13 +384,42 @@ class SensorColon implements ControlListener
     {
       int iA = list.get(0);
       row[iA].start(side,1);
+      println("dbg Random iAnim "+iA);
       list.shuffle();
     }
   }
 
+  void setMinMax(int mn,int mx)
+  {
+    min = mn;
+    max = mx;
+    sliderVal.setRange( (float)min,(float)max );
+    sliderVal.getValueLabel().align(ControlP5.CENTER,ControlP5.CENTER); //GRRRR
+    int t0 = threshold0; //GRRRR
+    int t1 = threshold1; //GRRRR
+    rangeThres.setRange( (float)min,(float)max );
+    rangeThres.setRangeValues((float)t0,(float)t1);
+  }
   
   void buildGUI(int x0,int y0,String tabname)
   {
+      //for debug
+      /*
+       textSensor = cp5.addTextlabel("EVTSENS"+index)
+       .setPosition(x0+150,y0)
+       .setSize(100,25)
+       //.setAutoClear(false)
+       .setColorBackground(0x20BBBBBB)  
+       .setColorForeground(0x10888888)
+       .setLabelVisible(false)
+       .moveTo(tabname)
+       .bringToFront()
+       .setText("00000")
+       .setColor(0).setFont(verdanaFont);
+      */
+    
+    
+    
     positionX = x0;
     positionY = y0;
     toggleActive = cp5.addToggle("EVONOFF"+index)
@@ -372,25 +489,23 @@ class SensorColon implements ControlListener
       y0+=20;
          
       dropList = cp5.addDropdownList("DROP"+index)
-          .setPosition(x0,y0+15)
-          .setSize(EVT_WIDTH,250)
+          .setPosition(positionX+100,positionY+20)
+          .setSize(EVT_WIDTH-100,250)
           .moveTo(tabname)
           .setItemHeight(20)
           .addListener(this)
-          .setBarHeight(12)
+          .setBarHeight(20)
           .setColorForeground(color(128,197,176))
-          .setColorBackground(color(204,232,224))
+          .setColorBackground(color(240))
           .setColorActive(color(0,138,98))
           .setColorLabel(0xFF000000)
           .toUpperCase(false)
           ;
-     //availableAnims.captionLabel().set("Load animation").setFont(createFont("Verdana",11)).align(ControlP5.LEFT,ControlP5.CENTER);
-     //availableAnims.valueLabel().setFont(createFont("Verdana",13)).setColor(0xFFFF0000).align(ControlP5.CENTER,ControlP5.CENTER); // ne marche pas.........
-     //updateDropDownAnimList();
-     for(int i=0;i<20;i++)
-     {
-       ListBoxItem item = dropList.addItem("anim label "+i, i);
-     }
+     dropList.captionLabel().setText("SENSOR").setFont(verdanaFont).align(ControlP5.CENTER,ControlP5.CENTER);
+     dropList.addItem("SENSOR",0);
+     dropList.addItem("MANUAL",1);
+     dropList.addItem("KNOB",2);
+     dropList.addItem("RANDOM",3);
      
        y0+=25;
        //String sDown = "EVDOWN"+index+"-";
@@ -405,8 +520,18 @@ class SensorColon implements ControlListener
        dropList.bringToFront();
   }
   
+  void onSensor(float val)
+  {
+    if(inputType != 0) //0 = SENSOR
+      return;
+    
+    if( textSensor != null )
+      textSensor.setText(""+val);
+    sliderVal.setValue(val);
+  }
   
-  boolean appendAnim(String label,int iAnim)
+  
+  int appendAnim(String label,int iAnim)
   {
     //TODO one loop ?
     for(int i=0;i<SENSOR_NB_ROWS;i++)
@@ -416,7 +541,7 @@ class SensorColon implements ControlListener
          row[i].setAnim(label,iAnim);
          row[i].setPosition(positionX,positionY+90+(iAnim*EVT_LINE_DY));
          row[i].setVisible(true);
-         return true;        
+         return i; //exists keeps toggles        
       }
     }   
  
@@ -427,10 +552,10 @@ class SensorColon implements ControlListener
          row[i].setAnim(label,iAnim);
          row[i].setPosition(positionX,positionY+90+(iAnim*EVT_LINE_DY));
          row[i].setVisible(true);
-         return true;
+         return i;
       }
     }
-    return false;
+    return -1;
   }
   
   void checkLabels( StringList labels )
@@ -448,6 +573,19 @@ class SensorColon implements ControlListener
     {
       appendAnim(labels.get(i),i);
     }
+
+    selectedLow.clear();
+    selectedHigh.clear();
+    animsLow.clear();
+    animsHigh.clear();
+    for(int i=0;i<SENSOR_NB_ROWS;i++)
+    {
+      int checked = row[i].getToggles();
+      toggleAnim(animsHigh,i,   ((checked&1)!=0));
+      toggleAnim(selectedHigh,i,((checked&2)!=0));
+      toggleAnim(selectedLow,i, ((checked&4)!=0));
+      toggleAnim(animsLow,i,    ((checked&8)!=0));
+    } 
   }
    
   void changeState(int st)
@@ -502,13 +640,13 @@ class SensorColon implements ControlListener
     {
       if(iA<0)
         list.append(irow);
-      println("dbg ON "+list.size());
+      //println("dbg ON "+list.size());
     }      
     else
     {
       if(iA>=0)
         list.remove(iA);
-      println("dbg OFF "+list.size());
+      //println("dbg OFF "+list.size());
     }
     list.shuffle();  
   }
@@ -516,7 +654,15 @@ class SensorColon implements ControlListener
   void controlEvent(ControlEvent evt)
   {
     if(evt.isGroup())
+    {
+      ControlGroup g = evt.group();
+      if( g == dropList )
+      {
+        inputType = (int)g.value();
+        println("dbg INPUTTYPE "+inputType);
+      }
       return;
+    }
     if(!evt.isController())
       return;
     
@@ -566,6 +712,7 @@ class SensorColon implements ControlListener
   }    
 
 
+
   
 }
 
@@ -580,16 +727,17 @@ class EventGUI implements ControlListener
     SensorColon[] sensorColons; 
   
     Slider sliderSensor;
-    Textfield[] textfields = new Textfield[6];
-    Button buttons[] = new Button[6];
-    Group selector;
+    //Textfield[] textfields = new Textfield[6];
+    //Button buttons[] = new Button[6];
+    //Group selector;
+    
+    
     
   EventGUI()
   {
-    sensorColons = new SensorColon[5];
+    sensorColons = new SensorColon[SENSOR_NB_COLS];
     labels = new StringList();
   }
-
 
   void onOpen()
   {
@@ -603,7 +751,7 @@ class EventGUI implements ControlListener
         iAnim++;
         label = animGUI.getAnimLabel(iAnim);
     }    
-    for(int i=0;i<5;i++)
+    for(int i=0;i<SENSOR_NB_COLS;i++)
     {
       sensorColons[i].checkLabels( labels );
     }
@@ -613,9 +761,15 @@ class EventGUI implements ControlListener
   void onClose()
   {
     openned = false;
+    save("events.xml");
   }
   
-    
+  void onSensorValue(int id,float val)
+  {
+    if( (id>=0)&&(id<SENSOR_NB_COLS) )
+      sensorColons[id].onSensor(val);
+  }
+      
   void controlEvent(ControlEvent evt)
   {
     if(evt.isGroup())
@@ -630,14 +784,14 @@ class EventGUI implements ControlListener
     if(!openned)
       return;
       
-    for(int i=0;i<5;i++)
+    for(int i=0;i<SENSOR_NB_COLS;i++)
       sensorColons[i].update();
   }
         
   void buildGUI(int x0,int y0,String tabname)
   {
     int x=x0;
-    for(int i=0;i<5;i++)
+    for(int i=0;i<SENSOR_NB_COLS;i++)
     {
       sensorColons[i]=new SensorColon();
       sensorColons[i].buildGUI(x,y0,tabname);
@@ -671,21 +825,37 @@ class EventGUI implements ControlListener
 
   }
 
-/*  
-  void draw()
+  void save(String filename)
   {
-    stroke(235);
-    strokeWeight(10);
-    int y=rowPos+20;
-    for(int i=0;i<20;i++)
+    XML eventsXml = new XML("EVENTS");
+    for(int i=0;i<SENSOR_NB_COLS;i++)
     {
-      line(0,y,1280,y);
-      y+=30;
+      sensorColons[i].toXML(eventsXml);
     }
+    saveXML(eventsXml,filename);
+    
   }
- */
-
   
+  void load(String filename)
+  {
+    try
+    {
+      XML eventsXml = loadXML(filename); //dont catch
+      if( eventsXml == null )
+        return;
+      XML[] children = eventsXml.getChildren("event");
+      int nbc = children.length;
+      if(nbc>SENSOR_NB_COLS)
+        nbc = SENSOR_NB_COLS;
+      for(int i=0;i<nbc;i++)
+        sensorColons[i].fromXML(children[i]);
+
+      onOpen(); //checks anims from animGUI      
+      
+    }
+    catch(Exception e){println(e);} 
+    
+  }  
 
 
 

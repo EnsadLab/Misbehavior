@@ -392,7 +392,8 @@ class CommArduino implements ControlListener //CallbackListener
         try{ 
           int   sensor = Integer.parseInt(toks[1]);
           float value  = Float.parseFloat(toks[2]);
-          sensorArray.rcvValue(sensor,value);
+          //sensorArray.rcvValue(sensor,value);
+          eventGUI.onSensorValue(sensor,value);
         }catch(Exception e){}
       }
       else if(toks[0].equals("ok")) //TODO TODO
@@ -446,7 +447,7 @@ class CommArduino implements ControlListener //CallbackListener
     }
     else
     {
-      textArea.append("---"+rcv,200);  
+      textArea.append("---"+rcv,200);
       textArea.scroll(1.0);
     }
   }
@@ -460,7 +461,7 @@ class CommArduino implements ControlListener //CallbackListener
        if(toSend.charAt(0)!='E')
          textArea.append( ">>>"+toSend );
        serial.write(toSend); //no exception ????
-       //print("send>"+toSend);
+   //print("send>"+toSend);
      }
    }
    catch(Exception e){}

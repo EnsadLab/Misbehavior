@@ -14,12 +14,10 @@ DxlControl      dxlGui;
 ServoArray      servoArray;
 ServoGUIarray   servoGUIarray;
 ScriptArray     scriptArray;
-SensorArray     sensorArray;
 SensorGUIarray  sensorGUI;
 AnimGUI        animGUI;
 
 EventGUI eventGUI;
-
 
 ControlP5 cp5;
 int globalID = 0;
@@ -107,8 +105,6 @@ void setup()
   dxlGui = new DxlControl();
   dxlGui.buildGUI(1050,70,tabNameAdvanced);
   
-  eventGUI = new EventGUI();
-  eventGUI.buildGUI(30,30,tabNameEvent);
   
   servoGUIarray = new ServoGUIarray(motorIds,jointwheelmodes);
 
@@ -117,18 +113,24 @@ void setup()
  
   animGUI = new AnimGUI();
   animGUI.buildGUI(marginLeft, 220, tabNameBasic,wFirstColumn+space);
+
+  eventGUI = new EventGUI();
+  eventGUI.buildGUI(30,30,tabNameEvent);
+  eventGUI.load(sketchPath+"/events.xml");
     
   scriptArray = new ScriptArray(motorIds.length );
   scriptArray.buildGUI(260,70,456,tabNameAdvanced);  //TODO ... more than 2 scripts
   scriptArray.scriptAt(0).load("scripts/Script00.txt"); //<<< TODO config.xml
   scriptArray.scriptAt(1).load("scripts/Script00.txt"); //<<< TODO config.xml
-  
+
+/*  
   sensorArray = new SensorArray();
   sensorArray.loadConfig("config_MIDI.xml");
   sensorGUI = new SensorGUIarray();
   //sensorGUI.buildGUI(280,5,tabNameEvent);
+*/
 
-  listMidiDevices();
+  //listMidiDevices();
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config
     openMidi(midiInDevice,midiOutDevice);
 
@@ -168,6 +170,7 @@ void draw()
 void exit()
 {
   arduino.close();
+  eventGUI.save(sketchPath+"/events.xml");
   println("EXIT");  
   super.exit();  
 }
