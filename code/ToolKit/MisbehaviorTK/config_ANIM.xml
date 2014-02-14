@@ -3,7 +3,9 @@
   <anim path="anims/testDB_m0.wav"/>
   <anim path="anims/adonf_m0_m1_m2_m3_m4_m5.wav"/>
   <anim path="anims/rien_m0.wav"/>
-  <anim path="anims/oneFW_m0.wav"/>
+  <anim path="anims/animdeuxpremiers_m0_m1.wav"/>
   <anim path="anims/oneBW_m0.wav"/>
   <anim path="anims/updown_m0.wav"/>
+  <anim path="anims/animdeuxderniers_m2_m3.wav"/>
+  <anim path="anims/animdeuxmilieux_m1_m2.wav"/>
 </anims>
