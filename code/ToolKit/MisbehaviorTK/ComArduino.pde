@@ -345,7 +345,7 @@ class CommArduino implements ControlListener //CallbackListener
   void close()
   {    
     println("SERIAL CLOSE");
-         
+    servoArray.stopAll();
     openned = false;
     action  = 1; 
     textArea.append("closing "+port+"\n");

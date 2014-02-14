@@ -71,9 +71,9 @@ class ServoArray
   void initAll()
   {
     sendDxlId();
-    delay(10);    
     for(int i=0;i<servos.length;i++)
     {
+      delay(10);    
       if(servos[i].dxlId>0)
       {
         if(servos[i].mode == 0)
@@ -87,6 +87,45 @@ class ServoArray
         servos[i].relax(false);
       }
     }        
+  }
+
+  void stopAll()
+  {
+    for(int i=0;i<servos.length;i++)
+    {
+      servos[i].stop();
+    }    
+  }
+
+  void toggleDirection(int iservo)
+  {
+    if( (iservo>=0)&&(iservo<servos.length) )
+      servos[iservo].wheelDirection *= -1;
+  }
+  
+  void loadFromXml(XML parent) //TODO config_SERVOS.xml
+  {
+    XML[] xservos = parent.getChildren("servo");    
+    for(int i=0;i<xservos.length;i++)
+    {
+      int num = xservos[i].getInt("index");
+      if( (num>=0)&&(num<servos.length) )
+      {
+        int d = xservos[num].getInt("direction");
+        if( d!=0 )
+          servos[num].wheelDirection = d;
+        println("dbg "+num+" WHEELDIR  "+d );
+      }
+    }
+  }
+  void saveToXml(XML parent) //TODO config_SERVOS.xml
+  {
+    for(int i=0;i<servos.length;i++)
+    {
+       XML x = parent.addChild("servo");
+       x.setInt( "index",i);
+       x.setInt( "direction",servos[i].wheelDirection );
+    }
   }
 
   
@@ -160,6 +199,7 @@ class ServoDxl
   int torqueLimit = 1023; //DXL34: relax
   int minGoal = 0;     //DXL 6
   int maxGoal = 1023;  //DXL 8
+  int wheelDirection = 1; //cf setSpeed, seWheelSpeed //used for reverse wheel direction (rumba)
 
   float origin = 0;
   float scale  = 0;
@@ -228,7 +268,14 @@ class ServoDxl
     }
     
   }
-  
+
+  void stop()
+  {  
+     //stopRecording();
+     stopPlaying(true);     
+     setSpeed(0); //!!! joint = speed max !!! 
+  }
+    
   void enableRecording()
   {
     enableRecording = true;
@@ -564,6 +611,7 @@ class ServoDxl
     arduino.serialSend("EW "+index+" 30 "+val+"\n");
     delay(1);
   }
+  
   void setSpeed(int val)
   {
     speed = val;

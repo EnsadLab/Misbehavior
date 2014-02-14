@@ -353,8 +353,6 @@ class SensorColon implements ControlListener
         row[irow].toggleRightState.setValue((float)xmlRow[i].getInt("whenHigh") );
       }
     }
-
-    
   }
   
   void update()
@@ -848,6 +846,10 @@ class EventGUI implements ControlListener
     {
       sensorColons[i].toXML(eventsXml);
     }
+    // save direction CW CCW
+    
+    servoArray.saveToXml(eventsXml);    
+    
     saveXML(eventsXml,filename);
     
   }
@@ -866,7 +868,9 @@ class EventGUI implements ControlListener
       for(int i=0;i<nbc;i++)
         sensorColons[i].fromXML(children[i]);
 
-      onOpen(); //checks anims from animGUI      
+      onOpen(); //checks anims from animGUI
+      
+      servoArray.loadFromXml(eventsXml);    
       
     }
     catch(Exception e){println(e);} 

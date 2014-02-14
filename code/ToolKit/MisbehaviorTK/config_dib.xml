@@ -2,7 +2,7 @@
  <config>
    <arduino port="COM13" bauds="115200" />
    <!-- arduino port="COM13" bauds="57600" / -->
-   <motor id="1" mode="wheel"/>
+   <motor id="1" mode="wheel" dir="-1"/>
    <motor id="8" mode="wheel"/>
    <motor id="13" mode="wheel"/>
    <motor id="18" mode="wheel"/>

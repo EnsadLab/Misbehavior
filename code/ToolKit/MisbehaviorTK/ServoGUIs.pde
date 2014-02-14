@@ -130,9 +130,9 @@ class ServoGUI implements ControlListener
   Toggle toggleRelax;
   Toggle toggleJoin;
   Knob knob;
-  Slider advSliderGoal;
-  Slider advSliderSpeed;
-  Slider advSliderWheel;
+  //Slider advSliderGoal;
+  //Slider advSliderSpeed;
+  //Slider advSliderWheel;
   Button stopVelocityButton;
   Slider sliderWheelGoal;
   //Knob watch;
@@ -307,6 +307,7 @@ void controlEvent(ControlEvent evt)
        //midiCtrlChange(servoIndex+1,64-(value>>3));
      }
   }
+  /*
   else if(c==advSliderSpeed)
   {
     println("dbg slider speed");
@@ -320,7 +321,7 @@ void controlEvent(ControlEvent evt)
     if(servo != null)
       servo.setWheelSpeed((int)c.getValue());
   }
-  
+  */
   else if(addr.startsWith("/JOIN")  )
   { 
      if( motorId>0 )
@@ -371,7 +372,7 @@ void controlEvent(ControlEvent evt)
            servo.tellToAnimServoIsFinished();
            servo.stopPlaying(false);
          }
-         servo.setSpeed( (int)c.getValue());
+         servo.setSpeed( (int)c.getValue()*servo.wheelDirection );
        }
        else
        {
