@@ -150,7 +150,7 @@ class AnimGUI implements ControlListener
        anims[i].buildGui(x,y,tabName,i);
        y += toggleSize  + spaceBetweenLines;
      }
-     
+          
      for(int i=0; i<animPaths.length; i++)
      {
          //anims

@@ -1,14 +1,8 @@
 <?xml version="1.0"?>
  <config>
    <arduino port="COM42" bauds="57600" />
-   <motor id="1"/>
-   <motor id="2"/>
-   <anim path="anims/animTemp.json"/>
-   <anim path="anims/anim.json"/>
-   <anim path="anims/anim2.json"/>
-   <anim path="anims/anim3.json"/>
-   <anim path="anims/anim3.json"/>
-   <anim path="anims/anim_13-1_23-11.json"/>
+   <motor id="1" mode="joint"/>
+   <motor id="2" mode="wheel"/>
    <midi in="nanoKONTROL2" out="nanoKONTROL2"/>
  </config>
  

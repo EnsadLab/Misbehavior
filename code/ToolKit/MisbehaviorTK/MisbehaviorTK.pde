@@ -2,9 +2,9 @@ import themidibus.*;
 import processing.serial.*;
 import controlP5.*;
 
-//String configFile = "config.xml";
+String configFile = "config.xml";
 //String configFile = "config_cbu.xml";
-String configFile = "config_dib.xml";
+//String configFile = "config_dib.xml";
 
 
 PApplet  mainApp;

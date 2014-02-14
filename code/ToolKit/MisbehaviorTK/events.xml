@@ -1,42 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EVENTS>
-  <event index="0" input="0" inputNum="1" max="300" min="0" thresHigh="29" thresLow="24">
-    <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="OneStepFW" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="OneStepBV" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="testM2" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="deux" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-  </event>
-  <event index="1" input="0" inputNum="1" max="300" min="0" thresHigh="75" thresLow="60">
-    <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="OneStepFW" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="OneStepBV" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="testM2" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="deux" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-  </event>
-  <event index="2" input="2" inputNum="1" max="4000" min="0" thresHigh="1094" thresLow="698">
-    <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="OneStepFW" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="OneStepBV" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="testM2" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="deux" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-  </event>
-  <event index="3" input="2" inputNum="1" max="4000" min="0" thresHigh="1000" thresLow="1000">
-    <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="OneStepFW" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="OneStepBV" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="testM2" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="deux" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-  </event>
-  <event index="4" input="2" inputNum="1" max="4000" min="0" thresHigh="2000" thresLow="1000">
-    <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="OneStepFW" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="OneStepBV" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="testM2" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="deux" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-  </event>
-  <servo direction="-1" index="0"/>
-  <servo direction="-1" index="1"/>
+  <event index="0" input="1" inputNum="0" max="1000" min="0" thresHigh="110" thresLow="100"/>
+  <event index="1" input="1" inputNum="0" max="1000" min="0" thresHigh="110" thresLow="100"/>
+  <event index="2" input="1" inputNum="0" max="1000" min="0" thresHigh="110" thresLow="100"/>
+  <event index="3" input="1" inputNum="0" max="1000" min="0" thresHigh="110" thresLow="100"/>
+  <event index="4" input="1" inputNum="0" max="1000" min="0" thresHigh="110" thresLow="100"/>
+  <servo direction="1" index="0"/>
+  <servo direction="1" index="1"/>
   <servo direction="1" index="2"/>
   <servo direction="1" index="3"/>
   <servo direction="1" index="4"/>

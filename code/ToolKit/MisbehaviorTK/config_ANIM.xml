@@ -5,4 +5,9 @@
   <anim path="anims/OneStepBV_m0_m1.wav"/>
   <anim path="anims/testM2_m1.wav"/>
   <anim path="anims/deux_m0_m1.wav"/>
+  <anim path="anims/adonf_m0_m1_m2_m3_m4_m5.wav"/>
+  <anim path="anims/rien_m0.wav"/>
+  <anim path="anims/animdeuxpremiers_m0_m1.wav"/>
+  <anim path="anims/oneBW_m0.wav"/>
+  <anim path="anims/updown_m0.wav"/>
 </anims>
