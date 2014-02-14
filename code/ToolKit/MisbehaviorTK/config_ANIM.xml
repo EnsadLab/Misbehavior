@@ -7,4 +7,8 @@
   <anim path="anims/oneBW_m0.wav"/>
   <anim path="anims/updown_m0.wav"/>
   <anim path="anims/testDir_m0.wav"/>
+  <anim path="anims/OneStepFW_m0_m1.wav"/>
+  <anim path="anims/OneStepBV_m0_m1.wav"/>
+  <anim path="anims/testM2_m1.wav"/>
+  <anim path="anims/deux_m0_m1.wav"/>
 </anims>

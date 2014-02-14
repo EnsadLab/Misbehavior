@@ -476,8 +476,8 @@ class SensorColon implements ControlListener
          .setHandleSize(4) //range
          .setRangeValues(threshold0,threshold1)
          .setColorBackground(0xFFC0B0A0)  
-         .setColorForeground(0xFFB02000)
-         .setColorActive(0xFFB02000)  
+         .setColorForeground(0xFF800000)
+         .setColorActive(0xFFF02000)  
          .moveTo(tabname)
          .addListener(this)
          //.setBroadcast(true)
