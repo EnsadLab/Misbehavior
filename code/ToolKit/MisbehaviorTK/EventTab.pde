@@ -638,7 +638,7 @@ class SensorColon implements ControlListener
       for(int i=0;i<SENSOR_NB_ROWS;i++)
         row[i].setVisible(onOff);
   }  
-    
+  
   void toggleAnim(IntList list,int irow,boolean onOff)
   {
     int iA = list.index(irow);
@@ -650,6 +650,7 @@ class SensorColon implements ControlListener
     }      
     else
     {
+      row[irow].stop();
       if(iA>=0)
         list.remove(iA);
       //println("dbg OFF "+list.size());
@@ -679,6 +680,7 @@ class SensorColon implements ControlListener
       //println("dbg val "+v+" state "+state+" t0  "+threshold0);
       switch(state)
       {
+        //changeState take 'activated' into count
         case 0:if(v>threshold1)changeState(1);break;
         case 1:if(v<threshold0)changeState(0);break;
       }
@@ -691,6 +693,8 @@ class SensorColon implements ControlListener
     else if(c==toggleActive)
     {
       activated = (c.getValue()>0.5);
+      if(!activated)
+        stop();
     }
     /*
     else if( c==test )

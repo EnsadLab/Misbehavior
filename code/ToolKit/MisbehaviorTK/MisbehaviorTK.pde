@@ -2,6 +2,11 @@ import themidibus.*;
 import processing.serial.*;
 import controlP5.*;
 
+String configFile = "config.xml";
+//String configFile = "config_cbu.xml";
+//String configFile = "config_dib.xml";
+
+
 PApplet  mainApp;
 int keyModifier = 0; //1 shift 2ctrl 4alt 
 
@@ -88,9 +93,8 @@ void setup()
      //.setColorLabel(color(255))
      //.setColorActive(color(0,138,98));
      ;
-  //loadConfig("config.xml");
-  loadConfig("config_dib.xml");
-  //loadConfig("config_cbu.xml");
+
+  loadConfig(sketchPath+"/"+configFile);
   loadAnim(animConfigPath);
   
   int wFirstColumn = 160;
@@ -104,8 +108,7 @@ void setup()
        
   dxlGui = new DxlControl();
   dxlGui.buildGUI(1050,70,tabNameAdvanced);
-  
-  
+    
   servoGUIarray = new ServoGUIarray(motorIds,jointwheelmodes);
 
   servoGUIarray.buildGUI(260,40,tabNameAdvanced);
