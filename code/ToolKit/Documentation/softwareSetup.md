@@ -18,7 +18,7 @@ The id is the number written on the back of your motor.
 
 Select which mode your motor is using : *wheel* or *join*.
 
-Firs line corresponds to the first motor inside processingg's gui, second line to the second one and so on.
+First line corresponds to the first motor inside processingg's gui, second line to the second one and so on.
 
 ### Midi setup
 
@@ -28,4 +28,19 @@ Firs line corresponds to the first motor inside processingg's gui, second line t
 
 ### Macintosh
 
-The xbee port can be found running this command line inside
+#### xbee
+
+The xbee port can be found running this command line inside the *Terminal.app* :
+	
+	ls /dev/tty.*
+	
+The port the xbee use will look this way : ```/dev/tty.usbserial-A600H2BB``` . Copy/paste it in the *config.xml* file :
+
+	<arduino port="/dev/tty.usbserial-A600H2BB" bauds="115200" />
+
+### Known Processing issue
+
+It might happen that when running processing the console will ask you to run the following line inside *Terminal.app* : 
+
+	sudo mkdir /var/lock
+	sudo chmod 777 /var/lock
