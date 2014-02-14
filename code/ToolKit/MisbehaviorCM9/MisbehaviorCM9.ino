@@ -20,7 +20,7 @@ DxlEngine engines[NB_ENGINES];
 //TODO test attach/detach interrupts
 int  pingSensorId = 0;
 int  pingIndex    = 0;
-int  pingPins[]   = {10,-1}; //{22,23)
+int  pingPins[]   = {13,15}; //{22,23)
 unsigned long pingEchoTimes[2];  //TODO: may share same long ?
 unsigned long pingStartTimes[2]; //TODO: may share same long ?
 int pingDistances[2];

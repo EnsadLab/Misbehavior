@@ -64,7 +64,8 @@ void controllerChange(int channel, int num, int value)
       if( value>64 ) //only press
       {
         //println("midi R");
-        midiValueCoef[num-64]*=-1.0f; //should send value? or stop ?
+        //midiValueCoef[num-64]*=-1.0f; //should send value? or stop ?
+        servoArray.toggleDirection(num-64);
       }
     }    
     else if( num==42 ) //Main Stop
