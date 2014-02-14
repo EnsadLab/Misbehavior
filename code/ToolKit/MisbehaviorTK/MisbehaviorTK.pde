@@ -2,9 +2,9 @@ import themidibus.*;
 import processing.serial.*;
 import controlP5.*;
 
-//String configFile = "config.xml";
+String configFile = "config.xml";
 //String configFile = "config_cbu.xml";
-String configFile = "config_dib.xml";
+//String configFile = "config_dib.xml";
 
 
 PApplet  mainApp;
@@ -277,6 +277,18 @@ void serialEvent(Serial serial)
   */
 }
 
+void toggleAdvancedTab()
+{
+    if(cp5.getTab(tabNameAdvanced).isVisible())
+    {
+      cp5.getTab(tabNameAdvanced).hide();
+    }
+    else
+    {
+      cp5.getTab(tabNameAdvanced).show();
+    }
+}
+
 
 void keyReleased()
 {
@@ -290,7 +302,6 @@ void keyReleased()
     }
   }
 }
-
 
 void keyPressed()
 { 
@@ -309,7 +320,7 @@ void keyPressed()
       case CONTROL: keyModifier |= 2; break;
       case ALT: keyModifier     |= 4; break;
     }
-
+/*
     if(keyCode == SHIFT) // TODO: @Didier: on peut changer is jamais... j'y voyais pas très clair ds cette methode
     {
       if(cp5.getTab(tabNameAdvanced).isVisible())
@@ -321,7 +332,8 @@ void keyPressed()
         cp5.getTab(tabNameAdvanced).show();
       }
     }
-    
+*/
+
   }
   else if(keyModifier!=0) //GRRRR SHIFT CTRL ALT
   {
@@ -329,8 +341,15 @@ void keyPressed()
       keyCode = SHIFT;
     else if( (keyModifier & 2)!=0 )
     {
+      println("dbg CONTROL key"+(int)key+" "+(int)keyCode );
+      
       key = (char)keyCode; //GRRRRRRRRRRRRR
       keyCode = CONTROL;
+      
+      if(key==9) //TAB
+        toggleAdvancedTab();
+
+        
     }
     else if( (keyModifier & 4)!=0 )
     {

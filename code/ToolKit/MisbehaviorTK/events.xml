@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EVENTS>
-  <event index="0" input="0" inputNum="1" max="300" min="0" thresHigh="100" thresLow="100">
+  <event index="0" input="0" inputNum="1" max="300" min="0" thresHigh="90" thresLow="90">
     <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="adonf" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="rien" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
@@ -18,7 +18,7 @@
     <anim label="updown" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="testDir" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
-  <event index="2" input="2" inputNum="1" max="4000" min="0" thresHigh="2000" thresLow="1264">
+  <event index="2" input="2" inputNum="1" max="4000" min="0" thresHigh="2000" thresLow="1132">
     <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="adonf" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="rien" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
@@ -27,7 +27,7 @@
     <anim label="updown" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="testDir" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
-  <event index="3" input="2" inputNum="1" max="4000" min="0" thresHigh="1377" thresLow="1094">
+  <event index="3" input="2" inputNum="1" max="4000" min="0" thresHigh="1245" thresLow="1000">
     <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="adonf" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="rien" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
@@ -36,7 +36,7 @@
     <anim label="updown" onHigh="0" onLow="0" whenHigh="0" whenLow="1"/>
     <anim label="testDir" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
-  <event index="4" input="2" inputNum="1" max="4000" min="0" thresHigh="2000" thresLow="1226">
+  <event index="4" input="2" inputNum="1" max="4000" min="0" thresHigh="2000" thresLow="1094">
     <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="adonf" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="rien" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
@@ -45,8 +45,8 @@
     <anim label="updown" onHigh="0" onLow="0" whenHigh="1" whenLow="0"/>
     <anim label="testDir" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
-  <servo direction="-1" index="0"/>
-  <servo direction="1" index="1"/>
+  <servo direction="1" index="0"/>
+  <servo direction="-1" index="1"/>
   <servo direction="1" index="2"/>
   <servo direction="1" index="3"/>
   <servo direction="1" index="4"/>
