@@ -614,6 +614,9 @@ class ServoDxl
   
   void setSpeed(int val)
   {
+    if(index==1)
+      println("dbg speed2 "+val);
+    
     speed = val;
     wantedSpeed = val;
     //println("setSpeed: " + val);
