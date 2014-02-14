@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
  <config>
-   <arduino port="COM42" bauds="57600" />
-   <motor id="1" mode="joint"/>
+   <arduino port="COM42" bauds="115200" />
+   <motor id="1" mode="wheel"/>
    <motor id="2" mode="wheel"/>
    <midi in="nanoKONTROL2" out="nanoKONTROL2"/>
  </config>
