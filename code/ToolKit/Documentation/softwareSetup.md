@@ -1,46 +1,39 @@
-# Software setup
+# Sensor information
 
-## Setting up processing
+## Info
 
-When launching the program processing reads a configuration file : *config.xml* . Keep this file at hand since this is where you will set up the parameters of your robot.
+Two kind of distance sensors are present in the toolkit : the *Parallax Ping)))* and the *sharp GP2Y0A21YK0F*.
 
-### xbee setup
-	
-	<arduino port="COM13" bauds="115200" />
-	
-Setup which port your xbee is using.  Bauds' value has to stay to 115200.
-	
-### Motor setup
-	
-	<motor id="1" mode="wheel"/>
-	
-The id is the number written on the back of your motor.
+* **Ping)))** : ultrasonic digital sensor. Ranges from 10cm to 1m.
+* **Sharp** : infrared anolog sensor. Ranges from 10cm to 80cm.
 
-Select which mode your motor is using : *wheel* or *join*.
+## How to connect the sensors
 
-First line corresponds to the first motor inside processingg's gui, second line to the second one and so on.
+The sensors have to be connected directly to the breadboard on which the openCM is plugged.
 
-### Midi setup
+* **Ping)))** :
 
-	 <midi in="nanoKONTROL2" out="nanoKONTROL2"/>   
+| Sensor | CM9 pin | Breadboard | 
+| ---- | ---- | ---- | 
+| black | GND | blue line |  
+| red | 5v | red line |  
+| white | 15 and 13 | 
 
-## System specific setup
 
-### Macintosh
+* **Sharp** :
 
-#### xbee
+| Sensor | CM9 pin | Breadboard |
+| ---- | ---- | ---- |
+| black | GND | blue line |
+| red | 5v | red line |
+| white | 7 |  |
 
-The xbee port can be found running this command line inside the *Terminal.app* :
-	
-	ls /dev/tty.*
-	
-The port the xbee use will look this way : ```/dev/tty.usbserial-A600H2BB``` . Copy/paste it in the *config.xml* file :
+## Inside the GUI
 
-	<arduino port="/dev/tty.usbserial-A600H2BB" bauds="115200" />
+The sensors are numbered as follow :
 
-### Known Processing issue
-
-It might happen that when running processing the console will ask you to run the following line inside *Terminal.app* : 
-
-	sudo mkdir /var/lock
-	sudo chmod 777 /var/lock
+| GUI | Sensor | CM9 pin |
+| ---- | ---- | ---- |
+| Sensor 1 | ping))) | 15 |
+| Sensor 2 | ping))) | 13 |
+| Sensor 3 | sharp | 7 |
