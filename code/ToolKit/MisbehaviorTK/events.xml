@@ -1,39 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EVENTS>
-  <event index="0" input="1" inputNum="1" max="500" min="0" thresHigh="334" thresLow="261">
-    <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
+  <event index="0" input="1" inputNum="1" max="500" min="0" thresHigh="327" thresLow="254">
+    <anim label="testDB" onHigh="1" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="adonf" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="rien" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="oneBW" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
+    <anim label="oneBW" onHigh="0" onLow="1" whenHigh="0" whenLow="0"/>
     <anim label="updown" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="animdeuxpremiers" onHigh="0" onLow="0" whenHigh="1" whenLow="0"/>
   </event>
-  <event index="1" input="1" inputNum="1" max="320" min="0" thresHigh="247" thresLow="172">
+  <event index="1" input="1" inputNum="1" max="320" min="0" thresHigh="243" thresLow="167">
     <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="adonf" onHigh="0" onLow="1" whenHigh="0" whenLow="0"/>
     <anim label="rien" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="oneBW" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="updown" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="animdeuxpremiers" onHigh="1" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
-  <event index="2" input="1" inputNum="1" max="4000" min="0" thresHigh="0" thresLow="75">
+  <event index="2" input="1" inputNum="1" max="4000" min="0" thresHigh="0" thresLow="18">
     <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="adonf" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="rien" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="oneBW" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="updown" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
-    <anim label="animdeuxpremiers" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
-  <event index="3" input="1" inputNum="1" max="4000" min="0" thresHigh="0" thresLow="75">
+  <event index="3" input="1" inputNum="1" max="4000" min="0" thresHigh="0" thresLow="18">
     <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="adonf" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="rien" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="oneBW" onHigh="0" onLow="1" whenHigh="0" whenLow="0"/>
     <anim label="updown" onHigh="0" onLow="0" whenHigh="0" whenLow="1"/>
-    <anim label="animdeuxpremiers" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
-  <event index="4" input="2" inputNum="1" max="4000" min="0" thresHigh="2000" thresLow="1075">
-    <anim label="animdeuxpremiers" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
+  <event index="4" input="2" inputNum="1" max="4000" min="0" thresHigh="2000" thresLow="1018">
     <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="adonf" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="rien" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
@@ -42,4 +37,6 @@
   </event>
   <servo direction="1" index="0"/>
   <servo direction="-1" index="1"/>
+  <servo direction="1" index="2"/>
+  <servo direction="1" index="3"/>
 </EVENTS>
