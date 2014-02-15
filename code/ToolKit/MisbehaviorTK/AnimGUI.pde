@@ -40,18 +40,21 @@ class AnimGUI implements ControlListener
       return anims[i].label;
     return null;
   }
-  /*
-  //DIB
-  Anim getByLabel(String label)
+  
+  IntDict getAnimLabels()
   {
-    for(int i=0;i>= anims.length;i++ )
+    IntDict dict = new IntDict();
+    for(int i=0;i<anims.length;i++)
     {
-      if( label.equals(anims[i]) )
-        return anims[i];
+      if( (anims[i].label!=null)&&(!anims[i].label.isEmpty()) )
+      {
+        dict.set(anims[i].label,i);        
+      }      
     }
-    return null;
+    return dict;    
   }
-  */
+  
+  
   boolean isAnimPlaying(int iAnim)
   {
     if( (iAnim>=0)&&(iAnim<anims.length) )
@@ -147,7 +150,7 @@ class AnimGUI implements ControlListener
        anims[i].buildGui(x,y,tabName,i);
        y += toggleSize  + spaceBetweenLines;
      }
-     
+          
      for(int i=0; i<animPaths.length; i++)
      {
          //anims
@@ -219,7 +222,7 @@ class AnimGUI implements ControlListener
                   .setSize(animLabelColumnWidth-toggleSize,toggleSize)
                   .setColorForeground(color(255,0,0))
                   .setColor(color(255,0,0))
-                  .setColorBackground(0xFFFFFFFF)
+                  .setColorBackground(0xFFE0D0D0)
                   .setColorActive(color(255,0,0))
                   .setAutoClear(false)
                   .moveTo(tabName)

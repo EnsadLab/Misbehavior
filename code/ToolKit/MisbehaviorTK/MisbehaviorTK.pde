@@ -2,8 +2,8 @@ import themidibus.*;
 import processing.serial.*;
 import controlP5.*;
 
-String configFile = "config.xml";
-//String configFile = "config_cbu.xml";
+//String configFile = "config.xml";
+String configFile = "config_cbu.xml";
 //String configFile = "config_dib.xml";
 
 
@@ -79,7 +79,7 @@ void setup()
   cp5.addTab(tabNameAdvanced)
      .activateEvent(true)
      .setId(2)
-     .hide()
+     //.hide()
      ;
      //.setColorBackground(color(255, 160, 100))
      //.setColorLabel(color(0,0,0))

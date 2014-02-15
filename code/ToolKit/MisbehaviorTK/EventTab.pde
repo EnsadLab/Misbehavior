@@ -476,8 +476,8 @@ class SensorColon implements ControlListener
          .setHandleSize(4) //range
          .setRangeValues(threshold0,threshold1)
          .setColorBackground(0xFFC0B0A0)  
-         .setColorForeground(0xFFB02000)
-         .setColorActive(0xFFB02000)  
+         .setColorForeground(0xFF800000)
+         .setColorActive(0xFFF02000)  
          .moveTo(tabname)
          .addListener(this)
          //.setBroadcast(true)
@@ -562,9 +562,9 @@ class SensorColon implements ControlListener
     return -1;
   }
   
-  void checkLabels( StringList labels )
+  void checkLabels( IntDict animDict )
   {
-    int nbl = labels.size();   
+    int nbl = animDict.size();   
     if(nbl>SENSOR_NB_ROWS)
       nbl = SENSOR_NB_ROWS;
 
@@ -572,10 +572,13 @@ class SensorColon implements ControlListener
     {
       row[i].setVisible(false);
     }
-              
+
+    //bourrin, à voir itération  
+    int    ias[] = animDict.valueArray();
+    String lbs[] = animDict.keyArray();
     for(int i=0;i<nbl;i++)
     {
-      appendAnim(labels.get(i),i);
+      appendAnim( lbs[i] , ias[i] );
     }
 
     selectedLow.clear();
@@ -731,7 +734,8 @@ class EventGUI implements ControlListener
     int rowPos = 100;
   
     boolean openned = false;
-    StringList labels;
+    //StringList labels;
+    IntDict animIndexLabels = null;
     SensorColon[] sensorColons; 
   
     Slider sliderSensor;
@@ -744,24 +748,15 @@ class EventGUI implements ControlListener
   EventGUI()
   {
     sensorColons = new SensorColon[SENSOR_NB_COLS];
-    labels = new StringList();
+    //labels = new StringList();
   }
 
   void onOpen()
   {
-    labels.clear();
-    int iAnim = 0;
-    String label = animGUI.getAnimLabel(0);
-    while(label!=null)
-    {
-        if(!label.isEmpty())
-          labels.append(label);
-        iAnim++;
-        label = animGUI.getAnimLabel(iAnim);
-    }    
+    animIndexLabels = animGUI.getAnimLabels();
     for(int i=0;i<SENSOR_NB_COLS;i++)
     {
-      sensorColons[i].checkLabels( labels );
+      sensorColons[i].checkLabels( animIndexLabels );
     }
     openned = true;    
   }
