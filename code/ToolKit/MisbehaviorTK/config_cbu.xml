@@ -2,10 +2,10 @@
  <config>
    <arduino port="/dev/tty.usbmodemfa141" bauds="115200" />-->
    <!--<arduino port="/dev/tty.usbserial-A9SF3D91" bauds = "115200" />-->
-   <motor id="7" mode="joint"/>
-   <motor id="17" mode= "wheel"/>
-   <motor id="15" mode= "joint"/>
-   <motor id="9" mode="wheel"/>
+   <motor id="1" mode="joint"/>
+   <motor id="2" mode= "wheel"/>
+   <motor id="3" mode= "joint"/>
+   <motor id="4" mode="wheel"/>
    <!--<motor id="30" mode="wheel"/>
    <motor id="36" mode= "wheel"/>-->
    <midi in="SLIDER/KNOB" out="CTRL"/>
