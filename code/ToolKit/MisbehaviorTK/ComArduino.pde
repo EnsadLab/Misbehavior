@@ -1,7 +1,7 @@
 
 //TODO READY ok ...
 
-class CommArduino implements ControlListener //CallbackListener
+class CommArduino implements ControlListener
 {
   int listIndex = 0;
   String port = "COM13";
@@ -88,7 +88,7 @@ class CommArduino implements ControlListener //CallbackListener
    
     y+=45;
     listBox = cp5.addDropdownList("SerialPort")
-      .setPosition(x,y+20) //??? origine en bas !!!
+      .setPosition(x,y+20) 
       .setWidth(180)
       .setBarHeight(19)
       .setOpen(false)
@@ -136,7 +136,6 @@ class CommArduino implements ControlListener //CallbackListener
            .setAutoClear(true)
            .moveTo(tabName);
     
-     //y+=20;
      cp5.addButton("CLEAR")
        .setWidth(30)
        .setPosition(x+150,y)

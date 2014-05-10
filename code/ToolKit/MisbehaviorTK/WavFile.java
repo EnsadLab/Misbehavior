@@ -1,12 +1,32 @@
-// Wav file IO class
-// A.Greensted
-// http://www.labbookpages.co.uk
+/*******************************************************************************                                                   
+*   Copyright 2013-2014 EnsadLab/Reflective interaction                        *
+*   Copyright Dr. Andrew Greensted                                             *
+*   http://www.labbookpages.co.uk/audio/javaWavFiles.html                      *
+*                                                                              *
+*   This file is part of MisB.                                                 *
+*                                                                              *
+*   MisB is free software: you can redistribute it and/or modify               *
+*   it under the terms of the Lesser GNU General Public License as             *
+*   published by the Free Software Foundation, either version 3 of the         *
+*   License, or (at your option) any later version.                            *
+*                                                                              *
+*   MisB is distributed in the hope that it will be useful,                    *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+*   GNU Lesser General Public License for more details.                        *
+*                                                                              *
+*   You should have received a copy of the GNU Lesser General Public License   *
+*   along with MisB.  If not, see <http://www.gnu.org/licenses/>.              *
+*******************************************************************************/
 
-// File format is based on the information from
-// http://www.sonicspot.com/guide/wavefiles.html
-// http://www.blitter.com/~russtopia/MIDI/~jglatt/tech/wave.htm
+/* 
+ *  File format is based on the information from
+ *  http://www.sonicspot.com/guide/wavefiles.html
+ *  http://www.blitter.com/~russtopia/MIDI/~jglatt/tech/wave.htm
+ * 
+ *  Version 1.0
+ */
 
-// Version 1.0
 
 import java.io.*;
 
@@ -20,15 +40,15 @@ public class WavFile
 	private final static int RIFF_CHUNK_ID = 0x46464952;
 	private final static int RIFF_TYPE_ID = 0x45564157;
 
-	private File file;						// File that will be read from or written to
+	private File file;				        // File that will be read from or written to
 	private IOState ioState;				// Specifies the IO State of the Wav File (used for snaity checking)
-	private int bytesPerSample;			// Number of bytes required to store a single sample
+	private int bytesPerSample;			        // Number of bytes required to store a single sample
 	private long numFrames;					// Number of frames within the data section
-	private FileOutputStream oStream;	// Output stream used for writting data
-	private FileInputStream iStream;		// Input stream used for reading data
+	private FileOutputStream oStream;	                // Output stream used for writting data
+	private FileInputStream iStream;		        // Input stream used for reading data
 	private double floatScale;				// Scaling factor used for int <-> float conversion				
-	private double floatOffset;			// Offset factor used for int <-> float conversion				
-	private boolean wordAlignAdjust;		// Specify if an extra byte at the end of the data chunk is required for word alignment
+	private double floatOffset;			        // Offset factor used for int <-> float conversion				
+	private boolean wordAlignAdjust;		        // Specify if an extra byte at the end of the data chunk is required for word alignment
 
 	// Wav Header
 	private int numChannels;				// 2 bytes unsigned, 0x0001 (1) to 0xFFFF (65,535)

@@ -1,11 +1,33 @@
+/*******************************************************************************                                                   
+*   Copyright 2013-2014 EnsadLab/Reflective interaction                        *
+*   Copyright 2013-2014 Didier Boucher, Cecile Bucher                          *
+*                                                                              *
+*   This file is part of MisB.                                                 *
+*                                                                              *
+*   MisB is free software: you can redistribute it and/or modify               *
+*   it under the terms of the Lesser GNU General Public License as             *
+*   published by the Free Software Foundation, either version 3 of the         *
+*   License, or (at your option) any later version.                            *
+*                                                                              *
+*   MisB is distributed in the hope that it will be useful,                    *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+*   GNU Lesser General Public License for more details.                        *
+*                                                                              *
+*   You should have received a copy of the GNU Lesser General Public License   *
+*   along with MisB.  If not, see <http://www.gnu.org/licenses/>.              *
+*******************************************************************************/
+
+// In order to run the MisB gui, the libraries TheMidiBus and controlP5 needs to be installed.
+// Under the menu Sketch, select "Import Library" and then "Add Library".
+// In the pop-up window, filter the two above libraries and add them to your processing application.
+
 import themidibus.*;
 import processing.serial.*;
 import controlP5.*;
 
-//String configFile = "config.xml";
-String configFile = "config_cbu.xml";
-//String configFile = "config_dib.xml";
-
+String configFile = "config.xml";
+String animConfigPath = "config_ANIM.xml";
 
 PApplet  mainApp;
 int keyModifier = 0; //1 shift 2ctrl 4alt 
@@ -13,6 +35,13 @@ int keyModifier = 0; //1 shift 2ctrl 4alt
 PFont courrierFont; // = createFont("Arial",20,true); // use true/false for smooth/no-smooth
 PFont verdanaFont; //
 PFont testFont;
+
+PFont verdanaFont_16 = createFont("Verdana",16,true);
+PFont verdanaFont_14 = createFont("Verdana",14,true);
+PFont verdanaFont_13 = createFont("Verdana",13,true);
+PFont verdanaFont_12 = createFont("Verdana",12,true);
+PFont verdanaFont_11 = createFont("Verdana",11,true);
+PFont verdanaFont_10 = createFont("Verdana",10,true);
 
 CommArduino     arduino;
 DxlControl      dxlGui;
@@ -32,23 +61,24 @@ String tabNameAdvanced = "ADVANCED";
 String tabNameEvent    = "EVENTS";
 int currentTabId = 1; // 1:default tab / 2:ADVANCED tab
 
-int nbMotors = 4; // default value. Might be overriden with value set in the config.xml file
+int nbMotors = 0; // this value will be overriden with the value set in the config.xml file
 int[] motorIds;
 int[] jointwheelmodes;
 String[] animPaths;
 int nbAnims = 0;
-int nbAnimsMax = 27;
+int nbAnimsMax = 27; // Fixed by the size of the window. TODO: add some scrolling
 
-String arduinoPort = "COM13";
-int arduinoBaudRate = 57600;
-
+// these values will be overriden with the value set in the config.xml file
+String arduinoPort = "COM13"; 
+int arduinoBaudRate = 57600; 
 String midiInDevice = null; 
 String midiOutDevice = null;
 
+// gui variables
 int marginLeft = 40;
 int marginTop = 50;
 
-String animConfigPath = "config_ANIM.xml";
+
 
 
 void setup()
@@ -72,8 +102,6 @@ void setup()
 
   cp5.addTab(tabNameEvent)
      .activateEvent(true)
-     //.setColorLabel(color(255))
-     //.setColorActive(color(200,200,200))
      .setId(3);
   
   cp5.addTab(tabNameAdvanced)
@@ -81,17 +109,12 @@ void setup()
      .setId(2)
      //.hide()
      ;
-     //.setColorBackground(color(255, 160, 100))
-     //.setColorLabel(color(0,0,0))
-     //.setColorActive(color(255,128,255));
+     
   cp5.getTab("default")
      .setLabel("ANIMATION")
      .activateEvent(true)
      .setMoveable(true)
      .setId(1)
-     //.setColorBackground(color(0, 160, 100))
-     //.setColorLabel(color(255))
-     //.setColorActive(color(0,138,98));
      ;
 
   loadConfig(sketchPath+"/"+configFile);
@@ -133,15 +156,9 @@ void setup()
   //sensorGUI.buildGUI(280,5,tabNameEvent);
 */
 
-  //listMidiDevices();
+  listMidiDevices();
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config
     openMidi(midiInDevice,midiOutDevice);
-
-  //String[] fonts = PFont.list();
-  //println(fonts);
-  
-  //threadTest = new ThreadTest(); //,"le thread");
-  //threadTest.start();
   
 }
 
@@ -154,20 +171,15 @@ void draw()
   else // tab ADVANCED
   {
     background(240);
-    //eventGUI.draw();
     eventGUI.update();
   } 
   
   scriptArray.update();
-  //scriptGuiArray[0].update();
   servoArray.update();
   servoGUIarray.update();
   arduino.update();  
   dxlGui.update();
   animGUI.update();
-  
-  //servoArray.draw(500,20);
-  //curve.test(500,100,1300,500);
 }
 
 void exit()
@@ -306,12 +318,6 @@ void keyReleased()
 void keyPressed()
 { 
   
-  
-  //print("KEY "+(int)key+" "+(int)keyCode);
-  //if(key>32)print(" "+key);
-  //if( (keyCode>32)&&(keyCode<256) )print(" "+(char)keyCode);
-  //println(" ");
-    
   if(key==CODED)
   {
     switch(keyCode)
@@ -320,19 +326,6 @@ void keyPressed()
       case CONTROL: keyModifier |= 2; break;
       case ALT: keyModifier     |= 4; break;
     }
-/*
-    if(keyCode == SHIFT) // TODO: @Didier: on peut changer is jamais... j'y voyais pas très clair ds cette methode
-    {
-      if(cp5.getTab(tabNameAdvanced).isVisible())
-      {
-        cp5.getTab(tabNameAdvanced).hide();
-      }
-      else
-      {
-        cp5.getTab(tabNameAdvanced).show();
-      }
-    }
-*/
 
   }
   else if(keyModifier!=0) //GRRRR SHIFT CTRL ALT
@@ -370,13 +363,6 @@ void keyPressed()
     //if(key=='A')
     //  anim.fromListEdit(editAnim);
   }  
-    
-/*  
-  if( (key=='s')||(key=='S') )
-  {  
-    println(" kmod "+keyModifier );
-  }
-*/  
   
 }
 

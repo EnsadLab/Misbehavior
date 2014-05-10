@@ -1,3 +1,22 @@
+/*******************************************************************************                                                   
+*   Copyright 2013-2014 EnsadLab/Reflective interaction                        *
+*   Copyright 2013-2014 Didier Boucher, Cecile Bucher                          *
+*                                                                              *
+*   This file is part of MisB.                                                 *
+*                                                                              *
+*   MisB is free software: you can redistribute it and/or modify               *
+*   it under the terms of the Lesser GNU General Public License as             *
+*   published by the Free Software Foundation, either version 3 of the         *
+*   License, or (at your option) any later version.                            *
+*                                                                              *
+*   MisB is distributed in the hope that it will be useful,                    *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+*   GNU Lesser General Public License for more details.                        *
+*                                                                              *
+*   You should have received a copy of the GNU Lesser General Public License   *
+*   along with MisB.  If not, see <http://www.gnu.org/licenses/>.              *
+*******************************************************************************/
 
 int motorColumnWidth;
 
@@ -159,7 +178,7 @@ void buildMotorGUI(int x, int y, String tabName)
                 .setPosition(x,y-30)
                 .setSize(20,20)
                 .moveTo(tabName)
-                .setImages(loadImage("stopVelButtonOff.jpg"),loadImage("stopVelButtonOver.jpg"),loadImage("stopVelButtonOn.jpg"))
+                .setImages(loadImage("images/stopVelButtonOff.jpg"),loadImage("images/stopVelButtonOver.jpg"),loadImage("images/stopVelButtonOn.jpg"))
                 .addListener(this)
                 ;
   
