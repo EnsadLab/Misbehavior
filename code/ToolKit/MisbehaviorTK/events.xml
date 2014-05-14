@@ -12,7 +12,7 @@
     <anim label="nouvelle anim" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="nouvelle anim2" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
-  <event index="1" input="1" inputNum="0" max="1000" min="0" thresHigh="556" thresLow="250">
+  <event index="1" input="1" inputNum="0" max="1000" min="0" thresHigh="551" thresLow="250">
     <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="OneStepFW" onHigh="0" onLow="0" whenHigh="1" whenLow="0"/>
     <anim label="OneStepBV" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
