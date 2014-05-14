@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
  <config>
-   <arduino port="COM42" bauds="115200" />
-   <motor id="1" mode="wheel"/>
-   <motor id="2" mode="wheel"/>
+   <cm9 port="COM42" bauds="115200" />
+   <motor id="1" mode="joint"/>
+   <motor id="2" mode= "wheel"/>
+   <motor id="3" mode= "joint"/>
+   <motor id="4" mode="wheel"/>
    <midi in="nanoKONTROL2" out="nanoKONTROL2"/>
  </config>
  

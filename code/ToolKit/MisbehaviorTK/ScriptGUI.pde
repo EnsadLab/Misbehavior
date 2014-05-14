@@ -1,3 +1,24 @@
+/*******************************************************************************                                                   
+*   Copyright 2013-2014 EnsadLab/Reflective interaction                        *
+*   Copyright 2013-2014 Didier Bouchon, Cecile Bucher                          *
+*                                                                              *
+*   This file is part of MisB.                                                 *
+*                                                                              *
+*   MisB is free software: you can redistribute it and/or modify               *
+*   it under the terms of the Lesser GNU General Public License as             *
+*   published by the Free Software Foundation, either version 3 of the         *
+*   License, or (at your option) any later version.                            *
+*                                                                              *
+*   MisB is distributed in the hope that it will be useful,                    *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+*   GNU Lesser General Public License for more details.                        *
+*                                                                              *
+*   You should have received a copy of the GNU Lesser General Public License   *
+*   along with MisB.  If not, see <http://www.gnu.org/licenses/>.              *
+*******************************************************************************/
+
+// TODO or delete for now?
 
 int numScriptGUI = 0;
 
@@ -234,7 +255,7 @@ class ScriptGUI implements ControlListener //implements CallbackListener
   listbox.captionLabel().setColor(0xff000000);
   listbox.captionLabel().style().marginTop = 3;
   listbox.valueLabel().style().marginTop = 3;
-  listbox.valueLabel().setFont(testFont); //......rien
+  listbox.valueLabel().setFont(consolasFont); //......rien
 
   listbox.addListener(this);
   

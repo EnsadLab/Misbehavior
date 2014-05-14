@@ -1,6 +1,6 @@
 /*******************************************************************************                                                   
 *   Copyright 2013-2014 EnsadLab/Reflective interaction                        *
-*   Copyright 2013-2014 Didier Boucher, Cecile Bucher                          *
+*   Copyright 2013-2014 Didier Bouchon, Cecile Bucher                          *
 *                                                                              *
 *   This file is part of MisB.                                                 *
 *                                                                              *
@@ -18,24 +18,27 @@
 *   along with MisB.  If not, see <http://www.gnu.org/licenses/>.              *
 *******************************************************************************/
 
-// In order to run the MisB gui, the libraries TheMidiBus and controlP5 needs to be installed.
-// Under the menu Sketch, select "Import Library" and then "Add Library".
-// In the pop-up window, filter the two above libraries and add them to your processing application.
+
+/* In order to run the MisB gui, the libraries TheMidiBus and controlP5 need to be installed.
+ * Under the menu Sketch, select "Import Library" and then "Add Library".
+ * In the pop-up window, filter the two above libraries and add them to your processing application.
+ */
 
 import themidibus.*;
 import processing.serial.*;
 import controlP5.*;
 
-String configFile = "config.xml";
-String animConfigPath = "config_ANIM.xml";
+String configFile = "config.xml"; // please insert you own configuration in the config.xml file
+String animConfigPath = "config_ANIM.xml"; // this file is updated automatically and list all animations that you select through the gui
 
 PApplet  mainApp;
+ControlP5 cp5;
+int globalID = 0;
 int keyModifier = 0; //1 shift 2ctrl 4alt 
 
-PFont courrierFont; // = createFont("Arial",20,true); // use true/false for smooth/no-smooth
-PFont verdanaFont; //
-PFont testFont;
-
+// fonts used throughout the application
+PFont courrierFont = createFont("Courier New",12,false); // use true/false for smooth/no-smooth
+PFont consolasFont = createFont("Consolas Bold",18,true);
 PFont verdanaFont_16 = createFont("Verdana",16,true);
 PFont verdanaFont_14 = createFont("Verdana",14,true);
 PFont verdanaFont_13 = createFont("Verdana",13,true);
@@ -43,87 +46,74 @@ PFont verdanaFont_12 = createFont("Verdana",12,true);
 PFont verdanaFont_11 = createFont("Verdana",11,true);
 PFont verdanaFont_10 = createFont("Verdana",10,true);
 
+// main objects
 CommArduino     arduino;
 DxlControl      dxlGui;
 ServoArray      servoArray;
 ServoGUIarray   servoGUIarray;
 ScriptArray     scriptArray;
 SensorGUIarray  sensorGUI;
-AnimGUI        animGUI;
+AnimGUI         animGUI;
+EventGUI        eventGUI;
 
-EventGUI eventGUI;
-
-ControlP5 cp5;
-int globalID = 0;
-
+// GUI tabs
 String tabNameBasic = "default"; // the identifier name is different from the label for the default tab.
 String tabNameAdvanced = "ADVANCED";
 String tabNameEvent    = "EVENTS";
-int currentTabId = 1; // 1:default tab / 2:ADVANCED tab
+int currentTabId = 1; // 1:default tab / 2:ADVANCED tab /3:EVENT tab
 
-int nbMotors = 0; // this value will be overriden with the value set in the config.xml file
+// these values will be overriden with the value set in the config.xml file
+String cm9_port = "COM13"; 
+int cm9_baudrate = 57600; 
+String midiInDevice = null; 
+String midiOutDevice = null;
+int nbMotors = 0;
+
 int[] motorIds;
 int[] jointwheelmodes;
 String[] animPaths;
 int nbAnims = 0;
 int nbAnimsMax = 27; // Fixed by the size of the window. TODO: add some scrolling
 
-// these values will be overriden with the value set in the config.xml file
-String arduinoPort = "COM13"; 
-int arduinoBaudRate = 57600; 
-String midiInDevice = null; 
-String midiOutDevice = null;
-
-// gui variables
+// margin variables
 int marginLeft = 40;
 int marginTop = 50;
-
-
 
 
 void setup()
 {
   
+  // general setting
   mainApp = this;
-  size(1280,720); //P3D OPENGL
-  
-  frame.setTitle("Misbehaviors toolkit");
-  
-  println("Path:"+sketchPath);
-  
+  size(1280,720);
+  frame.setTitle("MisB");
   cp5 = new ControlP5(this);
   globalID = 200;
   
-  courrierFont = createFont("Courier New",12,false); // use true/false for smooth/no-smooth
-  verdanaFont  = createFont("Verdana",12,true);
-  testFont = createFont("Consolas Bold",18,true);
-  
-  //cp5.setControlFont(testFont);
-
-  cp5.addTab(tabNameEvent)
-     .activateEvent(true)
-     .setId(3);
-  
-  cp5.addTab(tabNameAdvanced)
-     .activateEvent(true)
-     .setId(2)
-     //.hide()
-     ;
-     
+  // create our three tabs. Per default, just the tab ANIMATION and the tab EVENT are displayed
   cp5.getTab("default")
      .setLabel("ANIMATION")
      .activateEvent(true)
      .setMoveable(true)
      .setId(1)
      ;
+  cp5.addTab(tabNameEvent)
+     .activateEvent(true)
+     .setId(3);
+  cp5.addTab(tabNameAdvanced)
+     .activateEvent(true)
+     .setId(2)
+     .hide()
+     ;
 
+  // load our configurations and the animations
   loadConfig(sketchPath+"/"+configFile);
-  loadAnim(animConfigPath);
+  loadAnim(sketchPath+"/"+animConfigPath);
   
   int wFirstColumn = 160;
   int space = 20;
   
-  arduino = new CommArduino(arduinoPort,arduinoBaudRate);
+  arduino = new CommArduino(cm9_port,cm9_baudrate);
   arduino.buildBasicGUI(marginLeft,marginTop,tabNameBasic,wFirstColumn,50);
   arduino.buildGUI(marginLeft,marginTop,tabNameAdvanced);
 
@@ -145,19 +135,15 @@ void setup()
   eventGUI.load(sketchPath+"/events.xml");
     
   scriptArray = new ScriptArray(motorIds.length );
-  scriptArray.buildGUI(260,70,456,tabNameAdvanced);  //TODO ... more than 2 scripts
-  scriptArray.scriptAt(0).load("scripts/Script00.txt"); //<<< TODO config.xml
-  scriptArray.scriptAt(1).load("scripts/Script00.txt"); //<<< TODO config.xml
-
-/*  
-  sensorArray = new SensorArray();
-  sensorArray.loadConfig("config_MIDI.xml");
-  sensorGUI = new SensorGUIarray();
-  //sensorGUI.buildGUI(280,5,tabNameEvent);
-*/
-
+  scriptArray.buildGUI(260,70,456,tabNameAdvanced); 
+  if(motorIds.length >= 2)
+  {
+    scriptArray.scriptAt(0).load("scripts/Script00.txt"); 
+    scriptArray.scriptAt(1).load("scripts/Script00.txt"); 
+  }
+  
   listMidiDevices();
-  if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //config
+  if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //defined in the config.xml file
     openMidi(midiInDevice,midiOutDevice);
   
 }
@@ -168,7 +154,7 @@ void draw()
   {
     background(255);
   }
-  else // tab ADVANCED
+  else // tab EVENT or ADVANCED
   {
     background(240);
     eventGUI.update();
@@ -190,8 +176,10 @@ void exit()
   super.exit();  
 }
 
+
 void loadConfig(String xmlFilePath)
 {
+  
   println("Loading Config file...");
   XML xml = loadXML(xmlFilePath);
   if(xml==null)
@@ -200,39 +188,46 @@ void loadConfig(String xmlFilePath)
     return;    
   }
   
-  XML[] children = xml.getChildren("motor");
-  
-  arduinoPort = xml.getChild("arduino").getString("port");
-  arduinoBaudRate = xml.getChild("arduino").getInt("bauds");
-  println("-> Arduino port="+arduinoPort + " bauds=" + arduinoBaudRate);
+  // CM9 configuration
+  try{cm9_port = xml.getChild("cm9").getString("port");}catch(Exception e){}
+  try{cm9_baudrate = xml.getChild("cm9").getInt("bauds");}catch(Exception e){}
+  println("-> cm9 port="+cm9_port + " bauds=" + cm9_baudrate);
 
-  nbMotors = children.length;
-  motorIds = new int[nbMotors];
-  jointwheelmodes = new int[nbMotors];
-  for (int i = 0; i < children.length; i++) {
-    int id = children[i].getInt("id");
-    motorIds[i] = id;
-    String jointwheelmode = children[i].getString("mode");
-    if(jointwheelmode.equals("joint"))
-    {
-      jointwheelmodes[i] = 0;
+  // Motors configuration
+  XML[] children;
+  try{
+    children = xml.getChildren("motor");
+    nbMotors = children.length;
+    motorIds = new int[nbMotors];
+    jointwheelmodes = new int[nbMotors];
+    for (int i = 0; i < children.length; i++) {
+        int id = children[i].getInt("id");
+        motorIds[i] = id;
+        String jointwheelmode = children[i].getString("mode");
+        if(jointwheelmode.equals("joint"))
+        {
+          jointwheelmodes[i] = 0;
+        }
+        else
+        {
+          jointwheelmodes[i] = 1;
+        }
+        println("-> adding motor with id " + id + " in mode " + jointwheelmode);
     }
-    else
-    {
-      jointwheelmodes[i] = 1;
-    }
-    
-    println("-> adding motor with id " + id + " in mode " + jointwheelmode);
   }
+  catch(Exception e){}
   
+  // MIDI configuration
   try{midiInDevice  = xml.getChild("midi").getString("in");}catch(Exception e){}
   try{midiOutDevice = xml.getChild("midi").getString("out");}catch(Exception e){}
   println("MIDIin  "+midiInDevice);
-  println("MIDIout "+midiOutDevice);  
+  println("MIDIout "+midiOutDevice); 
+  
 }
 
 void loadAnim(String xmlFilePath)
 {
+  
   println("Loading ANIM Config file...");
   XML xml = loadXML(xmlFilePath);
   if(xml==null)
@@ -243,7 +238,6 @@ void loadAnim(String xmlFilePath)
   XML[] children = xml.getChildren("anim");
   nbAnims = children.length;
   animPaths = new String[nbAnims];
-  //animPaths = new String[nbAnimsMax];
   for(int i=0; i<children.length; i++)
   {
     String animPath = children[i].getString("path");
@@ -257,14 +251,12 @@ void controlEvent(ControlEvent evt)
 {
   if(evt.isTab())
   {
-    println("TAB "+evt.getTab().getName()+" IS SELECTED with id "+evt.getTab().getId());
+    //println("TAB " + evt.getTab().getName() + " IS SELECTED with id " + evt.getTab().getId());
     currentTabId = evt.getTab().getId();
-    if(currentTabId == 3) //TODO 3 ???
+    if(currentTabId == 3) 
       eventGUI.onOpen();
     else
       eventGUI.onClose();
-    
-      
   }
 }
 
@@ -341,8 +333,6 @@ void keyPressed()
       
       if(key==9) //TAB
         toggleAdvancedTab();
-
-        
     }
     else if( (keyModifier & 4)!=0 )
     {

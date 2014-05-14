@@ -1,4 +1,22 @@
-//#import import themidibus.*;
+/*******************************************************************************                                                   
+*   Copyright 2013-2014 EnsadLab/Reflective interaction                        *
+*   Copyright 2013-2014 Didier Bouchon, Cecile Bucher                          *
+*                                                                              *
+*   This file is part of MisB.                                                 *
+*                                                                              *
+*   MisB is free software: you can redistribute it and/or modify               *
+*   it under the terms of the Lesser GNU General Public License as             *
+*   published by the Free Software Foundation, either version 3 of the         *
+*   License, or (at your option) any later version.                            *
+*                                                                              *
+*   MisB is distributed in the hope that it will be useful,                    *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+*   GNU Lesser General Public License for more details.                        *
+*                                                                              *
+*   You should have received a copy of the GNU Lesser General Public License   *
+*   along with MisB.  If not, see <http://www.gnu.org/licenses/>.              *
+*******************************************************************************/
 
 static final int  MAX_MIDI_NUM  = 128;
 MidiBus midiBus;
@@ -76,24 +94,6 @@ void controllerChange(int channel, int num, int value)
           servoGUIarray.midiValue(i,0);
       }
     }
-    
-    
-    //TODO
-    //potars?
-    //Bouton:
-    // stop
-    // mode Wheel/joint
-    // reverse
-    //
 }
 
-/*
-void midiCtrlChange( int inum, int value )
-{
-  if(midiBus!=null)
-  {
-    //midiBus.sendControllerChange(midiChannel,inum,value);
-  }
-}
-*/
 

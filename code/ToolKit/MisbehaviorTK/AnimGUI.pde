@@ -1,6 +1,6 @@
 /*******************************************************************************                                                   
 *   Copyright 2013-2014 EnsadLab/Reflective interaction                        *
-*   Copyright 2013-2014 Didier Boucher, Cecile Bucher                          *
+*   Copyright 2013-2014 Didier Bouchon, Cecile Bucher                          *
 *                                                                              *
 *   This file is part of MisB.                                                 *
 *                                                                              *

@@ -1,3 +1,23 @@
+/*******************************************************************************                                                   
+*   Copyright 2013-2014 EnsadLab/Reflective interaction                        *
+*   Copyright 2013-2014 Didier Bouchon, Cecile Bucher                          *
+*                                                                              *
+*   This file is part of MisB.                                                 *
+*                                                                              *
+*   MisB is free software: you can redistribute it and/or modify               *
+*   it under the terms of the Lesser GNU General Public License as             *
+*   published by the Free Software Foundation, either version 3 of the         *
+*   License, or (at your option) any later version.                            *
+*                                                                              *
+*   MisB is distributed in the hope that it will be useful,                    *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+*   GNU Lesser General Public License for more details.                        *
+*                                                                              *
+*   You should have received a copy of the GNU Lesser General Public License   *
+*   along with MisB.  If not, see <http://www.gnu.org/licenses/>.              *
+*******************************************************************************/
+
 static final int SENSOR_NB_COLS   = 5;
 static final int SENSOR_NB_ROWS   = 30;
 static final int EVT_WIDTH = 220; 
@@ -118,7 +138,7 @@ class SensorRow
          .addListener(cl);
        toggleLeftState.getCaptionLabel()
            .align(ControlP5.CENTER,ControlP5.CENTER)
-           .setColor(255).setFont(verdanaFont).setText("X");
+           .setColor(255).setFont(verdanaFont_12).setText("X");
  
         x+=EVT_BT_SIZE+EVT_BT_SPC;
         toggleLeft=cp5.addToggle("EVDOWN"+col+"-"+index)
@@ -133,7 +153,7 @@ class SensorRow
          .addListener(cl);
        toggleLeft.getCaptionLabel()
            .align(ControlP5.CENTER,ControlP5.CENTER)
-           .setColor(255).setFont(verdanaFont).setText("X");
+           .setColor(255).setFont(verdanaFont_12).setText("X");
         
         x+=EVT_BT_SIZE+EVT_BT_SPC;
         int w = EVT_WIDTH - ((EVT_BT_SIZE+EVT_BT_SPC)*4);
@@ -150,7 +170,7 @@ class SensorRow
          .moveTo(tabname);
        progress.getCaptionLabel()
            .align(ControlP5.CENTER,ControlP5.CENTER)
-           .setColor(255).setFont(verdanaFont)
+           .setColor(255).setFont(verdanaFont_12)
            ;//.setText;
        
        textAnim = cp5.addTextlabel("ANIM"+col+"-"+index) //TODO progess label
@@ -163,7 +183,7 @@ class SensorRow
            .moveTo(tabname)
            .bringToFront()
            .setText("Anim Label")
-           .setColor(0).setFont(verdanaFont);
+           .setColor(0).setFont(verdanaFont_12);
 
        
         x+=w+EVT_BT_SPC;
@@ -180,7 +200,7 @@ class SensorRow
          .addListener(cl);
        toggleRight.getCaptionLabel()
            .align(ControlP5.CENTER,ControlP5.CENTER)
-           .setColor(255).setFont(verdanaFont).setText("U");
+           .setColor(255).setFont(verdanaFont_12).setText("U");
 
         x+=EVT_BT_SIZE+EVT_BT_SPC;
       toggleRightState=cp5.addToggle("STATEHIGH"+col+"-"+index)
@@ -195,7 +215,7 @@ class SensorRow
          .addListener(cl);
        toggleRightState.getCaptionLabel()
            .align(ControlP5.CENTER,ControlP5.CENTER)
-           .setColor(255).setFont(verdanaFont).setText("H");    
+           .setColor(255).setFont(verdanaFont_12).setText("H");    
   }
   
   void setAnim(String label,int ianim)
@@ -464,7 +484,7 @@ class SensorColon implements ControlListener
          .addListener(this)
          //.setBroadcast(true)
          ;
-       sliderVal.getValueLabel().setFont(testFont).align(ControlP5.CENTER,ControlP5.CENTER);
+       sliderVal.getValueLabel().setFont(consolasFont).align(ControlP5.CENTER,ControlP5.CENTER);
  
        y0+=20;
        rangeThres = cp5.addRange("EVTR"+index) //NOT VERTICAL ; HIGH VALUE FONT ????
@@ -498,7 +518,7 @@ class SensorColon implements ControlListener
           .setColorLabel(0xFF000000)
           .toUpperCase(false)
           ;
-     dropList.captionLabel().setText("SENSOR").setFont(verdanaFont).align(ControlP5.CENTER,ControlP5.CENTER);
+     dropList.captionLabel().setText("SENSOR").setFont(verdanaFont_12).align(ControlP5.CENTER,ControlP5.CENTER);
      dropList.addItem("SENSOR",0);
      dropList.addItem("MANUAL",1);
      dropList.addItem("KNOB",2);

@@ -1,3 +1,25 @@
+/*******************************************************************************                                                   
+*   Copyright 2013-2014 EnsadLab/Reflective interaction                        *
+*   Copyright 2013-2014 Didier Bouchon, Cecile Bucher                          *
+*                                                                              *
+*   This file is part of MisB.                                                 *
+*                                                                              *
+*   MisB is free software: you can redistribute it and/or modify               *
+*   it under the terms of the Lesser GNU General Public License as             *
+*   published by the Free Software Foundation, either version 3 of the         *
+*   License, or (at your option) any later version.                            *
+*                                                                              *
+*   MisB is distributed in the hope that it will be useful,                    *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+*   GNU Lesser General Public License for more details.                        *
+*                                                                              *
+*   You should have received a copy of the GNU Lesser General Public License   *
+*   along with MisB.  If not, see <http://www.gnu.org/licenses/>.              *
+*******************************************************************************/
+
+// TODO or delete for now?
+
 int numScript = 0;
 
 
@@ -64,6 +86,7 @@ class ScriptArray
   }
   void buildGUI(int x,int y,int h,String tabname)
   {
+    if(scriptList.length < 2) return;
     scriptGUIs[0] = new ScriptGUI(scriptList[0]);
     scriptGUIs[0].build(x,y,h,tabname);
     if( scriptList[0] != null)

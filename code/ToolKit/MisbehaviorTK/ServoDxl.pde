@@ -1,6 +1,6 @@
 /*******************************************************************************                                                   
 *   Copyright 2013-2014 EnsadLab/Reflective interaction                        *
-*   Copyright 2013-2014 Didier Boucher, Cecile Bucher                          *
+*   Copyright 2013-2014 Didier Bouchon, Cecile Bucher                          *
 *                                                                              *
 *   This file is part of MisB.                                                 *
 *                                                                              *
@@ -49,15 +49,15 @@ class ServoArray
     frameTime = millis();    
   }
     
- ServoDxl[] getServos()
- {
-   return servos;
- }
+  ServoDxl[] getServos()
+  {
+    return servos;
+  }
  
- int getNbServos()
- {
-   return servos.length;
- }
+  int getNbServos()
+  {
+    return servos.length;
+  }
 
   ServoDxl getByIndex(int i)
   {
@@ -185,17 +185,9 @@ class ServoArray
 
   void draw(int x,int y)
   {
-      //for(int i=0;i<servos.length;i++)
-      /*
-      for(int i=0;i<1;i++)
-      { 
-        servos[i].draw(x,y);
-        y+=170;
-      }
-      */
+    
   }
   
-
   
 };
 
@@ -209,23 +201,22 @@ class ServoDxl
   int index     = 0;
   int dxlId     = 0;
   int status    = 0;
-  int mode      = 0; //0=JOIN 1=WHEEL
+  int mode      = 0;       //0=JOIN 1=WHEEL
   int prevPos   = 0;
-  int currPos   = 0;  //DXL36 current pos
-  int currSpeed = 0;  //DXL38 current speed
-  int goal   = 0;       //DXL30 goal
+  int currPos   = 0;       //DXL36 current pos
+  int currSpeed = 0;       //DXL38 current speed
+  int goal   = 0;          //DXL30 goal
   int wantedSpeed = 0;
-  int speed  = 0;      //DXL32: moving speed
-  int torqueLimit = 1023; //DXL34: relax
-  int minGoal = 0;     //DXL 6
-  int maxGoal = 1023;  //DXL 8
-  int wheelDirection = 1; //cf setSpeed, seWheelSpeed //used for reverse wheel direction (rumba)
+  int speed  = 0;          //DXL32: moving speed
+  int torqueLimit = 1023;  //DXL34: relax
+  int minGoal = 0;         //DXL 6
+  int maxGoal = 1023;      //DXL 8
+  int wheelDirection = 1;  //cf setSpeed, seWheelSpeed //used for reverse wheel direction (rumba)
 
   float origin = 0;
   float scale  = 0;
   
   boolean recording = false;
-  boolean readyForRecording = false;
   boolean enableRecording = false;
   boolean playing = false;
   int oldGoal = 0;
@@ -234,7 +225,6 @@ class ServoDxl
   
   String oldModus = "none";
   
-  //JSONArray velocities;
   float[] recordValues;
   int[] animValues;
   int currRec = 0;
@@ -275,7 +265,7 @@ class ServoDxl
     {
       arduino.serialSend("EI "+index+" "+dxlId+"\n");
       delay(10);    
-//      arduino.serialSend("WA "+dxlId+" 36\n"); //add watch pos
+      //arduino.serialSend("WA "+dxlId+" 36\n"); //add watch pos
       delay(10);
       //println("-> add watch speed");
       //arduino.serialSend("WA "+dxlId+" 38\n"); //add watch speed
@@ -291,7 +281,6 @@ class ServoDxl
 
   void stop()
   {  
-     //stopRecording();
      stopPlaying(true);     
      setSpeed(0); //!!! joint = speed max !!! 
   }
@@ -306,16 +295,12 @@ class ServoDxl
     enableRecording = false;
   }
 
-
   void startRecording()
   {
     recordValues = new float[0];
-    readyForRecording = true;
     recording = true;
-    //recording = false; // an intermediate state in case we wanna ignore first frames... to be done...
     currFrame = 0;
   }
-  
   
   void recordFrame()
   {
@@ -331,18 +316,10 @@ class ServoDxl
     }
   }
   
-  
   float[] stopRecording()
   {
-    readyForRecording = false;
     recording = false;
     currFrame = 0;
-    /*int s = 0;
-    for(int i=0; i<200; i++)
-    {
-      recordValues = append(recordValues,s);
-      s += 2;
-    }*/
     return recordValues;
   }
   
@@ -363,7 +340,6 @@ class ServoDxl
     for(int i=0; i< val.length; i++)
     {
       double v = val[i]; 
-      //println("v = " + v);
       if(isWheelMode()) // convert to velocity
       {
         v = v*1024.0;
@@ -379,19 +355,15 @@ class ServoDxl
   
   void playFrame(int frame)
   {
-    
-    //println("Servo " + index + " f: " + frame + " " + animValues.length);
     if(frame <  animValues.length)
     {
       int v = animValues[frame];
       if(isWheelMode())
       {
-        //println("speed: " + v);
         setSpeed(v);
       }
       else
       {
-        //println("goal: " + v);
         if((v+512) != goal)
         {
           setGoal(v);
@@ -439,8 +411,7 @@ class ServoDxl
     {
       setSpeed(0);
     }
-    
-    scriptArray.scriptAt(index).setReady(); //TODO safe ? a discuter ensemble !
+    scriptArray.scriptAt(index).setReady(); 
   }
 
 
@@ -453,19 +424,17 @@ class ServoDxl
   void update()
   {
     
-    if(readyForRecording)
+    if(recording)
     {
-      if(recording)
+      long t = millis();    
+      if( (t-recframeTime)>=recRate ) 
       {
-        long t = millis();    
-        if( (t-recframeTime)>=recRate ) // ou controller depuis ServoDxl Array.... arf...
-        {
-          recframeTime = t;
-          recordFrame();
-          currFrame++;
-        }
+        recframeTime = t;
+        recordFrame();
+        currFrame++;
       }
     }
+    
     if(playing)
     {
       long t = millis();    
@@ -477,7 +446,7 @@ class ServoDxl
       }
     }
     
-    //becoz midi
+    //because midi
     if(speed!=wantedSpeed)
     {
       speed=wantedSpeed;
@@ -491,7 +460,7 @@ class ServoDxl
     arduino.serialSend("A "+dxlId+" "+tok+" "+value+"\n"); //Token immediat      
   }
   
-  //from sensor or midi //String alows labels
+  //from sensor or midi //String allows labels
   void onSensor(SensorEvt cmd)
   {
     int v = (int)(cmd.coef * (cmd.value-cmd.center) );
@@ -539,7 +508,7 @@ class ServoDxl
     }
   }
   
-  //from sensor or midi //String alows labels
+  //from sensor or midi //String allows labels
   void execStringCmd(String line,int value)
   {
       try{
@@ -605,29 +574,11 @@ class ServoDxl
     }
   }
   
- /*
-  int setKnobValue(int val)
-  {
-    if( mode == DXL_JOIN )
-    {
-      setGoal(val+512);
-      return goal;
-    }
-    else
-    {
-      if(val>0) setSpeed(    val<<1 );
-      else setSpeed( 1024-(val<<1) );
-      return speed;
-    }
-  }
-  */
-  
   void setGoal(int val)
   {
     //relax(false);
     val += 512;
     goal = val;
-    //println("setgoal " + val);
     arduino.serialSend("EW "+index+" 30 "+val+"\n");
     delay(1);
   }
@@ -639,7 +590,6 @@ class ServoDxl
     
     speed = val;
     wantedSpeed = val;
-    //println("setSpeed: " + val);
     arduino.serialSend("EW "+index+" 32 "+val+"\n");
     delay(1);
   }
