@@ -280,10 +280,6 @@ class ComCM9 implements ControlListener
   {
     textArea.clear();
   }
-
-  //cbu: done in DxlBehav09  
-  //void saveConfig(){...} //TODO
-  //void loadConfig(){...} //TODO
   
   void list()
   {

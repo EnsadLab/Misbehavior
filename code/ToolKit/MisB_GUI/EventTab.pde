@@ -18,6 +18,8 @@
 *   along with MisB.  If not, see <http://www.gnu.org/licenses/>.              *
 *******************************************************************************/
 
+// TODO
+
 static final int SENSOR_NB_COLS   = 5;
 static final int SENSOR_NB_ROWS   = 30;
 static final int EVT_WIDTH = 220; 
