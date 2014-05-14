@@ -146,7 +146,7 @@ class DxlControl implements ControlListener //CallbackListener
    {
      case 1: // read all values
        //dxlValues[currIndex].sendRead(currentMotor);
-       arduino.serialSend("MR "+currentMotor+" "+dxlValues[currIndex].registre+'\n');
+       comCM9.serialSend("MR "+currentMotor+" "+dxlValues[currIndex].registre+'\n');
        if(++currIndex>=dxlValues.length )
        {
          action=0;
@@ -227,7 +227,7 @@ class DxlControl implements ControlListener //CallbackListener
     }
     else if(cid<=dxlValues.length)
     {
-      arduino.serialSend(" ========\n");
+      comCM9.serialSend(" ========\n");
       dxlValues[cid-1].value = val;
       int reg = dxlValues[cid-1].registre;
       //arduino.serialSend("MW "+currentMotor+" "+reg+" "+str+'\n');

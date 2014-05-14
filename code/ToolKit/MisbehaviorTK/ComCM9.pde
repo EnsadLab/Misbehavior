@@ -20,7 +20,7 @@
 
 // TODO
 
-class CommArduino implements ControlListener
+class ComCM9 implements ControlListener
 {
   int listIndex = 0;
   String port = "COM13";
@@ -45,7 +45,7 @@ class CommArduino implements ControlListener
   int iBuffer = 0;
   byte[] buffer = new byte[256];
     
-  CommArduino(String port, int baudrate)
+  ComCM9(String port, int baudrate)
   {
     this.port = port;
     this.baudrate = baudrate;

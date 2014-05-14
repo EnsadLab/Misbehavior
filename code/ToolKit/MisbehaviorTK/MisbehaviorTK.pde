@@ -47,7 +47,7 @@ PFont verdanaFont_11 = createFont("Verdana",11,true);
 PFont verdanaFont_10 = createFont("Verdana",10,true);
 
 // main objects
-CommArduino     arduino;
+ComCM9          comCM9;
 DxlControl      dxlGui;
 ServoArray      servoArray;
 ServoGUIarray   servoGUIarray;
@@ -113,9 +113,9 @@ void setup()
   int wFirstColumn = 160;
   int space = 20;
   
-  arduino = new CommArduino(cm9_port,cm9_baudrate);
-  arduino.buildBasicGUI(marginLeft,marginTop,tabNameBasic,wFirstColumn,50);
-  arduino.buildGUI(marginLeft,marginTop,tabNameAdvanced);
+  comCM9 = new ComCM9(cm9_port,cm9_baudrate);
+  comCM9.buildBasicGUI(marginLeft,marginTop,tabNameBasic,wFirstColumn,50);
+  comCM9.buildGUI(marginLeft,marginTop,tabNameAdvanced);
 
   servoArray = new ServoArray(motorIds,jointwheelmodes);
        
@@ -163,14 +163,14 @@ void draw()
   scriptArray.update();
   servoArray.update();
   servoGUIarray.update();
-  arduino.update();  
+  comCM9.update();  
   dxlGui.update();
   animGUI.update();
 }
 
 void exit()
 {
-  arduino.close();
+  comCM9.close();
   eventGUI.save(sketchPath+"/events.xml");
   println("EXIT");  
   super.exit();  
@@ -264,9 +264,9 @@ void controlEvent(ControlEvent evt)
 void serialEvent(Serial serial)
 {
   try{      
-    if( serial == arduino.serial )
+    if( serial == comCM9.serial )
     {
-      arduino.serialRcv();
+      comCM9.serialRcv();
       //arduino.append("received "+serialEventCount+'\n');
     }
   }catch(Exception e){println("SERIAL EXCEPTION");}
@@ -341,7 +341,7 @@ void keyPressed()
     }
     //EMERGENCY STOP : SHIFT or CTRL or ALT + ' 'or ENTER or BACKSPACE
     if( (key==32)||(key==10)||(key==13)||(key==8) ) // BACKSPACE --> STOP ALL
-      arduino.serialSend("S\n");
+      comCM9.serialSend("S\n");
 
   }
   /*

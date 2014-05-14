@@ -266,7 +266,7 @@ class Script
     //dbg("SEND:"+"S "+servoIndex+" "+tok+" "+value);
     if(servoIndex>=0)
     {
-      arduino.serialSend("S "+servoIndex+" "+tok+" "+value+"\n");
+      comCM9.serialSend("S "+servoIndex+" "+tok+" "+value+"\n");
     }
     dbg(cmdToString(tok)+" "+value);
   }
@@ -275,7 +275,7 @@ class Script
     //dbg("SEND:"+"S "+servoIndex+" "+tok+" "+value);
     if(servoIndexB>=0)
     {
-      arduino.serialSend("S "+servoIndexB+" "+tok+" "+value+"\n");
+      comCM9.serialSend("S "+servoIndexB+" "+tok+" "+value+"\n");
     }
     dbg(cmdToString(tok)+" "+value);
   }
@@ -346,7 +346,7 @@ class Script
   {
     execMode = 0;
     servoArray.getByIndex(index).stopPlaying(true); // argument boolean tells whether the velocity should become zero in mode wheel
-    arduino.serialSend("Q "+servoIndex+"\n");    
+    comCM9.serialSend("Q "+servoIndex+"\n");    
   }
 
   void run()

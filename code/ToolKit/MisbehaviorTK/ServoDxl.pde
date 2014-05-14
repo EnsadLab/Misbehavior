@@ -82,7 +82,7 @@ class ServoArray
     {
       if(servos[i].dxlId>0)
       {
-        arduino.serialSend("EI "+i+" "+servos[i].dxlId+"\n");
+        comCM9.serialSend("EI "+i+" "+servos[i].dxlId+"\n");
         delay(40); //take your time
       }      
     }        
@@ -255,26 +255,26 @@ class ServoDxl
   {
     if(dxlId>0)
     {
-      arduino.serialSend("WR "+dxlId+" 36\n"); //remove watch pos
+      comCM9.serialSend("WR "+dxlId+" 36\n"); //remove watch pos
       delay(10);
-      arduino.serialSend("WR "+dxlId+" 38\n"); //remove watch speed
+      comCM9.serialSend("WR "+dxlId+" 38\n"); //remove watch speed
       delay(10);
     }
     dxlId = id;
     if(dxlId>0)
     {
-      arduino.serialSend("EI "+index+" "+dxlId+"\n");
+      comCM9.serialSend("EI "+index+" "+dxlId+"\n");
       delay(10);    
-      //arduino.serialSend("WA "+dxlId+" 36\n"); //add watch pos
+      //comCM9.serialSend("WA "+dxlId+" 36\n"); //add watch pos
       delay(10);
       //println("-> add watch speed");
-      //arduino.serialSend("WA "+dxlId+" 38\n"); //add watch speed
+      //comCM9.serialSend("WA "+dxlId+" 38\n"); //add watch speed
       delay(10);
-      arduino.serialSend("MR "+dxlId+" 6\n"); //CW min
+      comCM9.serialSend("MR "+dxlId+" 6\n"); //CW min
       delay(10);
-      arduino.serialSend("MR "+dxlId+" 8\n"); //CCW max, to know Joint/Wheel Mode
+      comCM9.serialSend("MR "+dxlId+" 8\n"); //CCW max, to know Joint/Wheel Mode
       delay(10);
-      arduino.serialSend("MR "+dxlId+" 34\n"); //torque, to know if relaxed
+      comCM9.serialSend("MR "+dxlId+" 34\n"); //torque, to know if relaxed
     }
     
   }
@@ -450,14 +450,14 @@ class ServoDxl
     if(speed!=wantedSpeed)
     {
       speed=wantedSpeed;
-      arduino.serialSend("EW "+index+" 32 "+speed+"\n");
+      comCM9.serialSend("EW "+index+" 32 "+speed+"\n");
     }
     
   }
 
   void sendToken(int tok,int value)
   {
-    arduino.serialSend("A "+dxlId+" "+tok+" "+value+"\n"); //Token immediat      
+    comCM9.serialSend("A "+dxlId+" "+tok+" "+value+"\n"); //Token immediat      
   }
   
   //from sensor or midi //String allows labels
@@ -579,7 +579,7 @@ class ServoDxl
     //relax(false);
     val += 512;
     goal = val;
-    arduino.serialSend("EW "+index+" 30 "+val+"\n");
+    comCM9.serialSend("EW "+index+" 30 "+val+"\n");
     delay(1);
   }
   
@@ -590,7 +590,7 @@ class ServoDxl
     
     speed = val;
     wantedSpeed = val;
-    arduino.serialSend("EW "+index+" 32 "+val+"\n");
+    comCM9.serialSend("EW "+index+" 32 "+val+"\n");
     delay(1);
   }
   
@@ -604,16 +604,16 @@ class ServoDxl
   {
     if(doRelax)
     {
-      arduino.serialSend("EW "+index+" 32 0\n" ); //speed
+      comCM9.serialSend("EW "+index+" 32 0\n" ); //speed
       delay(10);      
-      arduino.serialSend("EW "+index+" 34 0\n" ); //torque    
+      comCM9.serialSend("EW "+index+" 34 0\n" ); //torque    
     }
     else
     {
       //TODO mettre goal à current position
-      arduino.serialSend("EW "+index+" 32 0\n" ); //speed
+      comCM9.serialSend("EW "+index+" 32 0\n" ); //speed
       delay(10);      
-      arduino.serialSend("EW "+index+" 34 "+torqueLimit+"\n" );      
+      comCM9.serialSend("EW "+index+" 34 "+torqueLimit+"\n" );      
     }
   }
   void setWheelMode(boolean wheel)
@@ -623,9 +623,9 @@ class ServoDxl
     {
       println("JOINT ");
       mode = DXL_JOIN;
-      arduino.serialSend("EW "+index+" 6 "+minGoal+"\n" );
+      comCM9.serialSend("EW "+index+" 6 "+minGoal+"\n" );
       delay(10);
-      arduino.serialSend("EW "+index+" 8 "+maxGoal+"\n" );
+      comCM9.serialSend("EW "+index+" 8 "+maxGoal+"\n" );
       delay(10);
       //TODO set goal to current pos
     }
@@ -633,12 +633,12 @@ class ServoDxl
     {
       println("WHEEL ");
       mode = DXL_WHEEL;
-      arduino.serialSend("EW "+index+" 32 0\n" ); //moving speed à 0;
+      comCM9.serialSend("EW "+index+" 32 0\n" ); //moving speed à 0;
       speed = 0;
       delay(10);
-      arduino.serialSend("EW "+index+" 6 0\n" );
+      comCM9.serialSend("EW "+index+" 6 0\n" );
       delay(10);
-      arduino.serialSend("EW "+index+" 8 0\n" );
+      comCM9.serialSend("EW "+index+" 8 0\n" );
       delay(10);
     }
   }
@@ -657,7 +657,7 @@ class ServoDxl
   
   void askPos()
   {
-    arduino.serialSend("MR "+dxlId+" 36 ");
+    comCM9.serialSend("MR "+dxlId+" 36 ");
   }
   
   
