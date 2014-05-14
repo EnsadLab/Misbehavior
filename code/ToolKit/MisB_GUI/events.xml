@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EVENTS>
   <event index="0" input="1" inputNum="0" max="1000" min="0" thresHigh="500" thresLow="250">
-    <anim label="testDB" onHigh="0" onLow="1" whenHigh="0" whenLow="0"/>
     <anim label="OneStepFW" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="OneStepBV" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="deux" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
@@ -12,8 +11,7 @@
     <anim label="nouvelle anim" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="nouvelle anim2" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
-  <event index="1" input="1" inputNum="0" max="1000" min="0" thresHigh="528" thresLow="250">
-    <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
+  <event index="1" input="1" inputNum="0" max="1000" min="0" thresHigh="518" thresLow="250">
     <anim label="OneStepFW" onHigh="0" onLow="0" whenHigh="1" whenLow="0"/>
     <anim label="OneStepBV" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="deux" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
@@ -25,7 +23,6 @@
     <anim label="nouvelle anim2" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
   <event index="2" input="1" inputNum="0" max="1000" min="0" thresHigh="0" thresLow="0">
-    <anim label="testDB" onHigh="1" onLow="0" whenHigh="1" whenLow="0"/>
     <anim label="OneStepFW" onHigh="1" onLow="0" whenHigh="1" whenLow="0"/>
     <anim label="OneStepBV" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="deux" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
@@ -37,7 +34,6 @@
     <anim label="nouvelle anim2" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
   <event index="3" input="1" inputNum="0" max="1000" min="0" thresHigh="0" thresLow="0">
-    <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="OneStepFW" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="OneStepBV" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="deux" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
@@ -49,7 +45,6 @@
     <anim label="nouvelle anim2" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
   </event>
   <event index="4" input="1" inputNum="0" max="1000" min="0" thresHigh="0" thresLow="0">
-    <anim label="testDB" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="OneStepFW" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="OneStepBV" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>
     <anim label="deux" onHigh="0" onLow="0" whenHigh="0" whenLow="0"/>

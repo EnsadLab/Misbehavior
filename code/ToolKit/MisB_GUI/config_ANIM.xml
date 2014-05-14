@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <anims>
-  <anim path="anims/testDB_m0.wav"/>
+  <anim bla="anims/testDB_m0.wav"/>
   <anim path="anims/OneStepFW_m0_m1.wav"/>
   <anim path="anims/OneStepBV_m0_m1.wav"/>
   <anim path="anims/deux_m0_m1.wav"/>

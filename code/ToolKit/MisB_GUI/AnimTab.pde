@@ -780,6 +780,7 @@ class Anim implements ControlListener
 
   void setAnim(String path)
   {
+    if(path == null || path.equals("")) return;
     free = false;
     wavPath = path;
     int startLabelIndex = path.indexOf("/") + 1;

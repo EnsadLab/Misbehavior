@@ -235,15 +235,20 @@ void loadAnim(String xmlFilePath)
     println("[ERROR]: config ANIM file " + xmlFilePath + " could not be loaded");
     return;    
   }
-  XML[] children = xml.getChildren("anim");
-  nbAnims = children.length;
-  animPaths = new String[nbAnims];
-  for(int i=0; i<children.length; i++)
-  {
-    String animPath = children[i].getString("path");
-    animPaths[i] = animPath;
-    println("-> adding anim with path " + animPath);
+  
+  XML[] children;
+  try{
+    children = xml.getChildren("anim");
+    nbAnims = children.length;
+    animPaths = new String[nbAnims];
+    for(int i=0; i<children.length; i++)
+    {
+      String animPath = children[i].getString("path");
+      animPaths[i] = animPath;
+      println("-> adding anim with path " + animPath);
+    }
   }
+  catch(Exception e){}
   
 }
 
