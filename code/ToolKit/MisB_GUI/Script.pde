@@ -460,7 +460,7 @@ void startAnim(int iAnim)
   try
   { 
     //servoArray.getByIndex(servoIndex).startPlaying(anims.get(iAnim).name);
-    animGUI.startPlaying(anims.get(iAnim).name);
+    animTab.startPlaying(anims.get(iAnim).name);
     waitReady = true;
   }
   catch(Exception e)

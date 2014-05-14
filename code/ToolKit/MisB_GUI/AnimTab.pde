@@ -26,7 +26,7 @@ int secondColumnX = 650;
 int spaceBetweenLines = 15;
 PImage playImage;
 
-class AnimGUI implements ControlListener
+class AnimTab implements ControlListener
 {
   
   Anim[] anims;
@@ -44,7 +44,7 @@ class AnimGUI implements ControlListener
   Textlabel labelAnimSecond;
   Textlabel labelMotorSecond;
 
-  AnimGUI()
+  AnimTab()
   {
     
   }

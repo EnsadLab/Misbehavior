@@ -66,19 +66,19 @@ class SensorRow
 
     //progress.setValue((float)fakePos);
 
-    if(!animGUI.isAnimPlaying(animIndex))
+    if(!animTab.isAnimPlaying(animIndex))
     {
       stop();
       return 2; //just stopped
     }
     
-    progress.setValue( animGUI.getProgress(animIndex) );
+    progress.setValue( animTab.getProgress(animIndex) );
     return 1;  //playing
   }
     
   void stop()
   {
-     animGUI.stopPlaying(animIndex);
+     animTab.stopPlaying(animIndex);
      toggleRight.setColorActive(0xFF008a62);  
      toggleLeft.setColorActive(0xFF008a62);  
      toggleLeftState.setColorActive(0xFF008a62);  
@@ -106,7 +106,7 @@ class SensorRow
          toggleRightState.setColorActive(0xFFFF0000);       
      }
      progress.setValue(0);
-     animGUI.startPlaying(animIndex);
+     animTab.startPlaying(animIndex);
      playing  = true;
   }
   
@@ -775,7 +775,7 @@ class EventGUI implements ControlListener
 
   void onOpen()
   {
-    animIndexLabels = animGUI.getAnimLabels();
+    animIndexLabels = animTab.getAnimLabels();
     for(int i=0;i<SENSOR_NB_COLS;i++)
     {
       sensorColons[i].checkLabels( animIndexLabels );

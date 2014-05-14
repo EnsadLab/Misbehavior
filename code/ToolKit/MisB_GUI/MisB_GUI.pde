@@ -53,13 +53,13 @@ ServoArray      servoArray;
 ServoGUIarray   servoGUIarray;
 ScriptArray     scriptArray;
 SensorGUIarray  sensorGUI;
-AnimGUI         animGUI;
+AnimTab         animTab;
 EventGUI        eventGUI;
 
 // GUI tabs
-String tabNameBasic = "default"; // the identifier name is different from the label for the default tab.
-String tabNameAdvanced = "ADVANCED";
+String tabNameAnim = "default"; // the identifier name is different from the label for the default tab.
 String tabNameEvent    = "EVENTS";
+String tabNameAdvanced = "ADVANCED";
 int currentTabId = 1; // 1:default tab / 2:ADVANCED tab /3:EVENT tab
 
 // these values will be overriden with the value set in the config.xml file
@@ -114,7 +114,7 @@ void setup()
   int space = 20;
   
   comCM9 = new ComCM9(cm9_port,cm9_baudrate);
-  comCM9.buildBasicGUI(marginLeft,marginTop,tabNameBasic,wFirstColumn,50);
+  comCM9.buildBasicGUI(marginLeft,marginTop,tabNameAnim,wFirstColumn,50);
   comCM9.buildGUI(marginLeft,marginTop,tabNameAdvanced);
 
   servoArray = new ServoArray(motorIds,jointwheelmodes);
@@ -125,10 +125,10 @@ void setup()
   servoGUIarray = new ServoGUIarray(motorIds,jointwheelmodes);
 
   servoGUIarray.buildGUI(260,40,tabNameAdvanced);
-  servoGUIarray.buildMotorGui(marginLeft+wFirstColumn+space,marginTop,tabNameBasic);
+  servoGUIarray.buildMotorGui(marginLeft+wFirstColumn+space,marginTop,tabNameAnim);
  
-  animGUI = new AnimGUI();
-  animGUI.buildGUI(marginLeft, 220, tabNameBasic,wFirstColumn+space);
+  animTab = new AnimTab();
+  animTab.buildGUI(marginLeft, 220, tabNameAnim,wFirstColumn+space);
 
   eventGUI = new EventGUI();
   eventGUI.buildGUI(30,30,tabNameEvent);
@@ -165,7 +165,7 @@ void draw()
   servoGUIarray.update();
   comCM9.update();  
   dxlGui.update();
-  animGUI.update();
+  animTab.update();
 }
 
 void exit()
