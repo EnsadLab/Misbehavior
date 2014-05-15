@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
  <config>
-   <cm9 port="COM42" bauds="115200" />
+   <cm9 port="COM13" bauds="115200" />
    <motor id="1" mode="joint"/>
    <motor id="2" mode= "wheel"/>
    <motor id="3" mode= "joint"/>

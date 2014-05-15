@@ -136,13 +136,15 @@ void setup()
   eventTab.load(sketchPath+"/events.xml");
     
   scriptArray = new ScriptArray(motorIds.length );
-  scriptArray.buildGUI(260,70,456,tabNameAdvanced); 
+  scriptArray.buildGUI(260,70,456,tabNameAdvanced);
+
+  /* Removing Script experiment 
   if(motorIds.length >= 2)
   {
     scriptArray.scriptAt(0).load("scripts/Script00.txt"); 
     scriptArray.scriptAt(1).load("scripts/Script00.txt"); 
   }
-  
+  */
   listMidiDevices();
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //defined in the config.xml file
     openMidi(midiInDevice,midiOutDevice);
@@ -161,7 +163,7 @@ void draw()
     eventTab.update();
   } 
   
-  scriptArray.update();
+  //scriptArray.update(); //removing Script experiment
   servoArray.update();
   servoGUIarray.update();
   comCM9.update();  
