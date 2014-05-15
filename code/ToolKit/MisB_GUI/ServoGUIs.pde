@@ -69,15 +69,7 @@ class ServoGUIarray implements ControlListener
      tfID.addListener(this);
      ix+=120;
     }
-        
-    /* //DIB CLEAN ... ....  TODO: keep it out OK?
-    for(int i=0;i<servoGUIs.length;i++)
-    {
-      servoGUIs[i].buildGUI(i, x,y,tabName);
-      //y+=170;
-      x+=350;
-    }
-    */
+
   }
 
   void setDxlValue(int imot,int reg,int val)
@@ -203,28 +195,7 @@ class ServoGUI implements ControlListener
       }  
   }
   
-  // TODO: take it out ok?
-  void buildGUI(int index,int x,int y,String tabName)
-  {
-    //CLEAN ... ... ...
-    /*
-    int id0 = globalID;
-      Textfield tfID =cp5.addTextfield("MOTOR"+index)
-      .setId(globalID++)
-      .setPosition(x,y)
-      .setWidth(30)
-      .setInputFilter(Textfield.INTEGER)
-      .setAutoClear(false)
-      .moveTo(tabName);
-     tfID.getCaptionLabel().align(ControlP5.RIGHT_OUTSIDE,ControlP5.CENTER);
-     //tfID.getCaptionLabel().setText("MOTOR "+imot+" ");
-     tfID.setValue(""+motorId);
-     tfID.addListener(this);
-  //  y+=70;
-    */  
-  
-  }
-  
+ 
   void update()
   {
   }
