@@ -407,7 +407,7 @@ class ComCM9 implements ControlListener
           int   sensor = Integer.parseInt(toks[1]);
           float value  = Float.parseFloat(toks[2]);
           //sensorArray.rcvValue(sensor,value);
-          eventGUI.onSensorValue(sensor,value);
+          eventTab.onSensorValue(sensor,value);
         }catch(Exception e){}
       }
       else if(toks[0].equals("ok")) //TODO TODO

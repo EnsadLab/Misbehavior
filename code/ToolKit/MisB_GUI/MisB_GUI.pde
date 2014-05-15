@@ -54,13 +54,13 @@ ServoGUIarray   servoGUIarray;
 ScriptArray     scriptArray;
 SensorGUIarray  sensorGUI;
 AnimTab         animTab;
-EventGUI        eventGUI;
+EventTab        eventTab;
 
 // GUI tabs
 String tabNameAnim = "default"; // the identifier name is different from the label for the default tab.
 String tabNameEvent    = "EVENTS";
 String tabNameAdvanced = "ADVANCED";
-int tabIdEvent   = 3
+int tabIdEvent   = 3;
 int currentTabId = 1; // 1:default tab / 2:ADVANCED tab /3:EVENT tab
 
 // these values will be overriden with the value set in the config.xml file
@@ -131,9 +131,9 @@ void setup()
   animTab = new AnimTab();
   animTab.buildGUI(marginLeft, 220, tabNameAnim,wFirstColumn+space);
 
-  eventGUI = new EventGUI();
-  eventGUI.buildGUI(30,30,tabNameEvent);
-  eventGUI.load(sketchPath+"/events.xml");
+  eventTab = new EventTab();
+  eventTab.buildGUI(30,30,tabNameEvent);
+  eventTab.load(sketchPath+"/events.xml");
     
   scriptArray = new ScriptArray(motorIds.length );
   scriptArray.buildGUI(260,70,456,tabNameAdvanced); 
@@ -158,7 +158,7 @@ void draw()
   else // tab EVENT or ADVANCED
   {
     background(240);
-    eventGUI.update();
+    eventTab.update();
   } 
   
   scriptArray.update();
@@ -172,7 +172,7 @@ void draw()
 void exit()
 {
   comCM9.close();
-  eventGUI.save(sketchPath+"/events.xml");
+  eventTab.save(sketchPath+"/events.xml");
   println("EXIT");  
   super.exit();  
 }
@@ -260,9 +260,9 @@ void controlEvent(ControlEvent evt)
     //println("TAB " + evt.getTab().getName() + " IS SELECTED with id " + evt.getTab().getId());
     currentTabId = evt.getTab().getId();
     if(currentTabId == tabIdEvent) 
-      eventGUI.onOpen();
+      eventTab.onOpen();
     else
-      eventGUI.onClose();
+      eventTab.onClose();
   }
 }
 
