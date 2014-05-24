@@ -394,9 +394,9 @@ class SensorColon implements ControlListener
 
   void randomPlay(int side)
   {
-    println("dbg Random SIDE "+side);
-    println("dbg Random LOW  "+animsLow.size());
-    println("dbg Random HIGH "+animsHigh.size());
+    //println("dbg Random SIDE "+side);
+    //println("dbg Random LOW  "+animsLow.size());
+    //println("dbg Random HIGH "+animsHigh.size());
     IntList list = animsLow;
     if(side==1)
       list = animsHigh;
@@ -405,7 +405,7 @@ class SensorColon implements ControlListener
     {
       int iA = list.get(0);
       row[iA].start(side,1);
-      println("dbg Random iAnim "+iA);
+      //println("dbg Random iAnim "+iA);
       list.shuffle();
     }
   }
@@ -415,9 +415,9 @@ class SensorColon implements ControlListener
     min = mn;
     max = mx;
     sliderVal.setRange( (float)min,(float)max );
-    sliderVal.getValueLabel().align(ControlP5.CENTER,ControlP5.CENTER); //GRRRR
-    int t0 = threshold0; //GRRRR
-    int t1 = threshold1; //GRRRR
+    sliderVal.getValueLabel().align(ControlP5.CENTER,ControlP5.CENTER);
+    int t0 = threshold0;
+    int t1 = threshold1;
     rangeThres.setRange( (float)min,(float)max );
     rangeThres.setRangeValues((float)t0,(float)t1);
   }
@@ -751,7 +751,7 @@ class SensorColon implements ControlListener
 
 //=========================================
 
-class EventGUI implements ControlListener
+class EventTab implements ControlListener
 {
     int rowPos = 100;
   
@@ -767,7 +767,7 @@ class EventGUI implements ControlListener
     
     
     
-  EventGUI()
+  EventTab()
   {
     sensorColons = new SensorColon[SENSOR_NB_COLS];
     //labels = new StringList();

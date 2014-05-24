@@ -54,13 +54,14 @@ ServoGUIarray   servoGUIarray;
 ScriptArray     scriptArray;
 SensorGUIarray  sensorGUI;
 AnimTab         animTab;
-EventGUI        eventGUI;
+EventTab        eventTab;
 
 // GUI tabs
 String tabNameAnim = "default"; // the identifier name is different from the label for the default tab.
 String tabNameEvent    = "EVENTS";
 String tabNameAdvanced = "ADVANCED";
 String tabNameAbout = "ABOUT";
+int tabIdEvent   = 3;
 int currentTabId = 1; // 1:default tab / 2:ADVANCED tab /3:EVENT tab
 
 // these values will be overriden with the value set in the config.xml file
@@ -102,7 +103,7 @@ void setup()
      ;
   cp5.addTab(tabNameEvent)
      .activateEvent(true)
-     .setId(3);
+     .setId(tabIdEvent);
   cp5.addTab(tabNameAbout)
      .activateEvent(true)
      .setId(4);
@@ -136,18 +137,20 @@ void setup()
   animTab = new AnimTab();
   animTab.buildGUI(marginLeft, 220, tabNameAnim,wFirstColumn+space);
 
-  eventGUI = new EventGUI();
-  eventGUI.buildGUI(30,30,tabNameEvent);
-  eventGUI.load(sketchPath+"/events.xml");
+  eventTab = new EventTab();
+  eventTab.buildGUI(30,30,tabNameEvent);
+  eventTab.load(sketchPath+"/events.xml");
     
   scriptArray = new ScriptArray(motorIds.length );
-  scriptArray.buildGUI(260,70,456,tabNameAdvanced); 
+  scriptArray.buildGUI(260,70,456,tabNameAdvanced);
+
+  /* Removing Script experiment 
   if(motorIds.length >= 2)
   {
     scriptArray.scriptAt(0).load("scripts/Script00.txt"); 
     scriptArray.scriptAt(1).load("scripts/Script00.txt"); 
   }
-  
+  */
   listMidiDevices();
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //defined in the config.xml file
     openMidi(midiInDevice,midiOutDevice);
@@ -168,7 +171,7 @@ void draw()
   else // tab EVENT or ADVANCED
   {
     background(240);
-    eventGUI.update();
+    eventTab.update();
   } 
   
   if(currentTabId == 4)
@@ -177,8 +180,7 @@ void draw()
     textFont(verdanaFont_12);
     text(credits, marginLeft, marginTop, 600, 600);  // Text wraps within text box
   }
-  
-  scriptArray.update();
+  //scriptArray.update(); //removing Script experiment
   servoArray.update();
   servoGUIarray.update();
   comCM9.update();  
@@ -189,7 +191,7 @@ void draw()
 void exit()
 {
   comCM9.close();
-  eventGUI.save(sketchPath+"/events.xml");
+  eventTab.save(sketchPath+"/events.xml");
   println("EXIT");  
   super.exit();  
 }
@@ -276,13 +278,12 @@ void controlEvent(ControlEvent evt)
   {
     //println("TAB " + evt.getTab().getName() + " IS SELECTED with id " + evt.getTab().getId());
     currentTabId = evt.getTab().getId();
-    if(currentTabId == 3) 
-      eventGUI.onOpen();
+    if(currentTabId == tabIdEvent) 
+      eventTab.onOpen();
     else
-      eventGUI.onClose();
+      eventTab.onClose();
   }
 }
-
 
 void serialEvent(Serial serial)
 {
@@ -290,18 +291,8 @@ void serialEvent(Serial serial)
     if( serial == comCM9.serial )
     {
       comCM9.serialRcv();
-      //arduino.append("received "+serialEventCount+'\n');
     }
-  }catch(Exception e){println("SERIAL EXCEPTION");}
-  
-  /*
-  else
-  {
-    println("serial ?????????");
-    while(serial.available()>0)
-      serial.read();
-  }
-  */
+  }catch(Exception e){println("SERIAL EXCEPTION");}  
 }
 
 void toggleAdvancedTab()
@@ -323,59 +314,47 @@ void keyReleased()
   {
     switch(keyCode)
     {
-      case SHIFT: keyModifier   &= ~1; break;
+      case SHIFT:   keyModifier &= ~1; break;
       case CONTROL: keyModifier &= ~2; break;
-      case ALT: keyModifier     &= ~4; break;
+      case ALT:     keyModifier &= ~4; break;
     }
   }
 }
 
 void keyPressed()
 { 
-  
   if(key==CODED)
   {
     switch(keyCode)
     {
-      case SHIFT: keyModifier   |= 1; break;
+      case SHIFT:   keyModifier |= 1; break;
       case CONTROL: keyModifier |= 2; break;
-      case ALT: keyModifier     |= 4; break;
+      case ALT:     keyModifier |= 4; break;
     }
-
   }
   else if(keyModifier!=0) //GRRRR SHIFT CTRL ALT
   {
-    if( (keyModifier & 1)!=0 )  
+    if( (keyModifier & 1)!=0 )      //SHIFT  
       keyCode = SHIFT;
-    else if( (keyModifier & 2)!=0 )
+    else if( (keyModifier & 2)!=0 ) //CTRL
     {
-      println("dbg CONTROL key"+(int)key+" "+(int)keyCode );
-      
-      key = (char)keyCode; //GRRRRRRRRRRRRR
+      //println("dbg CONTROL key"+(int)key+" "+(int)keyCode );
+      key = (char)keyCode; //
       keyCode = CONTROL;
-      
       if(key==9) //TAB
         toggleAdvancedTab();
     }
-    else if( (keyModifier & 4)!=0 )
+    else if( (keyModifier & 4)!=0 ) //ALT
     {
       key = (char)keyCode; //majuscule plutot que minuscule
       keyCode = ALT;
     }
+    
     //EMERGENCY STOP : SHIFT or CTRL or ALT + ' 'or ENTER or BACKSPACE
     if( (key==32)||(key==10)||(key==13)||(key==8) ) // BACKSPACE --> STOP ALL
       comCM9.serialSend("S\n");
 
   }
-  /*
-  if( editHandleKey(key,keyCode) )
-    return;
-  */  
-  if( keyCode == CONTROL )
-  {
-    //if(key=='A')
-    //  anim.fromListEdit(editAnim);
-  }  
   
 }
 

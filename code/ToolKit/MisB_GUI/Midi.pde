@@ -63,7 +63,7 @@ void controllerChange(int channel, int num, int value)
     else if( (num>=16)&&(num<24) ) //knobs
     {
       float fval = (float)value/127.0;
-      eventGUI.onMidiValue(num-16,fval);
+      eventTab.onMidiValue(num-16,fval);
     }
     
     else if( (num>=32)&&(num<40) ) //Bouton [S]
