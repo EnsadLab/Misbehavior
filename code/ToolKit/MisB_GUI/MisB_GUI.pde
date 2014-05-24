@@ -60,6 +60,7 @@ EventGUI        eventGUI;
 String tabNameAnim = "default"; // the identifier name is different from the label for the default tab.
 String tabNameEvent    = "EVENTS";
 String tabNameAdvanced = "ADVANCED";
+String tabNameAbout = "ABOUT";
 int currentTabId = 1; // 1:default tab / 2:ADVANCED tab /3:EVENT tab
 
 // these values will be overriden with the value set in the config.xml file
@@ -78,6 +79,8 @@ int nbAnimsMax = 27; // Fixed by the size of the window. TODO: add some scrollin
 // margin variables
 int marginLeft = 40;
 int marginTop = 50;
+
+String credits;
 
 
 void setup()
@@ -100,6 +103,9 @@ void setup()
   cp5.addTab(tabNameEvent)
      .activateEvent(true)
      .setId(3);
+  cp5.addTab(tabNameAbout)
+     .activateEvent(true)
+     .setId(4);
   cp5.addTab(tabNameAdvanced)
      .activateEvent(true)
      .setId(2)
@@ -145,12 +151,17 @@ void setup()
   listMidiDevices();
   if( (midiInDevice!=null)&&(midiOutDevice!=null) ) //defined in the config.xml file
     openMidi(midiInDevice,midiOutDevice);
+    
+  credits = "MisB KIT est développé par l’équipe Reflective Interaction, sous la direction de Samuel Bianchini, par Didier Bouchon, Cécile Bucher, Martin Gautron, Benoît Verjat et Alexandre Saunier, dans le cadre du projet The Behaviour of Things, coordonné par Emanuele Quinz pour le compte du Labex Arts-H2H.";
+  credits += "L’ensemble des développements du MisB KIT, hardware comme software, sont sous Licence LGPL, à l’exception des modules propriétaires Bioloid que nous utilisons, principalement les moteurs Dynamixels et des pièces de jeu de construction K’Nex employés ici comme éléments de structure.";
+  credits += "Ce toolkit a été initié avec l’équipe Sociable Media (dirigée par Rémy Bourganel) avec en particulier Émeline Brulé et Max Mollon, pour le Workshop “The Misbehavior of Animated Objects”, TEI 2014, avec le soutien du Labex Arts-H2H et de la Fondation Bettencourt Schueller dans le cadre de la Chaire Innovation et Savoir faire et avec la participation de Jean-Baptiste Labrune et Nicolas Nova.";
+  credits += "Nous remercions la société Génération Robots pour leurs conseils avisés, ainsi que Marie Descourtieux, Hiroshi Ishii, Emmanuel Mahé et Élodie Tincq.";
   
 }
 
 void draw()
 {
-  if(currentTabId == 1) // tab BASIC
+  if(currentTabId == 1 || currentTabId == 4) // tab BASIC or ABOUT
   {
     background(255);
   }
@@ -159,6 +170,13 @@ void draw()
     background(240);
     eventGUI.update();
   } 
+  
+  if(currentTabId == 4)
+  {
+    fill(50);
+    textFont(verdanaFont_12);
+    text(credits, marginLeft, marginTop, 600, 600);  // Text wraps within text box
+  }
   
   scriptArray.update();
   servoArray.update();
@@ -360,6 +378,8 @@ void keyPressed()
   }  
   
 }
+
+
 
 
 
